@@ -72,7 +72,7 @@ set(INSTALL_LIB
   Ass
   RTMP
   PLIST
-  ShairPort
+  ShairPlay
   CEC
 )
 
