@@ -245,7 +245,7 @@ bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
     m_details.height = height;
     m_details.file = m_cachePath + ".jpg";
     if (texture)
-      *texture = CTextureCacheJob::LoadImage(CTextureCache::GetCachedPath(m_details.file), width, height, additional_info);
+      *texture = CTextureCacheJob::LoadImage(CTextureCache::GetCachedPath(m_details.file), width, height, "" /* already flipped */);
     CLog::Log(LOGDEBUG, "Fast %s image '%s' to '%s': %p", m_oldHash.IsEmpty() ? "Caching" : "Recaching", image.c_str(), m_details.file.c_str(), texture);
     return true;
   }
