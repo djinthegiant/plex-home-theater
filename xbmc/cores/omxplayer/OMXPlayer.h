@@ -106,7 +106,11 @@ public:
   }
 };
 
+#ifndef __PLEX__
 typedef struct
+#else
+struct OMXSelectionStream
+#endif
 {
   StreamType   type;
   int          type_index;
@@ -119,7 +123,41 @@ typedef struct
   int          id;
   std::string  codec;
   int          channels;
+
+
+  /* PLEX */
+  OMXSelectionStream()
+    : plexID(-1)
+    , plexSubIndex(-1)
+  {}
+
+  OMXSelectionStream& operator=(const OMXSelectionStream& other)
+  {
+    // Preserve Plex ID by *not* copying over plexID member
+    type = other.type;
+    filename = other.filename;
+
+    // Stream language from Plex stream.
+    if (type != STREAM_SUBTITLE)
+      name = other.name;
+    else if (language.size() != 3)
+      name = language;
+
+    language = other.language;
+    id = other.id;
+    flags = other.flags;
+    source = other.source;
+
+    return *this;
+  }
+  int plexID;
+  int plexSubIndex;
+  /* END PLEX */
+#ifndef __PLEX__
 } OMXSelectionStream;
+#else
+};
+#endif
 
 typedef std::vector<OMXSelectionStream> OMXSelectionStreams;
 
@@ -275,6 +313,23 @@ public:
   virtual void  GetScalingMethods(std::vector<int> &scalingMethods);
   virtual void  GetAudioCapabilities(std::vector<int> &audioCaps);
   virtual void  GetSubtitleCapabilities(std::vector<int> &subCaps);
+
+  /* PLEX */
+  virtual int GetSubtitlePlexID();
+  virtual int GetAudioStreamPlexID();
+  virtual void SetAudioStreamPlexID(int plexID);
+  virtual void SetSubtitleStreamPlexID(int plexID);
+  virtual int GetPlexMediaPartID()
+  {
+    CFileItemPtr part = m_item.m_selectedMediaPart;
+    if (part)
+      return part->GetProperty("id").asInteger();
+
+    return -1;
+  }
+  virtual bool CanOpenAsync() { return false; }
+  virtual void Abort() { m_bAbortRequest = true; }
+  /* END PLEX */
 protected:
   friend class COMXSelectionStreams;
 
@@ -350,6 +405,10 @@ protected:
   double m_UpdateApplication;
 
   bool m_bAbortRequest;
+
+  /* PLEX */
+  bool m_EndPlaybackRequest;
+  /* END PLEX */
 
   std::string           m_filename; // holds the actual filename
   std::string  m_mimetype;  // hold a hint to what content file contains (mime type)
@@ -506,6 +565,18 @@ protected:
   } m_EdlAutoSkipMarkers;
 
   CPlayerOptions          m_PlayerOptions;
+
+  /* PLEX */
+  void RelinkPlexStreams();
+
+  CStdString   m_strError;
+  CFileItemPtr m_itemWithDetails;
+  bool         m_hidingSub;
+  int          m_vobsubToDisplay;
+
+  unsigned int m_readRate;
+  void UpdateReadRate();
+  /* END PLEX */
 
   bool m_HasVideo;
   bool m_HasAudio;
