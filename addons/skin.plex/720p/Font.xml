@@ -37,6 +37,26 @@
 		</font>
 		<!-- Regular -->
 		<font>
+			<name>font10</name>
+			<filename>PlexFont-Regular.ttf</filename>
+			<size>14</size>
+		</font>
+		<font>
+			<name>font12</name>
+			<filename>PlexFont-Regular.ttf</filename>
+			<size>17</size>
+		</font>
+		<font>
+			<name>font13</name>
+			<filename>PlexFont-Regular.ttf</filename>
+			<size>20</size>
+		</font>
+		<font>
+			<name>font16</name>
+			<filename>PlexFont-Regular.ttf</filename>
+			<size>25</size>
+		</font>
+		<font>
 			<name>Regular-12</name>
 			<filename>PlexFont-Regular.ttf</filename>
 			<size>12</size>
@@ -112,6 +132,16 @@
 			<size>34</size>
 		</font>
 		<!-- Bold -->
+		<font>
+			<name>font13_title</name>
+			<filename>PlexFont-Bold.ttf</filename>
+			<size>20</size>
+		</font>
+		<font>
+			<name>font24_title</name>
+			<filename>PlexFont-Bold.ttf</filename>
+			<size>24</size>
+		</font>
 		<font>
 			<name>Bold-10</name>
 			<filename>PlexFont-Bold.ttf</filename>
