@@ -31,6 +31,8 @@
 #include "interfaces/AnnouncementManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GraphicContext.h"
+#include "guilib/GUIWindowManager.h"
+#include "dialogs/GUIDialogBusy.h"
 #include "dialogs/GUIDialogKaiToast.h"
 
 #ifdef HAS_LCD
@@ -46,15 +48,18 @@
 
 #elif defined(TARGET_ANDROID)
 #include "android/AndroidPowerSyscall.h"
-#elif defined(_LINUX) && defined(HAS_DBUS)
+#elif defined(TARGET_POSIX)
+#include "linux/FallbackPowerSyscall.h"
+#if defined(HAS_DBUS)
 #include "linux/ConsoleUPowerSyscall.h"
 #include "linux/ConsoleDeviceKitPowerSyscall.h"
-#include "linux/SystemdUPowerSyscall.h"
+#include "linux/LogindUPowerSyscall.h"
 #include "linux/UPowerSyscall.h"
-#ifdef HAS_HAL
+#if defined(HAS_HAL)
 #include "linux/HALPowerSyscall.h"
-#endif
-#elif defined(_WIN32)
+#endif // HAS_HAL
+#endif // HAS_DBUS
+#elif defined(TARGET_WINDOWS)
 #include "powermanagement/windows/Win32PowerSyscall.h"
 extern HWND g_hWnd;
 #endif
@@ -79,20 +84,24 @@ void CPowerManager::Initialize()
   m_instance = new CCocoaPowerSyscall();
 #elif defined(TARGET_ANDROID)
   m_instance = new CAndroidPowerSyscall();
-#elif defined(_LINUX) && defined(HAS_DBUS)
+#elif defined(TARGET_POSIX)
+#if defined(HAS_DBUS)
   if (CConsoleUPowerSyscall::HasConsoleKitAndUPower())
     m_instance = new CConsoleUPowerSyscall();
   else if (CConsoleDeviceKitPowerSyscall::HasDeviceConsoleKit())
     m_instance = new CConsoleDeviceKitPowerSyscall();
-  else if (CSystemdUPowerSyscall::HasSystemdAndUPower())
-    m_instance = new CSystemdUPowerSyscall();
+  else if (CLogindUPowerSyscall::HasLogind())
+    m_instance = new CLogindUPowerSyscall();
   else if (CUPowerSyscall::HasUPower())
     m_instance = new CUPowerSyscall();
-#ifdef HAS_HAL
-  else
+#if defined(HAS_HAL)
+  else if(1)
     m_instance = new CHALPowerSyscall();
-#endif
-#elif defined(_WIN32)
+#endif // HAS_HAL
+  else
+#endif // HAS_DBUS
+    m_instance = new CFallbackPowerSyscall();
+#elif defined(TARGET_WINDOWS)
   m_instance = new CWin32PowerSyscall();
 #endif
 
@@ -146,24 +155,57 @@ void CPowerManager::SetDefaults()
 
 bool CPowerManager::Powerdown()
 {
-  return CanPowerdown() ? m_instance->Powerdown() : false;
+  if (CanPowerdown() && m_instance->Powerdown())
+  {
+    CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+    if (dialog)
+      dialog->Show();
+
+    return true;
+  }
+
+  return false;
 }
 
 bool CPowerManager::Suspend()
 {
-  return CanSuspend() ? m_instance->Suspend() : false;
+  if (CanSuspend() && m_instance->Suspend())
+  {
+    CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+    if (dialog)
+      dialog->Show();
+
+    return true;
+  }
+
+  return false;
 }
 
 bool CPowerManager::Hibernate()
 {
-  return CanHibernate() ? m_instance->Hibernate() : false;
+  if (CanHibernate() && m_instance->Hibernate())
+  {
+    CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+    if (dialog)
+      dialog->Show();
+
+    return true;
+  }
+
+  return false;
 }
 bool CPowerManager::Reboot()
 {
   bool success = CanReboot() ? m_instance->Reboot() : false;
 
   if (success)
+  {
     CAnnouncementManager::Announce(System, "xbmc", "OnRestart");
+
+    CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+    if (dialog)
+      dialog->Show();
+  }
 
   return success;
 }
@@ -190,7 +232,12 @@ int CPowerManager::BatteryLevel()
 }
 void CPowerManager::ProcessEvents()
 {
-  m_instance->PumpPowerEvents(this);
+  static int nesting = 0;
+
+  if (++nesting == 1)
+    m_instance->PumpPowerEvents(this);
+
+  nesting--;
 }
 
 void CPowerManager::OnSleep()
@@ -223,6 +270,10 @@ void CPowerManager::OnWake()
 
   // reset out timers
   g_application.ResetShutdownTimers();
+
+  CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+  if (dialog)
+    dialog->Close();
 
 #if defined(HAS_SDL) || defined(TARGET_WINDOWS)
   if (g_Windowing.IsFullScreen())
