@@ -83,8 +83,6 @@ enum RenderMethod
   RENDER_PS      = 0x01,
   RENDER_SW      = 0x02,
   RENDER_DXVA    = 0x03,
-  /* PLEX */
-  RENDER_RGB     = 0x04,
 };
 
 #define PLANE_Y 0
@@ -178,11 +176,6 @@ public:
   void                 RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
   virtual unsigned int GetProcessorSize() { return m_processor.Size(); }
-  
-  /* PLEX */
-  virtual void SetRGB32Image(const char *image, int nHeight, int nWidth, int nPitch);
-  /* END PLEX */
-  
 
 protected:
   virtual void Render(DWORD flags);
@@ -197,10 +190,6 @@ protected:
   bool         CreateYV12Texture(int index);
   void         CopyYV12Texture(int dest);
   int          NextYV12Texture();
-  
-  /* PLEX */
-  void         RenderRGB();
-  /* END PLEX */
 
   void SelectRenderMethod();
   bool UpdateRenderMethod();
@@ -256,13 +245,6 @@ protected:
   // the separable HQ scalers need this info, but could the m_destRect be used instead?
   unsigned int         m_destWidth;
   unsigned int         m_destHeight;
-
-  /* PLEX - RGB rendering */
-  BYTE                *m_rgbBuffer;
-  int                  m_rgbBufferSize;
-  bool                 m_bRGBImageSet;
-  LPDIRECT3DTEXTURE9   m_rgbTexture;
-  /* END PLEX */
 };
 
 #else
