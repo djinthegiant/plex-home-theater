@@ -36,6 +36,7 @@
 #include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "cores/AudioEngine/Utils/AEConvert.h"
+#include "cores/AudioEngine/AEFactory.h"
 
 using namespace std;
 
@@ -85,6 +86,10 @@ COMXAudio::COMXAudio() :
   m_vizBufferSize   = m_vizRemapBufferSize = VIS_PACKET_SIZE * sizeof(float);
   m_vizRemapBuffer  = (uint8_t *)_aligned_malloc(m_vizRemapBufferSize,16);
   m_vizBuffer       = (uint8_t *)_aligned_malloc(m_vizBufferSize,16);
+
+  CAEFactory::Suspend();
+  while (!CAEFactory::IsSuspended())
+    Sleep(10);
 }
 
 COMXAudio::~COMXAudio()
@@ -93,6 +98,8 @@ COMXAudio::~COMXAudio()
 
   _aligned_free(m_vizRemapBuffer);
   _aligned_free(m_vizBuffer);
+
+  CAEFactory::Resume();
 }
 
 bool COMXAudio::PortSettingsChanged()
