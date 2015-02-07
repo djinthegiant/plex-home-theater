@@ -56,9 +56,8 @@ public:
   virtual OMX_ERRORTYPE OMX_SetupTunnel(OMX_HANDLETYPE hOutput, OMX_U32 nPortOutput, OMX_HANDLETYPE hInput, OMX_U32 nPortInput) = 0;
 
 };
-/* PLEX */
-#ifndef TARGET_RASPBERRY_PI
-/* END PLEX */
+
+#if (defined USE_EXTERNAL_OMX)
 class DllOMX : public DllDynamic, DllOMXInterface
 {
 public:
@@ -90,13 +89,7 @@ public:
 #else
 class DllOMX : public DllDynamic, DllOMXInterface
 {
-/* PLEX */
-#if defined (TARGET_RASPBERRY_PI)
-  DECLARE_DLL_WRAPPER(DllOMX, "/usr/lib/libopenmaxil.so")
-#else
   DECLARE_DLL_WRAPPER(DllOMX, "libopenmaxil.so")
-#endif
-/* END PLEX */
 
   DEFINE_METHOD0(OMX_ERRORTYPE, OMX_Init)
   DEFINE_METHOD0(OMX_ERRORTYPE, OMX_Deinit)
