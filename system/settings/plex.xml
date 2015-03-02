@@ -19,6 +19,11 @@
           </constraints>
           <control type="edit" format="string" />
         </setting>
+        <setting id="videoplayer.useffmpegavio" type="boolean" label="40007" help="40008">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
       </group>
     </category>
   </section>

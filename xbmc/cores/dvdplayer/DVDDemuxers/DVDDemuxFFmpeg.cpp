@@ -52,6 +52,8 @@
 #include "URL.h"
 #include "cores/FFmpeg.h"
 
+#include "filesystem/PlexFile.h"
+
 extern "C" {
 #include "libavutil/opt.h"
 }
@@ -241,6 +243,25 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
     // special stream type that makes avformat handle file opening
     // allows internal ffmpeg protocols to be used
     CURL url = m_pInput->GetURL();
+
+    /* PLEX */
+    if (url.IsProtocol("plexserver"))
+    {
+      // Translate the plexserver:// URL
+      if (!XFILE::CPlexFile::BuildHTTPURL(url))
+      {
+        CLog::Log(LOGWARNING, "%s - could not translate url %s", __FUNCTION__, url.GetRedacted().c_str());
+        Dispose();
+        return false;
+      }
+
+      // Get file URL without protocol options
+      std::string options = url.GetProtocolOptions();
+      url.SetProtocolOptions("");
+      strFile = url.Get();
+      url.SetProtocolOptions(options);
+    }
+    /* END PLEX */
 
     AVDictionary *options = GetFFMpegOptionsFromURL(url);
 

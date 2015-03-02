@@ -43,6 +43,8 @@
 #include "filesystem/File.h"
 #include "utils/URIUtils.h"
 
+#include "settings/Settings.h"
+
 
 CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, const std::string& file, const std::string& content)
 {
@@ -116,6 +118,10 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
   {
     if (item.IsType(".m3u8"))
       return new CDVDInputStreamFFmpeg();
+    /* PLEX */
+    if (file.substr(0, 13) == "plexserver://" && CSettings::Get().GetBool("videoplayer.useffmpegavio"))
+      return new CDVDInputStreamFFmpeg();
+    /* END PLEX */
     item.FillInMimeType();
     if (item.GetMimeType() == "application/vnd.apple.mpegurl")
       return new CDVDInputStreamFFmpeg();

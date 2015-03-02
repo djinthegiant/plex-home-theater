@@ -16148,3 +16148,13 @@ msgstr ""
 msgctxt "#40006"
 msgid "Enter the name or IP of your local Plex Media Server"
 msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40007"
+msgid "Use FFmpeg AVIO"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40008"
+msgid "Help for Use FFmpeg AVIO"
+msgstr ""
