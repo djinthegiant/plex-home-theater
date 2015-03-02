@@ -1,0 +1,8 @@
+CXXFLAGS += -D__STDC_FORMAT_MACROS
+
+SRCS  = PlexApplication.cpp
+
+LIB = plex.a
+
+include @abs_top_srcdir@/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))

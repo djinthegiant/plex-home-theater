@@ -351,6 +351,8 @@
 
 #include "cores/FFmpeg.h"
 
+#include "PlexApplication.h"
+
 using namespace std;
 using namespace ADDON;
 using namespace XFILE;
@@ -879,6 +881,10 @@ bool CApplication::Create()
   CUtil::InitRandomSeed();
 
   g_mediaManager.Initialize();
+
+  /* PLEX */
+  g_plexApplication.Initialize();
+  /* END PLEX */
 
   m_lastFrameTime = XbmcThreads::SystemClockMillis();
   m_lastRenderTime = m_lastFrameTime;
@@ -3527,6 +3533,10 @@ void CApplication::Stop(int exitCode)
 
     CLog::Log(LOGNOTICE, "stop player");
     m_pPlayer->ClosePlayer();
+
+    /* PLEX */
+    g_plexApplication.Deinitialize();
+    /* END PLEX */
 
     CAnnouncementManager::Get().Deinitialize();
 

@@ -75,7 +75,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\;..\..\plex\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_USE_32BIT_TIME_T;HAS_DX;D3D_DEBUG_INFO;__STDC_CONSTANT_MACROS;_SECURE_SCL=0;TAGLIB_STATIC;NPT_CONFIG_ENABLE_LOGGING;PLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi";PLT_HTTP_DEFAULT_SERVER="UPnP/1.0 DLNADOC/1.50 Kodi";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\SlingboxLib\SlingboxLib.cpp" />
+    <ClCompile Include="..\..\plex\PlexApplication.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacks.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksAddon.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksCodec.cpp" />
@@ -801,6 +802,7 @@
     <ClCompile Include="..\..\xbmc\TextureCacheJob.cpp" />
     <ClCompile Include="..\..\xbmc\TextureDatabase.cpp" />
     <ClCompile Include="..\..\xbmc\DatabaseManager.cpp" />
+    <ClInclude Include="..\..\plex\PlexApplication.h" />
     <ClInclude Include="..\..\xbmc\addons\AddonCallbacksCodec.h" />
     <ClInclude Include="..\..\xbmc\ApplicationPlayer.h" />
     <ClInclude Include="..\..\xbmc\AppParamParser.h" />

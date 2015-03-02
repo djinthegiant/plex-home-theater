@@ -102,6 +102,7 @@ DIRECTORY_ARCHIVES=$(DVDPLAYER_ARCHIVES) \
                    xbmc/view/view.a \
                    xbmc/windowing/windowing.a \
                    xbmc/windows/windows.a \
+                   plex/plex.a \
                    xbmc/xbmc.a \
 
 NWAOBJSXBMC=	xbmc/threads/threads.a \

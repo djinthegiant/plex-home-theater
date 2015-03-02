@@ -322,6 +322,9 @@
     <Filter Include="video\videosync">
       <UniqueIdentifier>{9775d5c0-c640-4606-a625-e6cdcf9f959e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plex">
+      <UniqueIdentifier>{95c3ea9e-945a-4ecd-8aec-8b599e83cb03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -3082,6 +3085,9 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\win32\crts_caller.cpp">
       <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexApplication.cpp">
+      <Filter>plex</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -6033,6 +6039,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\win32\crts_caller.h">
       <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexApplication.h">
+      <Filter>plex</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

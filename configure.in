@@ -2428,6 +2428,7 @@ fi
 OUTPUT_FILES="Makefile \
     Makefile.include \
     addons/skin.confluence/media/Makefile \
+    plex/Makefile \
     xbmc/Makefile \
     xbmc/cdrip/Makefile \
     xbmc/cores/Makefile \
