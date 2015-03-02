@@ -835,7 +835,10 @@ bool CCurlFile::ReadData(std::string& strHTML)
 {
   int size_read = 0;
   int data_size = 0;
-  strHTML = "";
+  strHTML.clear();
+  int64_t length = GetLength();
+  if (length > 0)
+    strHTML.reserve(length);
   char buffer[16384];
   while( (size_read = Read(buffer, sizeof(buffer)-1) ) > 0 )
   {
