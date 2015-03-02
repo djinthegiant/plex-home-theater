@@ -446,7 +446,7 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   g_curlInterface.easy_setopt(h, CURLOPT_READFUNCTION, read_callback);
 
   // set username and password for current handle
-  if (m_username.length() > 0 && m_password.length() > 0)
+  if (!m_username.empty() && !m_password.empty())
   {
     std::string userpwd = m_username + ':' + m_password;
     g_curlInterface.easy_setopt(h, CURLOPT_USERPWD, userpwd.c_str());
@@ -544,7 +544,7 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   }
 
   // allow passive mode for ftp
-  if( m_ftpport.length() > 0 )
+  if( !m_ftpport.empty() )
     g_curlInterface.easy_setopt(h, CURLOPT_FTPPORT, m_ftpport.c_str());
   else
     g_curlInterface.easy_setopt(h, CURLOPT_FTPPORT, NULL);
@@ -556,13 +556,13 @@ void CCurlFile::SetCommonOptions(CReadState* state)
     g_curlInterface.easy_setopt(h, CURLOPT_FTP_SKIP_PASV_IP, 1);
 
   // setup Content-Encoding if requested
-  if( m_contentencoding.length() > 0 )
+  if( !m_contentencoding.empty() )
     g_curlInterface.easy_setopt(h, CURLOPT_ENCODING, m_contentencoding.c_str());
 
   if (!m_useOldHttpVersion && !m_acceptCharset.empty())
     SetRequestHeader("Accept-Charset", m_acceptCharset);
 
-  if (m_userAgent.length() > 0)
+  if (!m_userAgent.empty())
     g_curlInterface.easy_setopt(h, CURLOPT_USERAGENT, m_userAgent.c_str());
   else /* set some default agent as shoutcast doesn't return proper stuff otherwise */
     g_curlInterface.easy_setopt(h, CURLOPT_USERAGENT, g_advancedSettings.m_userAgent.c_str());
@@ -573,15 +573,15 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   if (g_advancedSettings.m_curlDisableIPV6)
     g_curlInterface.easy_setopt(h, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-  if (m_proxy.length() > 0)
+  if (!m_proxy.empty())
   {
     g_curlInterface.easy_setopt(h, CURLOPT_PROXY, m_proxy.c_str());
     g_curlInterface.easy_setopt(h, CURLOPT_PROXYTYPE, proxyType2CUrlProxyType[m_proxytype]);
-    if (m_proxyuserpass.length() > 0)
+    if (!m_proxyuserpass.empty())
       g_curlInterface.easy_setopt(h, CURLOPT_PROXYUSERPWD, m_proxyuserpass.c_str());
 
   }
-  if (m_customrequest.length() > 0)
+  if (!m_customrequest.empty())
     g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, m_customrequest.c_str());
 
   if (m_connecttimeout == 0)
@@ -727,7 +727,7 @@ void CCurlFile::ParseAndCorrectUrl(CURL &url2)
     {
       m_proxy = CSettings::Get().GetString("network.httpproxyserver");
       m_proxy += StringUtils::Format(":%d", CSettings::Get().GetInt("network.httpproxyport"));
-      if (CSettings::Get().GetString("network.httpproxyusername").length() > 0 && m_proxyuserpass.empty())
+      if (!CSettings::Get().GetString("network.httpproxyusername").empty() && m_proxyuserpass.empty())
       {
         m_proxyuserpass = CSettings::Get().GetString("network.httpproxyusername");
         m_proxyuserpass += ":" + CSettings::Get().GetString("network.httpproxypassword");
@@ -785,7 +785,7 @@ void CCurlFile::ParseAndCorrectUrl(CURL &url2)
   // Unset the protocol options to have an url without protocol options
   url2.SetProtocolOptions("");
 
-  if (m_username.length() > 0 && m_password.length() > 0)
+  if (!m_username.empty() && !m_password.empty())
     m_url = url2.GetWithoutUserDetails();
   else
     m_url = url2.Get();
