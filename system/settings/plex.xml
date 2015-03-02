@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <section id="services">
+    <category id="plex" label="40001" help="40002">
+      <group id="1">
+        <setting id="system.uuid" type="string" label="40003" help="40004">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="plex.server" type="string" label="40005" help="40006">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>

@@ -16116,3 +16116,35 @@ msgstr ""
 msgctxt "#38010"
 msgid "GPU accelerated"
 msgstr ""
+
+# PLEX
+
+#: system/settings/plex.xml
+msgctxt "#40001"
+msgid "Plex"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40002"
+msgid "Category contains settings for Plex"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40003"
+msgid "Client Identifier"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40004"
+msgid "Help for Client Identifier"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40005"
+msgid "Plex Media Server Name"
+msgstr ""
+
+#: system/settings/plex.xml
+msgctxt "#40006"
+msgid "Enter the name or IP of your local Plex Media Server"
+msgstr ""

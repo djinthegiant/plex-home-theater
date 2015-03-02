@@ -475,6 +475,11 @@ bool CSettings::InitializeDefinitions()
 #endif
 #endif
 
+  /* PLEX */
+  if (CFile::Exists(SETTINGS_XML_FOLDER "plex.xml") && !Initialize(SETTINGS_XML_FOLDER "plex.xml"))
+	  CLog::Log(LOGFATAL, "Unable to load plex-specific settings definitions");
+  /* END PLEX */
+
   // load any custom visibility and default values before loading the special
   // appliance.xml so that appliances are able to overwrite even those values
   InitializeVisibility();
