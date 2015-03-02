@@ -1,6 +1,10 @@
 CXXFLAGS += -D__STDC_FORMAT_MACROS
 
 SRCS  = PlexApplication.cpp
+SRCS += filesystem/PlexDirectory.cpp
+SRCS += filesystem/PlexDirectoryParser.cpp
+SRCS += filesystem/PlexFile.cpp
+SRCS += utils/PlexXMLUtils.cpp
 
 LIB = plex.a
 

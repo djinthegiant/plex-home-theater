@@ -304,6 +304,12 @@ void CGUIDialogMediaSource::OnPathBrowse(int item)
       share1.strName = g_localizeStrings.Get(19017); // TV Recordings
       extraShares.push_back(share1);
     }
+
+    /* PLEX */
+    share1.strPath = "plexserver://plex.server/library/sections";
+    share1.strName = "Plex Library";
+    extraShares.push_back(share1);
+    /* END PLEX */
   }
   else if (m_type == "pictures")
   {

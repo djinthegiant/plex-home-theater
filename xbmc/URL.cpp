@@ -459,7 +459,8 @@ const std::string CURL::GetTranslatedProtocol() const
    || IsProtocol("daap")
    || IsProtocol("dav")
    || IsProtocol("tuxbox")
-   || IsProtocol("rss"))
+   || IsProtocol("rss")
+   || IsProtocol("plexserver"))
     return "http";
 
   if (IsProtocol("davs"))

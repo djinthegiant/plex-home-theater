@@ -325,6 +325,12 @@
     <Filter Include="plex">
       <UniqueIdentifier>{95c3ea9e-945a-4ecd-8aec-8b599e83cb03}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plex\filesystem">
+      <UniqueIdentifier>{f227cd84-d096-4b57-87fb-95b1dcdf4a11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\utils">
+      <UniqueIdentifier>{01cbd6fc-75d4-497f-9210-1e240a958336}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -3088,6 +3094,18 @@
     </ClCompile>
     <ClCompile Include="..\..\plex\PlexApplication.cpp">
       <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\filesystem\PlexDirectory.cpp">
+      <Filter>plex\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\filesystem\PlexDirectoryParser.cpp">
+      <Filter>plex\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\filesystem\PlexFile.cpp">
+      <Filter>plex\filesystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\utils\PlexXMLUtils.cpp">
+      <Filter>plex\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -6042,6 +6060,18 @@
     </ClInclude>
     <ClInclude Include="..\..\plex\PlexApplication.h">
       <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\filesystem\PlexDirectory.h">
+      <Filter>plex\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\filesystem\PlexDirectoryParser.h">
+      <Filter>plex\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\filesystem\PlexFile.h">
+      <Filter>plex\filesystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\utils\PlexXMLUtils.h">
+      <Filter>plex\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

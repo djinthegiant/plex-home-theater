@@ -171,7 +171,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\SlingboxLib\SlingboxLib.cpp" />
+    <ClCompile Include="..\..\plex\filesystem\PlexDirectory.cpp" />
+    <ClCompile Include="..\..\plex\filesystem\PlexDirectoryParser.cpp" />
+    <ClCompile Include="..\..\plex\filesystem\PlexFile.cpp" />
     <ClCompile Include="..\..\plex\PlexApplication.cpp" />
+    <ClCompile Include="..\..\plex\utils\PlexXMLUtils.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacks.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksAddon.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksCodec.cpp" />
@@ -802,7 +806,11 @@
     <ClCompile Include="..\..\xbmc\TextureCacheJob.cpp" />
     <ClCompile Include="..\..\xbmc\TextureDatabase.cpp" />
     <ClCompile Include="..\..\xbmc\DatabaseManager.cpp" />
+    <ClInclude Include="..\..\plex\filesystem\PlexDirectory.h" />
+    <ClInclude Include="..\..\plex\filesystem\PlexDirectoryParser.h" />
+    <ClInclude Include="..\..\plex\filesystem\PlexFile.h" />
     <ClInclude Include="..\..\plex\PlexApplication.h" />
+    <ClInclude Include="..\..\plex\utils\PlexXMLUtils.h" />
     <ClInclude Include="..\..\xbmc\addons\AddonCallbacksCodec.h" />
     <ClInclude Include="..\..\xbmc\ApplicationPlayer.h" />
     <ClInclude Include="..\..\xbmc\AppParamParser.h" />

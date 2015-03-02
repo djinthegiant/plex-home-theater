@@ -187,7 +187,8 @@ bool CTextureCacheJob::UpdateableURL(const CStdString &url) const
 {
   // we don't constantly check online images
   if (StringUtils::StartsWith(url, "http://") ||
-      StringUtils::StartsWith(url, "https://"))
+      StringUtils::StartsWith(url, "https://") ||
+      StringUtils::StartsWith(url, "plexserver://"))
     return false;
   return true;
 }
