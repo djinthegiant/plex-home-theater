@@ -322,6 +322,42 @@
     <Filter Include="video\videosync">
       <UniqueIdentifier>{9775d5c0-c640-4606-a625-e6cdcf9f959e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plex">
+      <UniqueIdentifier>{b0dfbe47-a556-4aa7-a7df-e07cb4352f55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Client">
+      <UniqueIdentifier>{538c75a6-f742-4a04-b656-40c740979fce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Client\MyPlex">
+      <UniqueIdentifier>{e2d33f67-098f-495e-83f1-e4ef4eb3fbd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\FileSystem">
+      <UniqueIdentifier>{82706937-67de-4e03-b043-a4a8bbc69ee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Filters">
+      <UniqueIdentifier>{b59fab4b-dda8-4fff-98da-1935e9255386}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\GUI">
+      <UniqueIdentifier>{a6a655c0-f5ad-43d5-935d-e2f0df0ce47b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Home">
+      <UniqueIdentifier>{c4bc66d1-d270-4147-858b-c92b9b61d500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Network">
+      <UniqueIdentifier>{23905d6c-1b11-4fb3-93c3-a1427e003d83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Owned">
+      <UniqueIdentifier>{eeb8b3c8-9927-4459-917e-8215b9ebbda1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Playlists">
+      <UniqueIdentifier>{b44b04e5-5fd0-40e5-b6ed-cdd6cdd1c5f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Remote">
+      <UniqueIdentifier>{e3bd7f5a-17be-48cc-a179-28d947692465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plex\Utility">
+      <UniqueIdentifier>{408f6444-17af-4a4e-9797-802a0f96dece}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\xbmc\win32\pch.cpp">
@@ -3085,6 +3121,279 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogSimpleMenu.cpp">
       <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexApplication.cpp">
+      <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexMediaDecisionEngine.cpp">
+      <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexTextureCache.cpp">
+      <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexThemeMusicPlayer.cpp">
+      <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\PlexUtils.cpp">
+      <Filter>plex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexManager.cpp">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexPinInfo.cpp">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexScanner.cpp">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexUserInfo.cpp">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexConnection.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexExtraInfoLoader.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexManualServerManager.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexMediaServerClient.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexNetworkServiceBrowser.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexServer.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexServerCacheDatabase.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexServerDataLoader.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexServerManager.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexServerVersion.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexTimeline.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexTimelineManager.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexTranscoderClient.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Client\PlexTranscoderClientRPi.cpp">
+      <Filter>plex\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexAttributeParser.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectory.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryCache.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParser.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserMusic.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserPicture.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserRelease.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserVideo.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexExtraDataLoader.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\FileSystem\PlexFile.cpp">
+      <Filter>plex\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Filters\GUIPlexFilterFactory.cpp">
+      <Filter>plex\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Filters\PlexFilterManager.cpp">
+      <Filter>plex\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Filters\PlexSecondaryFilter.cpp">
+      <Filter>plex\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Filters\PlexSectionFilter.cpp">
+      <Filter>plex\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogFilterSort.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlayListSelection.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexAudioSubtitlePicker.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexError.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexGlobalCacher.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexMedia.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexPluginSettings.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexSettingsMenu.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexUserSelect.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexVideoOSD.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogRating.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIDialogTimer.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIFilterOrderButtonControl.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIPlexDefaultActionHandler.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIPlexMediaWindow.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIPlexScreenSaverPhoto.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIPlexWindowFocusSaver.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowMyPlex.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowNowPlaying.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexMyChannels.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPlaylistSelection.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPlayQueue.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPreplayVideo.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexSearch.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexStartupHelper.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\GUI\GUIWindowStartup.cpp">
+      <Filter>plex\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Home\GUIWindowHome.cpp">
+      <Filter>plex\Home</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Home\PlexSectionFanout.cpp">
+      <Filter>plex\Home</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Network\NetworkInterface.cpp">
+      <Filter>plex\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceBSD.cpp">
+      <Filter>plex\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceLinux.cpp">
+      <Filter>plex\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceWin32.cpp">
+      <Filter>plex\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Owned\MusicThumbLoader.cpp">
+      <Filter>plex\Owned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Owned\PictureThumbLoader.cpp">
+      <Filter>plex\Owned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Owned\VideoThumbLoader.cpp">
+      <Filter>plex\Owned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Playlists\GUIDialogPlexPlayQueue.cpp">
+      <Filter>plex\Playlists</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueLocal.cpp">
+      <Filter>plex\Playlists</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueManager.cpp">
+      <Filter>plex\Playlists</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueServer.cpp">
+      <Filter>plex\Playlists</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexHTTPRemoteHandler.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteApplicationHandler.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteNavigationHandler.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexRemotePlaybackHandler.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexRemotePlayHandler.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteSubscriberManager.cpp">
+      <Filter>plex\Remote</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexAES.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexBusyIndicator.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexGlobalCacher.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexGlobalTimer.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexJobs.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexNavigationHelper.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexProfiler.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexQueue.cpp">
+      <Filter>plex\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plex\Utility\PlexTimer.cpp">
+      <Filter>plex\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -6039,6 +6348,300 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogSimpleMenu.h">
       <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexApplication.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexLog.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexMediaDecisionEngine.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexTextureCache.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexThemeMusicPlayer.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexTypes.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\PlexUtils.h">
+      <Filter>plex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexManager.h">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexPinInfo.h">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexScanner.h">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexUserInfo.h">
+      <Filter>plex\Client\MyPlex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexConnection.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexExtraInfoLoader.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexManualServerManager.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexMediaServerClient.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexNetworkServiceBrowser.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexServer.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexServerCacheDatabase.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexServerDataLoader.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexServerManager.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexServerVersion.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexTimeline.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexTimelineManager.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexTranscoderClient.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Client\PlexTranscoderClientRPi.h">
+      <Filter>plex\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexAttributeParser.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectory.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryCache.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParser.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserMusic.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserPicture.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserRelease.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserVideo.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexExtraDataLoader.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\PlexFile.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\FileSystem\XMLChoice.h">
+      <Filter>plex\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Filters\GUIPlexFilterFactory.h">
+      <Filter>plex\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Filters\PlexFilterManager.h">
+      <Filter>plex\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Filters\PlexSecondaryFilter.h">
+      <Filter>plex\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Filters\PlexSectionFilter.h">
+      <Filter>plex\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogFilterSort.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlayListSelection.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexAudioSubtitlePicker.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexError.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexGlobalCacher.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexMedia.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexPluginSettings.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexSettingsMenu.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexUserSelect.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexVideoOSD.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogRating.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIDialogTimer.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIFilterOrderButtonControl.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIPlexDefaultActionHandler.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIPlexMediaWindow.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIPlexScreenSaverPhoto.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIPlexWindowFocusSaver.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowMyPlex.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowNowPlaying.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexMyChannels.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPlaylistSelection.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPlayQueue.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPreplayVideo.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexSearch.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexStartupHelper.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowSharedContent.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\GUI\GUIWindowStartup.h">
+      <Filter>plex\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Home\GUIWindowHome.h">
+      <Filter>plex\Home</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Home\PlexSectionFanout.h">
+      <Filter>plex\Home</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkInterface.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkService.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkServiceAdvertiser.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkServiceAdvertiserPMS.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkServiceBase.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\NetworkServiceBrowser.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Network\PlexNetworkServiceAdvertiser.h">
+      <Filter>plex\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Owned\MusicThumbLoader.h">
+      <Filter>plex\Owned</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Owned\PictureThumbLoader.h">
+      <Filter>plex\Owned</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Owned\VideoThumbLoader.h">
+      <Filter>plex\Owned</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Playlists\GUIDialogPlexPlayQueue.h">
+      <Filter>plex\Playlists</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueLocal.h">
+      <Filter>plex\Playlists</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueManager.h">
+      <Filter>plex\Playlists</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueServer.h">
+      <Filter>plex\Playlists</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexHTTPRemoteHandler.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteApplicationHandler.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteNavigationHandler.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexRemotePlaybackHandler.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexRemotePlayHandler.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteSubscriberManager.h">
+      <Filter>plex\Remote</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexAES.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexBusyIndicator.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexGlobalCacher.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexGlobalTimer.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexJobs.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexNavigationHelper.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexProfiler.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexQueue.h">
+      <Filter>plex\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plex\Utility\PlexTimer.h">
+      <Filter>plex\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

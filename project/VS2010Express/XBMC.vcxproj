@@ -75,8 +75,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NOMINMAX;_USE_32BIT_TIME_T;HAS_DX;D3D_DEBUG_INFO;__STDC_CONSTANT_MACROS;_SECURE_SCL=0;TAGLIB_STATIC;NPT_CONFIG_ENABLE_LOGGING;PLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi";PLT_HTTP_DEFAULT_SERVER="UPnP/1.0 DLNADOC/1.50 Kodi";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\;..\..\plex\;..\..\xbmc\;..\..\xbmc\cores\dvdplayer;..\..\xbmc\win32;..\..\lib;..\..\lib\win32\ffmpeg;..\..\lib\libUPnP;..\..\lib\libUPnP\Platinum\Source\Devices\MediaRenderer;..\..\lib\libUPnP\Platinum\Source\Devices\MediaConnect;..\..\lib\libUPnP\Platinum\Source\Devices\MediaServer;..\..\lib\libUPnP\Platinum\Source\Platinum;..\..\lib\libUPnP\Platinum\Source\Core;..\..\lib\libUPnP\Platinum\Source\Extras;..\..\lib\libUPnP\Neptune\Source\Core;..\..\lib\libUPnP\Neptune\Source\System\Win32;..\..\lib\win32\pcre;..\..\lib\win32;..\..\xbmc\cores\AudioEngine\;..\..\addons\library.xbmc.gui;..\..\addons\library.xbmc.addon;..\..\addons\library.xbmc.pvr;..\..\addons\library.xbmc.codec;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__PLEX__;NOMINMAX;_USE_32BIT_TIME_T;HAS_DX;D3D_DEBUG_INFO;__STDC_CONSTANT_MACROS;_SECURE_SCL=0;TAGLIB_STATIC;NPT_CONFIG_ENABLE_LOGGING;PLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi";PLT_HTTP_DEFAULT_SERVER="UPnP/1.0 DLNADOC/1.50 Kodi";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -171,6 +171,97 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lib\SlingboxLib\SlingboxLib.cpp" />
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexManager.cpp" />
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexPinInfo.cpp" />
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexScanner.cpp" />
+    <ClCompile Include="..\..\plex\Client\MyPlex\MyPlexUserInfo.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexConnection.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexExtraInfoLoader.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexManualServerManager.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexMediaServerClient.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexNetworkServiceBrowser.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexServer.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexServerCacheDatabase.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexServerDataLoader.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexServerManager.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexServerVersion.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexTimeline.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexTimelineManager.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexTranscoderClient.cpp" />
+    <ClCompile Include="..\..\plex\Client\PlexTranscoderClientRPi.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexAttributeParser.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectory.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryCache.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParser.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserMusic.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserPicture.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserRelease.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexDirectoryTypeParserVideo.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexExtraDataLoader.cpp" />
+    <ClCompile Include="..\..\plex\FileSystem\PlexFile.cpp" />
+    <ClCompile Include="..\..\plex\Filters\GUIPlexFilterFactory.cpp" />
+    <ClCompile Include="..\..\plex\Filters\PlexFilterManager.cpp" />
+    <ClCompile Include="..\..\plex\Filters\PlexSecondaryFilter.cpp" />
+    <ClCompile Include="..\..\plex\Filters\PlexSectionFilter.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogFilterSort.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlayListSelection.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexAudioSubtitlePicker.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexError.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexGlobalCacher.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexMedia.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexPluginSettings.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexSettingsMenu.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexUserSelect.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogPlexVideoOSD.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogRating.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIDialogTimer.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIFilterOrderButtonControl.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIPlexDefaultActionHandler.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIPlexMediaWindow.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIPlexScreenSaverPhoto.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIPlexWindowFocusSaver.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowMyPlex.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowNowPlaying.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexMyChannels.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPlaylistSelection.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPlayQueue.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexPreplayVideo.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexSearch.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowPlexStartupHelper.cpp" />
+    <ClCompile Include="..\..\plex\GUI\GUIWindowStartup.cpp" />
+    <ClCompile Include="..\..\plex\Home\GUIWindowHome.cpp" />
+    <ClCompile Include="..\..\plex\Home\PlexSectionFanout.cpp" />
+    <ClCompile Include="..\..\plex\Network\NetworkInterface.cpp" />
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceBSD.cpp" />
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceLinux.cpp" />
+    <ClCompile Include="..\..\plex\Network\NetworkInterfaceWin32.cpp" />
+    <ClCompile Include="..\..\plex\Owned\MusicThumbLoader.cpp" />
+    <ClCompile Include="..\..\plex\Owned\PictureThumbLoader.cpp" />
+    <ClCompile Include="..\..\plex\Owned\VideoThumbLoader.cpp" />
+    <ClCompile Include="..\..\plex\Playlists\GUIDialogPlexPlayQueue.cpp" />
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueLocal.cpp" />
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueManager.cpp" />
+    <ClCompile Include="..\..\plex\Playlists\PlexPlayQueueServer.cpp" />
+    <ClCompile Include="..\..\plex\PlexApplication.cpp" />
+    <ClCompile Include="..\..\plex\PlexMediaDecisionEngine.cpp" />
+    <ClCompile Include="..\..\plex\PlexTextureCache.cpp" />
+    <ClCompile Include="..\..\plex\PlexThemeMusicPlayer.cpp" />
+    <ClCompile Include="..\..\plex\PlexUtils.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexHTTPRemoteHandler.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteApplicationHandler.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteNavigationHandler.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexRemotePlaybackHandler.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexRemotePlayHandler.cpp" />
+    <ClCompile Include="..\..\plex\Remote\PlexRemoteSubscriberManager.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexAES.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexBusyIndicator.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexGlobalCacher.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexGlobalTimer.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexJobs.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexNavigationHelper.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexProfiler.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexQueue.cpp" />
+    <ClCompile Include="..\..\plex\Utility\PlexTimer.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacks.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksAddon.cpp" />
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksCodec.cpp" />
@@ -802,6 +893,104 @@
     <ClCompile Include="..\..\xbmc\TextureCacheJob.cpp" />
     <ClCompile Include="..\..\xbmc\TextureDatabase.cpp" />
     <ClCompile Include="..\..\xbmc\DatabaseManager.cpp" />
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexManager.h" />
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexPinInfo.h" />
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexScanner.h" />
+    <ClInclude Include="..\..\plex\Client\MyPlex\MyPlexUserInfo.h" />
+    <ClInclude Include="..\..\plex\Client\PlexConnection.h" />
+    <ClInclude Include="..\..\plex\Client\PlexExtraInfoLoader.h" />
+    <ClInclude Include="..\..\plex\Client\PlexManualServerManager.h" />
+    <ClInclude Include="..\..\plex\Client\PlexMediaServerClient.h" />
+    <ClInclude Include="..\..\plex\Client\PlexNetworkServiceBrowser.h" />
+    <ClInclude Include="..\..\plex\Client\PlexServer.h" />
+    <ClInclude Include="..\..\plex\Client\PlexServerCacheDatabase.h" />
+    <ClInclude Include="..\..\plex\Client\PlexServerDataLoader.h" />
+    <ClInclude Include="..\..\plex\Client\PlexServerManager.h" />
+    <ClInclude Include="..\..\plex\Client\PlexServerVersion.h" />
+    <ClInclude Include="..\..\plex\Client\PlexTimeline.h" />
+    <ClInclude Include="..\..\plex\Client\PlexTimelineManager.h" />
+    <ClInclude Include="..\..\plex\Client\PlexTranscoderClient.h" />
+    <ClInclude Include="..\..\plex\Client\PlexTranscoderClientRPi.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexAttributeParser.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectory.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryCache.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParser.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserMusic.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserPicture.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserRelease.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexDirectoryTypeParserVideo.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexExtraDataLoader.h" />
+    <ClInclude Include="..\..\plex\FileSystem\PlexFile.h" />
+    <ClInclude Include="..\..\plex\FileSystem\XMLChoice.h" />
+    <ClInclude Include="..\..\plex\Filters\GUIPlexFilterFactory.h" />
+    <ClInclude Include="..\..\plex\Filters\PlexFilterManager.h" />
+    <ClInclude Include="..\..\plex\Filters\PlexSecondaryFilter.h" />
+    <ClInclude Include="..\..\plex\Filters\PlexSectionFilter.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogFilterSort.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlayListSelection.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexAudioSubtitlePicker.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexError.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexGlobalCacher.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexMedia.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexPluginSettings.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexSettingsMenu.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexUserSelect.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogPlexVideoOSD.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogRating.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIDialogTimer.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIFilterOrderButtonControl.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIPlexDefaultActionHandler.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIPlexMediaWindow.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIPlexScreenSaverPhoto.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIPlexWindowFocusSaver.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowMyPlex.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowNowPlaying.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexMyChannels.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPlaylistSelection.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPlayQueue.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexPreplayVideo.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexSearch.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowPlexStartupHelper.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowSharedContent.h" />
+    <ClInclude Include="..\..\plex\GUI\GUIWindowStartup.h" />
+    <ClInclude Include="..\..\plex\Home\GUIWindowHome.h" />
+    <ClInclude Include="..\..\plex\Home\PlexSectionFanout.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkInterface.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkService.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkServiceAdvertiser.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkServiceAdvertiserPMS.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkServiceBase.h" />
+    <ClInclude Include="..\..\plex\Network\NetworkServiceBrowser.h" />
+    <ClInclude Include="..\..\plex\Network\PlexNetworkServiceAdvertiser.h" />
+    <ClInclude Include="..\..\plex\Owned\MusicThumbLoader.h" />
+    <ClInclude Include="..\..\plex\Owned\PictureThumbLoader.h" />
+    <ClInclude Include="..\..\plex\Owned\VideoThumbLoader.h" />
+    <ClInclude Include="..\..\plex\Playlists\GUIDialogPlexPlayQueue.h" />
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueLocal.h" />
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueManager.h" />
+    <ClInclude Include="..\..\plex\Playlists\PlexPlayQueueServer.h" />
+    <ClInclude Include="..\..\plex\PlexApplication.h" />
+    <ClInclude Include="..\..\plex\PlexLog.h" />
+    <ClInclude Include="..\..\plex\PlexMediaDecisionEngine.h" />
+    <ClInclude Include="..\..\plex\PlexTextureCache.h" />
+    <ClInclude Include="..\..\plex\PlexThemeMusicPlayer.h" />
+    <ClInclude Include="..\..\plex\PlexTypes.h" />
+    <ClInclude Include="..\..\plex\PlexUtils.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexHTTPRemoteHandler.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteApplicationHandler.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteNavigationHandler.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexRemotePlaybackHandler.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexRemotePlayHandler.h" />
+    <ClInclude Include="..\..\plex\Remote\PlexRemoteSubscriberManager.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexAES.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexBusyIndicator.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexGlobalCacher.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexGlobalTimer.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexJobs.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexNavigationHelper.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexProfiler.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexQueue.h" />
+    <ClInclude Include="..\..\plex\Utility\PlexTimer.h" />
     <ClInclude Include="..\..\xbmc\addons\AddonCallbacksCodec.h" />
     <ClInclude Include="..\..\xbmc\ApplicationPlayer.h" />
     <ClInclude Include="..\..\xbmc\AppParamParser.h" />
@@ -2395,6 +2584,12 @@
     <ProjectReference Include="..\..\lib\libXDAAP\libXDAAP_win32\libXDAAP_win32.vcxproj">
       <Project>{19b16cd0-3b47-47b7-ab0e-81ef2bf1b187}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\..\plex\Third-Party\aes\plex-aes.vcxproj">
+      <Project>{e819b7c8-d84a-4392-b3b0-a57b202944fd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\plex\Third-Party\hash-library\plex-hash-library.vcxproj">
+      <Project>{24864c73-06c6-4b0e-a324-4f07a418e0b2}</Project>
     </ProjectReference>
     <ProjectReference Include="libPlatinum.vcxproj">
       <Project>{b2975495-fbe4-4f94-aac5-b21a9842bf50}</Project>
