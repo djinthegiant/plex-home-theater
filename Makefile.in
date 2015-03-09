@@ -102,6 +102,9 @@ DIRECTORY_ARCHIVES=$(DVDPLAYER_ARCHIVES) \
                    xbmc/view/view.a \
                    xbmc/windowing/windowing.a \
                    xbmc/windows/windows.a \
+                   plex/Third-Party/aes/plex-aes.a \
+                   plex/Third-Party/hash-library/plex-hash-library.a \
+                   plex/plex.a \
                    xbmc/xbmc.a \
 
 NWAOBJSXBMC=	xbmc/threads/threads.a \

@@ -1,0 +1,13 @@
+CXXFLAGS += -D__STDC_FORMAT_MACROS
+
+SRCS  = crc32.cpp
+SRCS += keccak.cpp
+SRCS += md5.cpp
+SRCS += sha1.cpp
+SRCS += sha3.cpp
+SRCS += sha256.cpp
+
+LIB = plex-hash-library.a
+
+include @abs_top_srcdir@/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))

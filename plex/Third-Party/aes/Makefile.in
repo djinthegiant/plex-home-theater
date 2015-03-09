@@ -1,0 +1,12 @@
+CXXFLAGS += -D__STDC_FORMAT_MACROS
+
+SRCS  = aes_modes.c
+SRCS += aes_ni.c
+SRCS += aescrypt.c
+SRCS += aeskey.c
+SRCS += aestab.c
+
+LIB = plex-aes.a
+
+include @abs_top_srcdir@/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))

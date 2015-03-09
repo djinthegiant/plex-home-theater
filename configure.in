@@ -9,6 +9,7 @@ m4_include([m4/ax_prog_cc_for_build.m4])
 m4_include([m4/ax_prog_cxx_for_build.m4])
 m4_include([m4/ax_python_devel.m4])
 m4_include([m4/xbmc_arch.m4])
+m4_include([m4/boost.m4])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign])
@@ -595,6 +596,12 @@ OBJDUMP="${OBJDUMP:-objdump}"
 READELF="${READELF:-readelf}"
 NM="${NM:-nm}"
 
+# Boost
+BOOST_REQUIRE([1.44.0])
+BOOST_THREAD
+LDFLAGS="$LDFLAGS $BOOST_THREAD_LDFLAGS"
+LIBS="$LIBS $BOOST_THREAD_LIBS"
+
 # host detection and setup
 case $host in
   i*86*-linux-android*)
@@ -737,6 +744,8 @@ case $use_platform in
 esac
 
 XBMC_SETUP_ARCH_DEFINES()
+
+PLEX_DEFINES="$PLEX_DEFINES -D__PLEX__ -DUSE_PAGING -DTARGET_RASPLEX -DOPENELEC"
 
 # detect soname version
 
@@ -2428,6 +2437,9 @@ fi
 OUTPUT_FILES="Makefile \
     Makefile.include \
     addons/skin.confluence/media/Makefile \
+    plex/Third-Party/aes/Makefile \
+    plex/Third-Party/hash-library/Makefile \
+    plex/Makefile \
     xbmc/Makefile \
     xbmc/cdrip/Makefile \
     xbmc/cores/Makefile \
@@ -2558,6 +2570,7 @@ AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CXXFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
+AC_SUBST(PLEX_DEFINES)
 AC_SUBST(SDL_DEFINES)
 AC_SUBST(BUILD_DVDCSS)
 AC_SUBST(DISABLE_WAVEFORM)
