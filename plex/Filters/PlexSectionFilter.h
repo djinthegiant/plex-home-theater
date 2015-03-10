@@ -4,7 +4,7 @@
 #include <vector>
 #include "PlexSecondaryFilter.h"
 #include "URL.h"
-#include "UrlOptions.h"
+#include "utils/UrlOptions.h"
 
 #include <boost/foreach.hpp>
 

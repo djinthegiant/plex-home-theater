@@ -1,11 +1,11 @@
 #include "PlexSecondaryFilter.h"
-#include "Variant.h"
+#include "utils/Variant.h"
 #include <boost/foreach.hpp>
-#include "StringUtils.h"
-#include "JobManager.h"
-#include "PlexJobs.h"
+#include "utils/StringUtils.h"
+#include "utils/JobManager.h"
+#include "Utility/PlexJobs.h"
 
-#include "Key.h"
+#include "guilib/Key.h"
 #include "guilib/GUIWindowManager.h"
 
 #include <sstream>

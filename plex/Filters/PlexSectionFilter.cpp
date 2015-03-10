@@ -1,14 +1,14 @@
 #include "PlexSectionFilter.h"
 #include "PlexUtils.h"
 
-#include "PlexDirectory.h"
+#include "FileSystem/PlexDirectory.h"
 #include "FileItem.h"
 #include "URL.h"
 
 #include "PlexApplication.h"
 #include "Client/PlexServerDataLoader.h"
 
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexSectionFilter::CPlexSectionFilter(const CURL &sectionUrl) : m_sectionUrl(sectionUrl)
@@ -198,9 +198,9 @@ CURL CPlexSectionFilter::addFiltersToUrl(const CURL &baseUrl)
     // this should really be refactored to a CPlexMusicSectionFilter instead
     PlexUtils::AppendPathToURL(nu, "all");
     if (m_currentPrimaryFilter == "all")
-      nu.SetOption("type", boost::lexical_cast<CStdString>(PLEX_MEDIA_FILTER_TYPE_ARTIST));
+      nu.SetOption("type", boost::lexical_cast<std::string>(PLEX_MEDIA_FILTER_TYPE_ARTIST));
     else if (m_currentPrimaryFilter == "albums")
-      nu.SetOption("type", boost::lexical_cast<CStdString>(PLEX_MEDIA_FILTER_TYPE_ALBUM));
+      nu.SetOption("type", boost::lexical_cast<std::string>(PLEX_MEDIA_FILTER_TYPE_ALBUM));
   }
   else
   {

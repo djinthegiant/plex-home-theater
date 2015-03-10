@@ -6,9 +6,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include "FileItem.h"
-#include "Variant.h"
-#include "JobManager.h"
-#include "UrlOptions.h"
+#include "utils/Variant.h"
+#include "utils/JobManager.h"
+#include "utils/UrlOptions.h"
 
 #include <boost/foreach.hpp>
 

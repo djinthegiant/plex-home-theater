@@ -5,7 +5,7 @@
 #include <vector>
 #include "URL.h"
 #include "threads/CriticalSection.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "PlexSectionFilter.h"
 
 class CPlexSectionFilterLoadJob : public CJob
