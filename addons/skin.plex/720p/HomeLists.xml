@@ -47,8 +47,11 @@
 		<control type="image">
 			<posy>-123</posy>
 			<posx>0</posx>
+			<width>14</width>
+			<height>30</height>
 			<texture background="true">arrow-big.png</texture>
 			<colordiffuse>orange</colordiffuse>
+			<aspectratio>keep</aspectratio>
 			<animation effect="fade" start="0" end="100" time="200" condition="true">Visible</animation>
 			<animation effect="fade" start="100" end="0" time="100" condition="true">Hidden</animation>
 			<visible>ControlGroup(5000).HasFocus + !Control.IsVisible(999)</visible>
