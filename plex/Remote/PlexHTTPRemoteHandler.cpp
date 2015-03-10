@@ -26,17 +26,16 @@
 #include <boost/asio/detail/socket_ops.hpp>
 #include "PlexApplication.h"
 
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "guilib/GUIEditControl.h"
-#include "GUIAudioManager.h"
+#include "guilib/GUIAudioManager.h"
 
-#include "PlayList.h"
-#include "Settings.h"
+#include "playlists/PlayList.h"
 
-#include "GUIWindowSlideShow.h"
-#include "PlexNavigationHelper.h"
+#include "pictures/GUIWindowSlideShow.h"
+#include "Utility/PlexNavigationHelper.h"
 
-#include "ViewDatabase.h"
+#include "view/ViewDatabase.h"
 
 #include "PlexRemoteApplicationHandler.h"
 #include "PlexRemoteNavigationHandler.h"
@@ -76,7 +75,7 @@ int CPlexHTTPRemoteHandler::HandleHTTPRequest(const HTTPRequest &request)
 
   ArgMap argumentMap;
   ArgMap headerMap;
-  CStdString path(request.url);
+  std::string path(request.url);
   
   CWebServer::GetRequestHeaderValues(request.connection, MHD_GET_ARGUMENT_KIND, argumentMap);
   CWebServer::GetRequestHeaderValues(request.connection, MHD_HEADER_KIND, headerMap);
@@ -84,7 +83,7 @@ int CPlexHTTPRemoteHandler::HandleHTTPRequest(const HTTPRequest &request)
   /* first see if we need to handle CORS requests - Access-Control-Allow-Origin needs to be
    * available for all requests, the other headers is only needed on a OPTIONS call */
   m_responseHeaderFields.insert(std::pair<std::string, std::string>("Access-Control-Allow-Origin", "*"));
-  m_responseHeaderFields.insert(std::pair<std::string, std::string>("X-Plex-Client-Identifier", g_guiSettings.GetString("system.uuid")));
+  m_responseHeaderFields.insert(std::pair<std::string, std::string>("X-Plex-Client-Identifier", CSettings::Get().GetString("system.uuid")));
   if (request.method == OPTIONS &&
       headerMap.find("Access-Control-Request-Method") != headerMap.end())
   {
@@ -110,8 +109,8 @@ int CPlexHTTPRemoteHandler::HandleHTTPRequest(const HTTPRequest &request)
 
   if (boost::starts_with(path, "/resources"))
     response = resources();
-  else if (path.Equals("/player/playback/playMedia") ||
-      /* LEGACY */ path.Equals("/player/application/playMedia"))
+  else if (path == "/player/playback/playMedia" ||
+      /* LEGACY */ path == "/player/application/playMedia")
     response = playHandler->handle(path, argumentMap);
   else if (boost::starts_with(path, "/player/playback"))
     response = playbackHandler->handle(path, argumentMap);
@@ -119,13 +118,13 @@ int CPlexHTTPRemoteHandler::HandleHTTPRequest(const HTTPRequest &request)
     response = navigationHandler->handle(path, argumentMap);
   else if (boost::starts_with(path, "/player/application"))
     response = applicationHandler->handle(path, argumentMap);
-  else if (path.Equals("/player/timeline/subscribe"))
+  else if (path == "/player/timeline/subscribe")
     response = subscribe(request, argumentMap);
-  else if (path.Equals("/player/mirror/details"))
+  else if (path == "/player/mirror/details")
     response = showDetails(argumentMap);
-  else if (path.Equals("/player/timeline/unsubscribe"))
+  else if (path == "/player/timeline/unsubscribe")
     response = unsubscribe(request, argumentMap);
-  else if (path.Equals("/player/timeline/poll"))
+  else if (path == "/player/timeline/poll")
     response = poll(request, argumentMap);
   else
     response = CPlexRemoteResponse(500, "Not implemented");
@@ -143,10 +142,10 @@ class NavigationTimeout : public IPlexGlobalTimeout
     void OnTimeout()
     {
       if (!g_application.IsPlayingFullScreenVideo())
-        CApplicationMessenger::Get().ActivateWindow(WINDOW_HOME, std::vector<CStdString>(), true);
+        CApplicationMessenger::Get().ActivateWindow(WINDOW_HOME, std::vector<std::string>(), true);
     }
 
-    CStdString TimerName() const { return "navigationTimeout"; }
+    std::string TimerName() const { return "navigationTimeout"; }
 };
 
 static NavigationTimeout* navTimeout;
@@ -176,7 +175,7 @@ CPlexRemoteResponse CPlexHTTPRemoteHandler::showDetails(const ArgMap &arguments)
 
   if (!PlexUtils::CurrentSkinHasPreplay() ||
       g_application.IsPlayingFullScreenVideo() ||
-      g_application.IsVisualizerActive() ||
+      //MERGE: g_application.IsVisualizerActive() ||
       g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW)
     return CPlexRemoteResponse();
 
@@ -362,7 +361,7 @@ CPlexRemoteSubscriberPtr CPlexHTTPRemoteHandler::getSubFromRequest(const HTTPReq
   
   int port = 32400;
   int commandID = -1;
-  CStdString protocol = "http";
+  std::string protocol = "http";
 
   if (arguments.find("port") != arguments.end())
     port = boost::lexical_cast<int>(arguments.find("port")->second);
@@ -443,11 +442,11 @@ CPlexRemoteResponse CPlexHTTPRemoteHandler::resources()
 
   // title="My Nexus 7" machineIdentifier="x" product="p" platform="p" platformVersion="v" protocolVersion="x" protocolCapabilities="y" deviceClass="z"
   TiXmlElement *player = new TiXmlElement("Player");
-  player->SetAttribute("title", g_guiSettings.GetString("services.devicename").c_str());
+  player->SetAttribute("title", CSettings::Get().GetString("services.devicename").c_str());
   player->SetAttribute("protocol", "plex");
   player->SetAttribute("protocolVersion", "1");
   player->SetAttribute("protocolCapabilities", PLEX_HOME_THEATER_CAPABILITY_STRING);
-  player->SetAttribute("machineIdentifier", g_guiSettings.GetString("system.uuid").c_str());
+  player->SetAttribute("machineIdentifier", CSettings::Get().GetString("system.uuid").c_str());
   player->SetAttribute("product", "Plex Home Theater");
   player->SetAttribute("platform", PlexUtils::GetMachinePlatform());
   player->SetAttribute("platformVersion", PlexUtils::GetMachinePlatformVersion());

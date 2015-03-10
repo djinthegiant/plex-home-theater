@@ -6,9 +6,9 @@
 class CPlexRemotePlaybackHandler : public IPlexRemoteHandler
 {
 public:
-  virtual CPlexRemoteResponse handle(const CStdString &url, const ArgMap &arguments);
+  virtual CPlexRemoteResponse handle(const std::string &url, const ArgMap &arguments);
 
-  CPlexRemoteResponse stepFunction(const CStdString &url, const ArgMap &arguments);
+  CPlexRemoteResponse stepFunction(const std::string &url, const ArgMap &arguments);
   CPlexRemoteResponse skipNext(const ArgMap &arguments);
   CPlexRemoteResponse skipPrevious(const ArgMap &arguments);
   CPlexRemoteResponse pausePlay(const ArgMap &arguments);

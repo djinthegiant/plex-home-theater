@@ -14,12 +14,12 @@
 #include "video/VideoInfoTag.h"
 
 #include "Application.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 
 #include "Client/PlexMediaServerClient.h"
 #include "PlexApplication.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 #include "Client/PlexTimeline.h"
 #include "Client/PlexTimelineManager.h"
 
@@ -102,9 +102,9 @@ bool CPlexRemoteSubscriber::sendTimeline(const CPlexTimelineCollectionPtr &timel
 
   CXBMCTinyXML xml = timelines->getTimelinesXML(m_commandID);
   std::string data = PlexUtils::GetXMLString(xml);
-  CStdString ret;
+  std::string ret;
 
-  return m_file.Post(u.Get(), data, ret);
+  return m_file.Post(u, data, ret);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -173,9 +173,9 @@ CPlexRemoteSubscriberPtr CPlexRemoteSubscriberManager::addSubscriber(CPlexRemote
     CLog::Log(LOGDEBUG, "CPlexRemoteSubscriberManager::addSubscriber added %s:%d [%s]",
               subscriber->getURL().GetHostName().c_str(), subscriber->getURL().GetPort(), subscriber->getUUID().c_str());
 
-    if (!g_application.IsPlayingVideo())
+    if (!g_application.m_pPlayer->IsPlayingVideo())
       CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(52500),
-                                            subscriber->getName().empty() ? CStdString(subscriber->getURL().GetHostName()) : CStdString(subscriber->getName()),
+                                            subscriber->getName().empty() ? std::string(subscriber->getURL().GetHostName()) : std::string(subscriber->getName()),
                                             TOAST_DISPLAY_TIME, false);
 
     if (!subscriber->isPoller())
@@ -213,9 +213,9 @@ void CPlexRemoteSubscriberManager::removeSubscriber(CPlexRemoteSubscriberPtr sub
   if (m_map.size() == 0)
     g_plexApplication.timer->RemoveTimeout(this);
 
-  if (!g_application.IsPlayingVideo())
+  if (!g_application.m_pPlayer->IsPlayingVideo())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(52501),
-                                          subscriber->getName().empty() ? CStdString(subscriber->getURL().GetHostName()) : CStdString(subscriber->getName()),
+                                          subscriber->getName().empty() ? std::string(subscriber->getURL().GetHostName()) : std::string(subscriber->getName()),
                                           TOAST_DISPLAY_TIME, false);
 }
 

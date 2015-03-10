@@ -3,59 +3,61 @@
 #include "Application.h"
 #include "PlexApplication.h"
 #include "Client/PlexServerManager.h"
-#include "settings/GUISettings.h"
+#include "settings/MediaSettings.h"
 #include "settings/Settings.h"
 #include "guilib/GUIWindowManager.h"
 #include "pictures/GUIWindowSlideShow.h"
+#include "playlists/PlayList.h"
 #include "Playlists/PlexPlayQueueManager.h"
+#include "guilib/Key.h"
 
 #include <boost/lexical_cast.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CPlexRemoteResponse CPlexRemotePlaybackHandler::handle(const CStdString &url, const ArgMap &arguments)
+CPlexRemoteResponse CPlexRemotePlaybackHandler::handle(const std::string &url, const ArgMap &arguments)
 {
-  if (url.Equals("/player/playback/stepForward") ||
-           url.Equals("/player/playback/stepBack") ||
-           url.Equals("/player/playback/bigStepForward") ||
-           url.Equals("/player/playback/bigStepBack"))
+  if (url == "/player/playback/stepForward" ||
+      url == "/player/playback/stepBack" ||
+      url == "/player/playback/bigStepForward" ||
+      url == "/player/playback/bigStepBack")
     return stepFunction(url, arguments);
-  else if (url.Equals("/player/playback/skipNext"))
+  else if (url == "/player/playback/skipNext")
     return skipNext(arguments);
-  else if (url.Equals("/player/playback/skipPrevious"))
+  else if (url == "/player/playback/skipPrevious")
     return skipPrevious(arguments);
-  else if (url.Equals("/player/playback/stop"))
+  else if (url == "/player/playback/stop")
     return stop(arguments);
-  else if (url.Equals("/player/playback/seekTo"))
+  else if (url == "/player/playback/seekTo")
     return seekTo(arguments);
-  else if (url.Equals("/player/playback/skipTo"))
+  else if (url == "/player/playback/skipTo")
     return skipTo(arguments);
-  else if (url.Equals("/player/playback/setParameters"))
+  else if (url == "/player/playback/setParameters")
     return set(arguments);
-  else if (url.Equals("/player/playback/setStreams"))
+  else if (url == "/player/playback/setStreams")
     return setStreams(arguments);
-  else if (url.Equals("/player/playback/pause"))
+  else if (url == "/player/playback/pause")
     return pausePlay(arguments);
-  else if (url.Equals("/player/playback/play"))
+  else if (url == "/player/playback/play")
     return pausePlay(arguments);
-  else if (url.Equals("/player/playback/refreshPlayQueue"))
+  else if (url == "/player/playback/refreshPlayQueue")
     return refreshPlayQueue(arguments);
 
   return CPlexRemoteResponse();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-CPlexRemoteResponse CPlexRemotePlaybackHandler::stepFunction(const CStdString &url, const ArgMap &arguments)
+CPlexRemoteResponse CPlexRemotePlaybackHandler::stepFunction(const std::string &url, const ArgMap &arguments)
 {
-  if (!g_application.IsPlaying())
+  if (!g_application.m_pPlayer->IsPlaying())
     return CPlexRemoteResponse();
 
-  if (url.Equals("/player/playback/bigStepForward"))
+  if (url == "/player/playback/bigStepForward")
     CApplicationMessenger::Get().ExecBuiltIn("playercontrol(bigskipforward)");
-  else if (url.Equals("/player/playback/bigStepBack"))
+  else if (url == "/player/playback/bigStepBack")
     CApplicationMessenger::Get().ExecBuiltIn("playercontrol(bigskipbackward)");
-  else if (url.Equals("/player/playback/stepForward"))
+  else if (url == "/player/playback/stepForward")
     CApplicationMessenger::Get().ExecBuiltIn("playercontrol(smallskipforward)");
-  else if (url.Equals("/player/playback/stepBack"))
+  else if (url == "/player/playback/stepBack")
     CApplicationMessenger::Get().ExecBuiltIn("playercontrol(smallskipbackward)");
 
   return CPlexRemoteResponse();
@@ -64,7 +66,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::stepFunction(const CStdString &u
 ////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlaybackHandler::skipNext(const ArgMap &arguments)
 {
-  CStdString type="video";
+  std::string type="video";
   if (arguments.find("type") != arguments.end())
     type = arguments.find("type")->second;
 
@@ -80,7 +82,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::skipNext(const ArgMap &arguments
 ////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlaybackHandler::skipPrevious(const ArgMap &arguments)
 {
-  CStdString type="video";
+  std::string type="video";
   if (arguments.find("type") != arguments.end())
     type = arguments.find("type")->second;
 
@@ -95,7 +97,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::skipPrevious(const ArgMap &argum
 ////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlaybackHandler::pausePlay(const ArgMap &arguments)
 {
-  CStdString type="video";
+  std::string type="video";
   if (arguments.find("type") != arguments.end())
     type = arguments.find("type")->second;
 
@@ -109,7 +111,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::pausePlay(const ArgMap &argument
 ////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlaybackHandler::stop(const ArgMap &arguments)
 {
-  CStdString type="video";
+  std::string type="video";
   if (arguments.find("type") != arguments.end())
     type = arguments.find("type")->second;
 
@@ -140,7 +142,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::seekTo(const ArgMap &arguments)
   else
     return CPlexRemoteResponse(500, "missing offset argument!");
 
-  if (g_application.IsPlaying() && g_application.m_pPlayer)
+  if (g_application.m_pPlayer->IsPlaying())
     g_application.m_pPlayer->SeekTime(seekTo);
 
   return CPlexRemoteResponse();
@@ -292,7 +294,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::setVolume(const ArgMap &argument
 ////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlaybackHandler::setStreams(const ArgMap &arguments)
 {
-  if (!g_application.IsPlayingVideo())
+  if (!g_application.m_pPlayer->IsPlayingVideo())
     return CPlexRemoteResponse();
 
   if (arguments.find("type") != arguments.end())
@@ -316,7 +318,7 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::setStreams(const ArgMap &argumen
       return CPlexRemoteResponse(500, "Failed to find stream");
     }
     g_application.m_pPlayer->SetAudioStreamPlexID(audioStreamID);
-    g_settings.m_currentVideoSettings.m_AudioStream = g_application.m_pPlayer->GetAudioStream();
+    CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream = g_application.m_pPlayer->GetAudioStream();
   }
 
   if (arguments.find("subtitleStreamID") != arguments.end())
@@ -339,11 +341,11 @@ CPlexRemoteResponse CPlexRemotePlaybackHandler::setStreams(const ArgMap &argumen
         return CPlexRemoteResponse(500, "Failed to find stream");
       }
       g_application.m_pPlayer->SetSubtitleStreamPlexID(subStreamID);
-      g_settings.m_currentVideoSettings.m_SubtitleStream = g_application.m_pPlayer->GetSubtitle();
+      CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream = g_application.m_pPlayer->GetSubtitle();
     }
 
     g_application.m_pPlayer->SetSubtitleVisible(visible);
-    g_settings.m_currentVideoSettings.m_SubtitleOn = visible;
+    CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn = visible;
 
   }
 

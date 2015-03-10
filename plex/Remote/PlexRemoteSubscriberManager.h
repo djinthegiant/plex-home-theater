@@ -12,15 +12,15 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexGlobalTimer.h"
 #include "threads/Event.h"
 #include "URL.h"
 #include "FileItem.h"
 #include "Utility/PlexTimer.h"
 #include "FileSystem/PlexFile.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 #include "Client/PlexTimeline.h"
-#include "PlexQueue.h"
+#include "Utility/PlexQueue.h"
 
 class CPlexRemoteSubscriber;
 typedef boost::shared_ptr<CPlexRemoteSubscriber> CPlexRemoteSubscriberPtr;
@@ -98,7 +98,7 @@ class CPlexRemoteSubscriberManager : public IPlexGlobalTimeout
     std::vector<CPlexRemoteSubscriberPtr> getSubscribers() const;
   
     bool hasSubscribers() const { CSingleLock lk(m_crit); return m_map.size(); }
-    CStdString TimerName() const { return "remoteSubscriberManager"; }
+    std::string TimerName() const { return "remoteSubscriberManager"; }
     void Stop();
 
   private:

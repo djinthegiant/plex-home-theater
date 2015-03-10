@@ -6,7 +6,7 @@
 class CPlexRemoteNavigationHandler : public IPlexRemoteHandler
 {
 public:
-  virtual CPlexRemoteResponse handle(const CStdString &url, const ArgMap &arguments);
+  virtual CPlexRemoteResponse handle(const std::string &url, const ArgMap &arguments);
 };
 
 #endif // PLEXREMOTENAVIGATIONHANDLER_H

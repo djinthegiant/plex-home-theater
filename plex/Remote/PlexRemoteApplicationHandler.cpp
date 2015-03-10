@@ -1,19 +1,20 @@
 #include "PlexRemoteApplicationHandler.h"
 #include "PlexApplication.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
 #include "ApplicationMessenger.h"
 #include "Client/PlexTimelineManager.h"
 #include "Application.h"
 #include <boost/lexical_cast.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CPlexRemoteResponse CPlexRemoteApplicationHandler::handle(const CStdString &url, const ArgMap &arguments)
+CPlexRemoteResponse CPlexRemoteApplicationHandler::handle(const std::string &url, const ArgMap &arguments)
 {
-  if (url.Equals("/player/application/sendString") ||
-      url.Equals("/player/application/setText"))
+  if (url == "/player/application/sendString" ||
+      url == "/player/application/setText")
     return sendString(arguments);
-  else if (url.Equals("/player/application/sendVirtualKey") ||
-           url.Equals("/player/application/sendKey"))
+  else if (url == "/player/application/sendVirtualKey" ||
+           url == "/player/application/sendKey")
     return sendVKey(arguments);
 
   return CPlexRemoteResponse(500, "not implemented");

@@ -49,13 +49,13 @@ public:
   }
 
   int code;
-  CStdString body;
+  std::string body;
 };
 
 class IPlexRemoteHandler
 {
 public:
-  virtual CPlexRemoteResponse handle(const CStdString& url, const ArgMap& arguments) = 0;
+  virtual CPlexRemoteResponse handle(const std::string& url, const ArgMap& arguments) = 0;
 };
 
 class CPlexHTTPRemoteHandler : public IHTTPRequestHandler
@@ -89,7 +89,7 @@ private:
   CPlexRemoteResponse resources();
   CPlexRemoteResponse showDetails(const ArgMap &arguments);
 
-  CStdString m_data;
+  std::string m_data;
   int m_formerWindow;
 };
 

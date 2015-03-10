@@ -6,7 +6,7 @@
 class CPlexRemoteApplicationHandler : public IPlexRemoteHandler
 {
 public:
-  CPlexRemoteResponse handle(const CStdString &url, const ArgMap &arguments);
+  CPlexRemoteResponse handle(const std::string &url, const ArgMap &arguments);
 private:
   CPlexRemoteResponse sendVKey(const ArgMap &arguments);
   CPlexRemoteResponse sendString(const ArgMap &arguments);

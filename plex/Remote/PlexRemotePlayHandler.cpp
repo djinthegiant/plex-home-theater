@@ -27,7 +27,7 @@ bool CPlexRemotePlayHandler::getKeyAndContainerUrl(const ArgMap& arguments, std:
   if (boost::starts_with(keyPath, "http://"))
   {
     CURL keyURL(keyPath);
-    CStdString options = keyURL.GetOptions();
+    std::string options = keyURL.GetOptions();
     CURL::Decode(options);
     keyPath = "/" + keyURL.GetFileName() + options;
 
@@ -62,8 +62,8 @@ CFileItemPtr CPlexRemotePlayHandler::getItemFromContainer(const std::string& key
   for (int i = 0; i < list.Size(); i ++)
   {
     CFileItemPtr it = list.Get(i);
-    CStdString itemKey = it->GetProperty("unprocessed_key").asString();
-    CStdString decodedKey(itemKey);
+    std::string itemKey = it->GetProperty("unprocessed_key").asString();
+    std::string decodedKey(itemKey);
     CURL::Decode(decodedKey);
 
     CLog::Log(LOGDEBUG, "CPlexHTTPRemoteHandler::playMedia compare %s|%s = %s", itemKey.c_str(), decodedKey.c_str(), key.c_str());
@@ -101,7 +101,7 @@ int64_t CPlexRemotePlayHandler::getStartPosition(const ArgMap& arguments)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexRemoteResponse CPlexRemotePlayHandler::playPlayQueue(const CPlexServerPtr& server,
-                                                          const CStdString& playQueueUrl,
+                                                          const std::string& playQueueUrl,
                                                           const ArgMap& arguments)
 {
 
@@ -125,7 +125,7 @@ CPlexRemoteResponse CPlexRemotePlayHandler::playPlayQueue(const CPlexServerPtr& 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-CPlexRemoteResponse CPlexRemotePlayHandler::handle(const CStdString& url, const ArgMap &arguments)
+CPlexRemoteResponse CPlexRemotePlayHandler::handle(const std::string& url, const ArgMap &arguments)
 {
   CPlexServerPtr server;
 
@@ -190,7 +190,7 @@ CPlexRemoteResponse CPlexRemotePlayHandler::handle(const CStdString& url, const 
   else if (item->GetPlexDirectoryType() == PLEX_DIR_TYPE_PHOTO)
   {
     /* if we are playing music, we don't need to stop */
-    if (g_application.IsPlayingVideo())
+    if (g_application.m_pPlayer->IsPlayingVideo())
       CApplicationMessenger::Get().MediaStop(true);
 
     CLog::Log(LOGDEBUG, "PlexHTTPRemoteHandler::playMedia photo slideshow with start %s", list.Get(idx)->GetPath().c_str());

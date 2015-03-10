@@ -4,41 +4,42 @@
 #include "Application.h"
 #include "guilib/GUIAudioManager.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
 #include <vector>
 
 #define LEGACY 1
 
 ////////////////////////////////////////////////////////////////////////////////////////
-CPlexRemoteResponse CPlexRemoteNavigationHandler::handle(const CStdString &url, const ArgMap &arguments)
+CPlexRemoteResponse CPlexRemoteNavigationHandler::handle(const std::string &url, const ArgMap &arguments)
 {
   int action = ACTION_NONE;
   int activeWindow = g_windowManager.GetFocusedWindow();
 
-  CStdString navigation = url.Mid(19, url.length() - 19);
+  std::string navigation = url.substr(19, url.length() - 19);
 
-  if (navigation.Equals("moveRight"))
+  if (navigation == "moveRight")
     action = ACTION_MOVE_RIGHT;
-  else if (navigation.Equals("moveLeft"))
+  else if (navigation == "moveLeft")
     action = ACTION_MOVE_LEFT;
-  else if (navigation.Equals("moveDown"))
+  else if (navigation == "moveDown")
     action = ACTION_MOVE_DOWN;
-  else if (navigation.Equals("moveUp"))
+  else if (navigation == "moveUp")
     action = ACTION_MOVE_UP;
-  else if (navigation.Equals("select"))
+  else if (navigation == "select")
     action = ACTION_SELECT_ITEM;
-  else if (navigation.Equals("music"))
+  else if (navigation == "music")
   {
-    if (g_application.IsPlayingAudio() && activeWindow != WINDOW_VISUALISATION)
+    if (g_application.m_pPlayer->IsPlayingAudio() && activeWindow != WINDOW_VISUALISATION)
       action = ACTION_SHOW_GUI;
   }
-  else if (navigation.Equals("home"))
+  else if (navigation == "home")
   {
-    std::vector<CStdString> args;
+    std::vector<std::string> args;
     g_application.WakeUpScreenSaverAndDPMS();
     CApplicationMessenger::Get().ActivateWindow(WINDOW_HOME, args, false);
     return CPlexRemoteResponse();
   }
-  else if (navigation.Equals("back"))
+  else if (navigation == "back")
   {
     if (g_application.IsPlayingFullScreenVideo() &&
         (activeWindow != WINDOW_DIALOG_AUDIO_OSD_SETTINGS &&
@@ -51,17 +52,17 @@ CPlexRemoteResponse CPlexRemoteNavigationHandler::handle(const CStdString &url, 
   }
 
 #ifdef LEGACY
-  else if (navigation.Equals("contextMenu"))
+  else if (navigation == "contextMenu")
     action = ACTION_CONTEXT_MENU;
-  else if (navigation.Equals("toggleOSD"))
+  else if (navigation == "toggleOSD")
     action = ACTION_SHOW_OSD;
-  else if (navigation.Equals("pageUp"))
+  else if (navigation == "pageUp")
     action = ACTION_PAGE_UP;
-  else if (navigation.Equals("pageDown"))
+  else if (navigation == "pageDown")
     action = ACTION_PAGE_DOWN;
-  else if (navigation.Equals("nextLetter"))
+  else if (navigation == "nextLetter")
     action = ACTION_NEXT_LETTER;
-  else if (navigation.Equals("previousLetter"))
+  else if (navigation == "previousLetter")
     action = ACTION_PREV_LETTER;
 #endif
 
@@ -73,7 +74,7 @@ CPlexRemoteResponse CPlexRemoteNavigationHandler::handle(const CStdString &url, 
     g_application.WakeUpScreenSaverAndDPMS();
     g_application.ResetSystemIdleTimer();
 
-    if (!g_application.IsPlaying())
+    if (!g_application.m_pPlayer->IsPlaying())
       g_audioManager.PlayActionSound(actionId);
 
     CApplicationMessenger::Get().SendAction(actionId, WINDOW_INVALID, false);
