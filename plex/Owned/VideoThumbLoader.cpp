@@ -25,9 +25,8 @@
 using namespace XFILE;
 using namespace std;
 
-
 CVideoThumbLoader::CVideoThumbLoader() :
-  CThumbLoader(1)
+  CThumbLoader(), CJobQueue(true, 1, CJob::PRIORITY_LOW_PAUSABLE)
 {
 }
 
@@ -36,17 +35,38 @@ CVideoThumbLoader::~CVideoThumbLoader()
   StopThread();
 }
 
-void CVideoThumbLoader::Initialize()
-{
-}
-
 void CVideoThumbLoader::OnLoaderStart()
 {
-  Initialize();
 }
 
 void CVideoThumbLoader::OnLoaderFinish()
 {
+}
+
+vector<string> CVideoThumbLoader::GetArtTypes(const string &type)
+{
+  vector<string> ret;
+  if (type == MediaTypeEpisode)
+    ret.push_back("thumb");
+  else if (type == MediaTypeTvShow || type == MediaTypeSeason)
+  {
+    ret.push_back("banner");
+    ret.push_back("poster");
+    ret.push_back("fanart");
+  }
+  else if (type == MediaTypeMovie || type == MediaTypeMusicVideo || type == MediaTypeVideoCollection)
+  {
+    ret.push_back("poster");
+    ret.push_back("fanart");
+  }
+  else if (type.empty()) // unknown - just throw everything in
+  {
+    ret.push_back("poster");
+    ret.push_back("banner");
+    ret.push_back("thumb");
+    ret.push_back("fanart");
+  }
+  return ret;
 }
 
 /**
@@ -88,35 +108,21 @@ bool CVideoThumbLoader::LoadItem(CFileItem* pItem)
   return true;
 }
 
+void CVideoThumbLoader::SetArt(CFileItem &item, const map<string, string> &artwork)
+{
+  item.SetArt(artwork);
+  if (artwork.find("thumb") == artwork.end())
+  { // set fallback for "thumb"
+    if (artwork.find("poster") != artwork.end())
+      item.SetArtFallback("thumb", "poster");
+    else if (artwork.find("banner") != artwork.end())
+      item.SetArtFallback("thumb", "banner");
+  }
+}
+
 bool CVideoThumbLoader::FillThumb(CFileItem &item)
 {
   return true;
-}
-
-vector<string> CVideoThumbLoader::GetArtTypes(const string &type)
-{
-  vector<string> ret;
-  if (type == "episode")
-    ret.push_back("thumb");
-  else if (type == "tvshow" || type == "season")
-  {
-    ret.push_back("banner");
-    ret.push_back("poster");
-    ret.push_back("fanart");
-  }
-  else if (type == "movie" || type == "musicvideo" || type == "set")
-  {
-    ret.push_back("poster");
-    ret.push_back("fanart");
-  }
-  else if (type.empty()) // unknown - just throw everything in
-  {
-    ret.push_back("poster");
-    ret.push_back("banner");
-    ret.push_back("thumb");
-    ret.push_back("fanart");
-  }
-  return ret;
 }
 
 std::string CVideoThumbLoader::GetLocalArt(const CFileItem &item, const std::string &type, bool checkFolder)

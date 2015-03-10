@@ -20,7 +20,7 @@
 
 #include "MusicThumbLoader.h"
 #include "FileItem.h"
-#include "TextureCache.h"
+#include "TextureDatabase.h"
 #include "music/tags/MusicInfoTag.h"
 #include "music/tags/MusicInfoTagLoaderFactory.h"
 #include "music/infoscanner/MusicInfoScanner.h"
@@ -30,80 +30,37 @@
 using namespace std;
 using namespace MUSIC_INFO;
 
-CMusicThumbLoader::CMusicThumbLoader() : CThumbLoader(1)
+CMusicThumbLoader::CMusicThumbLoader() : CThumbLoader()
 {
-#ifndef __PLEX__
-  m_database = new CMusicDatabase;
-#endif
 }
 
 CMusicThumbLoader::~CMusicThumbLoader()
 {
-#ifndef __PLEX__
-  delete m_database;
-#endif
-}
-
-void CMusicThumbLoader::Initialize()
-{
-#ifndef __PLEX__
-  m_database->Open();
-#endif
-  m_albumArt.clear();
-}
-
-void CMusicThumbLoader::Deinitialize()
-{
-#ifndef __PLEX__
-  m_database->Close();
-#endif
-  m_albumArt.clear();
 }
 
 void CMusicThumbLoader::OnLoaderStart()
 {
-  Initialize();
+  m_albumArt.clear();
 }
 
 void CMusicThumbLoader::OnLoaderFinish()
 {
-  Deinitialize();
+  m_albumArt.clear();
 }
 
 bool CMusicThumbLoader::LoadItem(CFileItem* pItem)
 {
   if (pItem->m_bIsShareOrDrive)
-    return true;
+    return false;
 
   if (pItem->HasMusicInfoTag() && pItem->GetArt().empty())
   {
     if (FillLibraryArt(*pItem))
       return true;
-    if (pItem->GetMusicInfoTag()->GetType() == "artist")
-      return true; // no fallback
+      
+    if (pItem->GetMusicInfoTag()->GetType() == MediaTypeArtist)
+      return false; // No fallback
   }
-
-#ifndef __PLEX__
-  if (!pItem->HasArt("fanart"))
-  {
-    if (pItem->HasMusicInfoTag() && !pItem->GetMusicInfoTag()->GetArtist().empty())
-    {
-      std::string artist = pItem->GetMusicInfoTag()->GetArtist()[0];
-      m_database->Open();
-      int idArtist = m_database->GetArtistByName(artist);
-      if (idArtist >= 0)
-      {
-        string fanart = m_database->GetArtForItem(idArtist, "artist", "fanart");
-        if (!fanart.empty())
-        {
-          pItem->SetArt("artist.fanart", fanart);
-          pItem->SetArtFallback("fanart", "artist.fanart");
-        }
-      }
-      m_database->Close();
-    }
-  }
-#endif
 
   if (!pItem->HasArt("thumb"))
   {
@@ -114,7 +71,7 @@ bool CMusicThumbLoader::LoadItem(CFileItem* pItem)
       if (!FillThumb(*pItem, false)) // Check for user thumbs but ignore folder thumbs
       {
         // No user thumb, use embedded art
-        CStdString thumb = CTextureCache::GetWrappedImageURL(pItem->GetPath(), "music");
+        CStdString thumb = CTextureUtils::GetWrappedImageURL(pItem->GetPath(), "music");
         pItem->SetArt("thumb", thumb);
       }
     }
@@ -133,54 +90,19 @@ bool CMusicThumbLoader::FillThumb(CFileItem &item, bool folderThumbs /* = true *
   if (item.HasArt("thumb"))
     return true;
   CStdString thumb = GetCachedImage(item, "thumb");
-  if (thumb.IsEmpty())
+  if (thumb.empty())
   {
     thumb = item.GetUserMusicThumb(false, folderThumbs);
-    if (!thumb.IsEmpty())
+    if (!thumb.empty())
       SetCachedImage(item, "thumb", thumb);
   }
-  item.SetArt("thumb", thumb);
-  return !thumb.IsEmpty();
+  if (!thumb.empty())
+    item.SetArt("thumb", thumb);
+  return !thumb.empty();
 }
 
 bool CMusicThumbLoader::FillLibraryArt(CFileItem &item)
 {
-#ifndef __PLEX__
-  CMusicInfoTag &tag = *item.GetMusicInfoTag();
-  if (tag.GetDatabaseId() > -1 && !tag.GetType().empty())
-  {
-    m_database->Open();
-    map<string, string> artwork;
-    if (m_database->GetArtForItem(tag.GetDatabaseId(), tag.GetType(), artwork))
-      item.SetArt(artwork);
-    else if (tag.GetType() == "song")
-    { // no art for the song, try the album
-      ArtCache::const_iterator i = m_albumArt.find(tag.GetAlbumId());
-      if (i == m_albumArt.end())
-      {
-        m_database->GetArtForItem(tag.GetAlbumId(), "album", artwork);
-        i = m_albumArt.insert(make_pair(tag.GetAlbumId(), artwork)).first;
-      }
-      if (i != m_albumArt.end())
-      {
-        item.AppendArt(i->second, "album");
-        for (map<string, string>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-          item.SetArtFallback(j->first, "album." + j->first);
-      }
-    }
-    if (tag.GetType() == "song" || tag.GetType() == "album")
-    { // fanart from the artist
-      string fanart = m_database->GetArtistArtForItem(tag.GetDatabaseId(), tag.GetType(), "fanart");
-      if (!fanart.empty())
-      {
-        item.SetArt("artist.fanart", fanart);
-        item.SetArtFallback("fanart", "artist.fanart");
-      }
-    }
-    m_database->Close();
-  }
-  return !item.GetArt().empty();
-#endif
   return false;
 }
 

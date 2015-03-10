@@ -23,32 +23,25 @@
 #include "ThumbLoader.h"
 #include "utils/JobManager.h"
 #include "FileItem.h"
-#include "PlexJobs.h"
-
-#define kJobTypeMediaFlags "mediaflags"
+#include "Utility/PlexJobs.h"
 
 class IStreamDetailsObserver;
 
-class CVideoThumbLoader : public CThumbLoader
+class CVideoThumbLoader : public CThumbLoader, public CJobQueue
 {
 public:
   CVideoThumbLoader();
   virtual ~CVideoThumbLoader();
 
-  virtual void Initialize();
-  virtual bool LoadItem(CFileItem* pItem);
-
-  static bool FillThumb(CFileItem &item);
-  
-  static std::vector<std::string> GetArtTypes(const std::string &type);
-  
-  static std::string GetLocalArt(const CFileItem &item, const std::string &type, bool checkFolder);
-  
-  void SetStreamDetailsObserver(IStreamDetailsObserver *pObs) { }
-  
-private:
   virtual void OnLoaderStart();
   virtual void OnLoaderFinish();
+
+  virtual bool LoadItem(CFileItem* pItem);
+
+  virtual bool FillThumb(CFileItem &item);
+  static std::string GetLocalArt(const CFileItem &item, const std::string &type, bool checkFolder = false);
+  static std::vector<std::string> GetArtTypes(const std::string &type);
+  static void SetArt(CFileItem &item, const std::map<std::string, std::string> &artwork);
 };
 
 class CPlexThumbCacher : public CJobQueue

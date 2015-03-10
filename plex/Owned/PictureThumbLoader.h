@@ -29,6 +29,7 @@ public:
   CPictureThumbLoader();
   virtual ~CPictureThumbLoader();
   virtual bool LoadItem(CFileItem* pItem);
+  void SetRegenerateThumbs(bool regenerate) { };
   static void ProcessFoldersAndArchives(CFileItem *pItem);
   
 protected:

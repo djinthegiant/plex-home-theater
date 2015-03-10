@@ -35,12 +35,12 @@ class CMusicThumbLoader : public CThumbLoader
 public:
   CMusicThumbLoader();
   virtual ~CMusicThumbLoader();
-  
-  virtual void Initialize();
-  virtual void Deinitialize();
+
+  virtual void OnLoaderStart();
+  virtual void OnLoaderFinish();
 
   virtual bool LoadItem(CFileItem* pItem);
-  
+
   /*! \brief helper function to fill the art for a video library item
    \param item a video CFileItem
    \return true if we fill art, false otherwise
@@ -53,17 +53,11 @@ public:
    \param item the CFileItem object to fill
    \return true if we fill the thumb, false otherwise
    */
-  static bool FillThumb(CFileItem &item, bool folderThumbs = true);
+  virtual bool FillThumb(CFileItem &item, bool folderThumbs = true);
   
   static bool GetEmbeddedThumb(const std::string &path, MUSIC_INFO::EmbeddedArt &art);
 
 protected:
-  virtual void OnLoaderStart();
-  virtual void OnLoaderFinish();
-  
-#ifndef __PLEX__
-  CMusicDatabase *m_database;
-#endif
   typedef std::map<int, std::map<std::string, std::string> > ArtCache;
   ArtCache m_albumArt;
 };

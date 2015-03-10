@@ -19,7 +19,7 @@
  */
 
 #include "PictureThumbLoader.h"
-#include "Picture.h"
+#include "pictures/Picture.h"
 #include "filesystem/File.h"
 #include "FileItem.h"
 #include "TextureCache.h"
@@ -27,16 +27,16 @@
 #include "filesystem/MultiPathDirectory.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIUserMessages.h"
-#include "settings/GUISettings.h"
 #include "utils/URIUtils.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "video/VideoThumbLoader.h"
+#include "URL.h"
 
 using namespace XFILE;
 using namespace std;
 
-CPictureThumbLoader::CPictureThumbLoader() : CThumbLoader(1), CJobQueue(true)
+CPictureThumbLoader::CPictureThumbLoader() : CThumbLoader(), CJobQueue(true, 1, CJob::PRIORITY_LOW_PAUSABLE)
 {
 }
 
@@ -45,14 +45,13 @@ CPictureThumbLoader::~CPictureThumbLoader()
   StopThread();
 }
 
+void CPictureThumbLoader::OnLoaderFinish()
+{
+}
+
 bool CPictureThumbLoader::LoadItem(CFileItem* pItem)
 {
   return true;
-}
-
-
-void CPictureThumbLoader::OnLoaderFinish()
-{
 }
 
 void CPictureThumbLoader::ProcessFoldersAndArchives(CFileItem *pItem)
