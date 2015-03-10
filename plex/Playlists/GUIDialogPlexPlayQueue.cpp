@@ -4,6 +4,7 @@
 #include "PlexPlayQueueManager.h"
 #include "music/tags/MusicInfoTag.h"
 #include "Application.h"
+#include "guilib/Key.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CGUIDialogPlexPlayQueue::CGUIDialogPlexPlayQueue()

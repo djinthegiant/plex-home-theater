@@ -1,13 +1,13 @@
 #include "PlexPlayQueueServer.h"
 #include "PlexUtils.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "playlists/PlayList.h"
 #include "PlayListPlayer.h"
 #include "dialogs/GUIDialogOK.h"
 #include "Client/PlexServerManager.h"
 #include "PlexApplication.h"
 #include "ApplicationMessenger.h"
-#include "GUISettings.h"
+#include "settings/Settings.h"
 #include "Application.h"
 
 using namespace PLAYLIST;
@@ -36,7 +36,7 @@ CURL CPlexPlayQueueServer::getPlayQueueURL(ePlexMediaType type, const std::strin
   
   if (!key.empty())
   {
-    CStdString keyStr = key;
+    std::string keyStr = key;
 
     CURL keyURL(key);
     if (keyURL.GetProtocol() == "plexserver")
@@ -59,7 +59,7 @@ CURL CPlexPlayQueueServer::getPlayQueueURL(ePlexMediaType type, const std::strin
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexPlayQueueServer::sendRequest(const CURL& url, const CStdString& verb,
+bool CPlexPlayQueueServer::sendRequest(const CURL& url, const std::string& verb,
                                        const CPlexPlayQueueOptions& options)
 {
   CURL u(url);
@@ -75,7 +75,7 @@ bool CPlexPlayQueueServer::sendRequest(const CURL& url, const CStdString& verb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexPlayQueueServer::create(const CFileItem& container, const CStdString& uri,
+bool CPlexPlayQueueServer::create(const CFileItem& container, const std::string& uri,
                                   const CPlexPlayQueueOptions &options)
 {
 
@@ -85,8 +85,8 @@ bool CPlexPlayQueueServer::create(const CFileItem& container, const CStdString& 
 
   setType(type);
   
-  CStdString realUri(uri);
-  CStdString playlistID;
+  std::string realUri(uri);
+  std::string playlistID;
   if (realUri.empty())
   {
     // calculate URI from the container item
@@ -111,7 +111,7 @@ bool CPlexPlayQueueServer::create(const CFileItem& container, const CStdString& 
   // add trailers option count to creation url if required
   if (container.GetPlexDirectoryType() == PLEX_DIR_TYPE_MOVIE)
   {
-    int trailerCount = g_guiSettings.GetInt("videoplayer.playtrailercount");
+    int trailerCount = CSettings::Get().GetInt("videoplayer.playtrailercount");
     if ((trailerCount) && ((container.GetProperty("viewOffset").asInteger() == 0) || (options.forceTrailers)))
       u.SetOption("extrasPrefixCount", boost::lexical_cast<std::string>(trailerCount));
   }
@@ -128,8 +128,7 @@ bool CPlexPlayQueueServer::refresh()
 
   CLog::Log(LOGDEBUG, "CPlexPlayQueueServer::refresh refreshing playQueue %d", id);
 
-  CStdString path;
-  path.Format("/playQueues/%d", id);
+  std::string path = StringUtils::Format("/playQueues/%d", id);
 
   sendRequest(m_server->BuildPlexURL(path), "", CPlexPlayQueueOptions(false, false));
   return true;
@@ -179,8 +178,7 @@ void CPlexPlayQueueServer::removeItem(const CFileItemPtr& item)
   if (!item || !item->HasProperty("playQueueItemID"))
     return;
 
-  CStdString path;
-  path.Format("/playQueues/%d/items/%d", (int)item->GetProperty("playQueueID").asInteger(),
+  std::string path = StringUtils::Format("/playQueues/%d/items/%d", (int)item->GetProperty("playQueueID").asInteger(),
               (int)item->GetProperty("playQueueItemID").asInteger());
   CURL u = m_server->BuildPlexURL(path);
 
@@ -190,14 +188,13 @@ void CPlexPlayQueueServer::removeItem(const CFileItemPtr& item)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CPlexPlayQueueServer::addItem(const CFileItemPtr& item, bool next)
 {
-  CStdString uri = CPlexPlayQueueManager::getURIFromItem(*item);
+  std::string uri = CPlexPlayQueueManager::getURIFromItem(*item);
   CPlexServerPtr server = g_plexApplication.serverManager->FindFromItem(item);
 
   if (server)
   {
     CURL u = getPlayQueueURL(PlexUtils::GetMediaTypeFromItem(item), uri, "", "", false, false, 0, next);
-    CStdString path;
-    path.Format("/playQueues/%d", getID());
+    std::string path = StringUtils::Format("/playQueues/%d", getID());
 
     u.SetFileName(path);
 
@@ -228,7 +225,7 @@ int CPlexPlayQueueServer::getPlaylistID()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexPlayQueueServer::getPlaylistTitle()
+std::string CPlexPlayQueueServer::getPlaylistTitle()
 {
   if (m_list)
     return m_list->GetProperty("playQueuePlaylistTitle").asString();
@@ -236,10 +233,9 @@ CStdString CPlexPlayQueueServer::getPlaylistTitle()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexPlayQueueServer::get(const CStdString &playQueueID, const CPlexPlayQueueOptions &options)
+void CPlexPlayQueueServer::get(const std::string &playQueueID, const CPlexPlayQueueOptions &options)
 {
-  CStdString path;
-  path.Format("/playQueues/%s", playQueueID);
+  std::string path = StringUtils::Format("/playQueues/%s", playQueueID.c_str());
   sendRequest(m_server->BuildPlexURL(path), "", options);
 }
 
@@ -324,7 +320,7 @@ bool CPlexPlayQueueServer::moveItem(const CFileItemPtr& item, const CFileItemPtr
     return false;
 
   // define insert pos
-  CStdString insertID = "";
+  std::string insertID = "";
   if (afteritem)
   {
     if (!afteritem->HasProperty("playQueueItemID") ||
@@ -335,12 +331,11 @@ bool CPlexPlayQueueServer::moveItem(const CFileItemPtr& item, const CFileItemPtr
   }
 
   // move the item in PMS
-  CStdString path;
-  path.Format("/playQueues/%d/items/%d/move", (int)item->GetProperty("playQueueID").asInteger(),
+  std::string path = StringUtils::Format("/playQueues/%d/items/%d/move", (int)item->GetProperty("playQueueID").asInteger(),
               (int)item->GetProperty("playQueueItemID").asInteger());
   CURL u = m_server->BuildPlexURL(path);
 
-  if (!insertID.IsEmpty())
+  if (!insertID.empty())
     u.SetOption("after", insertID);
 
   sendRequest(u, "PUT", CPlexPlayQueueOptions(false, false));

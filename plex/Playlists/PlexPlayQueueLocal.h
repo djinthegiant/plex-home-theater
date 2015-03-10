@@ -3,7 +3,7 @@
 
 #include <map>
 #include "PlexPlayQueueManager.h"
-#include "Job.h"
+#include "utils/Job.h"
 #include "Client/PlexServer.h"
 
 class CPlexPlayQueueLocal : public CPlexPlayQueue, public IJobCallback
@@ -19,7 +19,7 @@ public:
 
   const std::string implementationName() { return "local"; }
 
-  virtual bool create(const CFileItem& container, const CStdString& uri,
+  virtual bool create(const CFileItem& container, const std::string& uri,
                       const CPlexPlayQueueOptions& options = CPlexPlayQueueOptions());
   virtual bool refresh();
   virtual bool get(CFileItemList& list, bool unplayed = false);
@@ -29,8 +29,8 @@ public:
   virtual bool moveItem(const CFileItemPtr& item, const CFileItemPtr& afteritem);
   virtual int getID();
   virtual int getPlaylistID();
-  virtual CStdString getPlaylistTitle();
-  virtual void get(const CStdString &playQueueID,
+  virtual std::string getPlaylistTitle();
+  virtual void get(const std::string &playQueueID,
                    const CPlexPlayQueueOptions& options = CPlexPlayQueueOptions());
   virtual CPlexServerPtr server() const
   {

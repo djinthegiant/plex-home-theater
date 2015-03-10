@@ -1,6 +1,6 @@
 #include "PlexPlayQueueLocal.h"
-#include "PlexJobs.h"
-#include "JobManager.h"
+#include "Utility/PlexJobs.h"
+#include "utils/JobManager.h"
 #include "URL.h"
 #include "ApplicationMessenger.h"
 #include "PlexApplication.h"
@@ -15,7 +15,7 @@ CPlexPlayQueueLocal::CPlexPlayQueueLocal(const CPlexServerPtr& server, ePlexMedi
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexPlayQueueLocal::create(const CFileItem& container, const CStdString& uri,
+bool CPlexPlayQueueLocal::create(const CFileItem& container, const std::string& uri,
                                  const CPlexPlayQueueOptions& options)
 {
   CURL containerURL(container.GetPath());
@@ -88,7 +88,7 @@ int CPlexPlayQueueLocal::getPlaylistID()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexPlayQueueLocal::getPlaylistTitle()
+std::string CPlexPlayQueueLocal::getPlaylistTitle()
 {
   if (m_list)
     return m_list->GetProperty("playQueuePlaylistTitle").asString();
@@ -96,7 +96,7 @@ CStdString CPlexPlayQueueLocal::getPlaylistTitle()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexPlayQueueLocal::get(const CStdString& playQueueID, const CPlexPlayQueueOptions &options)
+void CPlexPlayQueueLocal::get(const std::string& playQueueID, const CPlexPlayQueueOptions &options)
 {
   if (m_list && m_list->GetProperty("playQueueID").asString() == playQueueID)
     OnPlayQueueUpdated(PlexUtils::GetMediaTypeFromItem(m_list), options.startPlaying);

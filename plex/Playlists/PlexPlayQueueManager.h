@@ -4,8 +4,8 @@
 #include "PlexTypes.h"
 #include "FileItem.h"
 #include "Client/PlexServer.h"
-#include "PlexJobs.h"
-#include "gtest/gtest_prod.h"
+#include "Utility/PlexJobs.h"
+//#include "gtest/gtest_prod.h"
 #include <map>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ public:
     return false;
   }
 
-  virtual bool create(const CFileItem& container, const CStdString& uri = "",
+  virtual bool create(const CFileItem& container, const std::string& uri = "",
                       const CPlexPlayQueueOptions& options = CPlexPlayQueueOptions()) = 0;
   virtual bool refresh() = 0;
   virtual bool get(CFileItemList& list, bool unplayed = false) = 0;
@@ -69,8 +69,8 @@ public:
   virtual bool moveItem(const CFileItemPtr& item, const CFileItemPtr& afteritem) = 0;
   virtual int getID() = 0;
   virtual int getPlaylistID() = 0;
-  virtual CStdString getPlaylistTitle() = 0;
-  virtual void get(const CStdString& playQueueID,
+  virtual std::string getPlaylistTitle() = 0;
+  virtual void get(const std::string& playQueueID,
                    const CPlexPlayQueueOptions& = CPlexPlayQueueOptions()) = 0;
   virtual CPlexServerPtr server() const = 0;
   
@@ -110,11 +110,11 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 class CPlexPlayQueueManager
 {
-  friend class PlayQueueManagerTest;
-  FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_basic);
-  FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_noMatching);
-  FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_gapInMiddle);
-  FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_largedataset);
+  //friend class PlayQueueManagerTest;
+  //FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_basic);
+  //FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_noMatching);
+  //FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_gapInMiddle);
+  //FRIEND_TEST(PlayQueueManagerTest, ReconcilePlayQueueChanges_largedataset);
 
 public:
   CPlexPlayQueueManager()
@@ -123,12 +123,12 @@ public:
   
   virtual ~CPlexPlayQueueManager() {}
 
-  bool create(const CFileItem& container, const CStdString& uri = "",
+  bool create(const CFileItem& container, const std::string& uri = "",
               const CPlexPlayQueueOptions& options = CPlexPlayQueueOptions());
   void clear();
   void clear(ePlexMediaType type);
 
-  static CStdString getURIFromItem(const CFileItem& item, const CStdString& uri = "");
+  static std::string getURIFromItem(const CFileItem& item, const std::string& uri = "");
   static int getPlaylistFromType(ePlexMediaType type);
 
   void playQueueUpdated(const ePlexMediaType& type, bool startPlaying, int id = -1);

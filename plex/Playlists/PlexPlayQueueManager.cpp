@@ -8,20 +8,20 @@
 #include "PlexApplication.h"
 #include "Client/PlexServerManager.h"
 #include "PlexPlayQueueLocal.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "guilib/GUIWindowManager.h"
 #include "music/tags/MusicInfoTag.h"
 #include "Client/PlexTimelineManager.h"
 #include "dialogs/GUIDialogYesNo.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 #include "Application.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "URIUtils.h"
+#include "utils/URIUtils.h"
 
 using namespace PLAYLIST;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexPlayQueueManager::create(const CFileItem& container, const CStdString& uri,
+bool CPlexPlayQueueManager::create(const CFileItem& container, const std::string& uri,
                                    const CPlexPlayQueueOptions& options)
 {
   // look for existing PQ of same type
@@ -174,7 +174,7 @@ void CPlexPlayQueueManager::playQueueUpdated(const ePlexMediaType& type, bool st
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexPlayQueueManager::getURIFromItem(const CFileItem& item, const CStdString& uri)
+std::string CPlexPlayQueueManager::getURIFromItem(const CFileItem& item, const std::string& uri)
 {
   if (item.GetPath().empty())
     return "";
@@ -184,11 +184,11 @@ CStdString CPlexPlayQueueManager::getURIFromItem(const CFileItem& item, const CS
   if (u.GetProtocol() != "plexserver")
     return "";
 
-  CStdString itemDirStr = "item";
+  std::string itemDirStr = "item";
   if (item.m_bIsFolder)
     itemDirStr = "directory";
 
-  CStdString librarySectionUUID;
+  std::string librarySectionUUID;
   if (!item.HasProperty("librarySectionUUID"))
   {
     if (!item.HasProperty("extraType"))
@@ -204,10 +204,10 @@ CStdString CPlexPlayQueueManager::getURIFromItem(const CFileItem& item, const CS
   else
     librarySectionUUID = item.GetProperty("librarySectionUUID").asString();
 
-  CStdString realURI;
+  std::string realURI;
   if (uri.empty())
   {
-    realURI = (CStdString)item.GetProperty("unprocessed_key").asString();
+    realURI = (std::string)item.GetProperty("unprocessed_key").asString();
     CURL::Encode(realURI);
   }
   else
@@ -215,9 +215,8 @@ CStdString CPlexPlayQueueManager::getURIFromItem(const CFileItem& item, const CS
     realURI = uri;
   }
 
-  CStdString ret;
-  ret.Format("library://%s/%s/%s", librarySectionUUID, itemDirStr,
-             realURI);
+  std::string ret = StringUtils::Format("library://%s/%s/%s", librarySectionUUID.c_str(), itemDirStr.c_str(),
+             realURI.c_str());
 
   return ret;
 }
@@ -356,7 +355,7 @@ CPlexPlayQueuePtr CPlexPlayQueueManager::getImpl(const CFileItem& container)
               server->toString().c_str(),
               URIUtils::GetFileName(container.GetPath()).c_str());
 
-    if ((boost::starts_with(container.GetAsUrl().GetFileName(), "playlists") ||
+    if ((boost::starts_with(container.GetURL().GetFileName(), "playlists") ||
         (container.GetProperty("identifier").asString() == "com.plexapp.plugins.library" &&
          URIUtils::GetFileName(container.GetPath()) != "folder")) &&
         CPlexPlayQueueServer::isSupported(server))
@@ -430,8 +429,8 @@ void CPlexPlayQueueManager::QueueItem(const CFileItemPtr& item, bool next)
     options.startPlaying = false;
     success = create(*item, "", options);
 
-    if ((g_application.IsPlayingAudio() && isItemVideo) ||
-        (g_application.IsPlayingVideo() && isItemAudio))
+    if ((g_application.m_pPlayer->IsPlayingAudio() && isItemVideo) ||
+        (g_application.m_pPlayer->IsPlayingVideo() && isItemAudio))
       CApplicationMessenger::Get().MediaStop();
   }
   else
