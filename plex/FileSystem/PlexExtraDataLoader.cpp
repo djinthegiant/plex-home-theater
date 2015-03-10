@@ -1,11 +1,11 @@
 #include "PlexExtraDataLoader.h"
 #include "PlexDirectory.h"
 #include "URL.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include <stdlib.h>
 #include "boost/lexical_cast.hpp"
-#include "GUIWindowManager.h"
-#include "LocalizeStrings.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/LocalizeStrings.h"
 #include "PlexApplication.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

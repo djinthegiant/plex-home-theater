@@ -2,7 +2,7 @@
 #include "PlexDirectoryCache.h"
 #include <boost/unordered_map.hpp>
 #include <boost/foreach.hpp>
-#include "log.h"
+#include "utils/log.h"
 
 
 int CPlexDirectoryCache::CACHE_THESHOLD_COUNT = 20;

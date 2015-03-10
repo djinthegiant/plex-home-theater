@@ -11,14 +11,14 @@ void CPlexDirectoryTypeParserRelease::Process(CFileItem &item, CFileItem &mediaC
   for (XML_ELEMENT* package = itemElement->first_node(); package; package = package->next_sibling())
 #endif
   {
-    CFileItemPtr pItem = XFILE::CPlexDirectory::NewPlexElement(package, item, item.GetPath());
+    CFileItemPtr pItem = XFILE::CPlexDirectory::NewPlexElement(package, item, item.GetURL());
     if(!pItem)
       continue;
 
     CPlexAttributeParserKey key;
 
-    key.Process(mediaContainer.GetPath(), "filePath", pItem->GetProperty("file").asString(), pItem.get());
-    key.Process(mediaContainer.GetPath(), "manifestPath", pItem->GetProperty("manifest").asString(), pItem.get());
+    key.Process(mediaContainer.GetURL(), "filePath", pItem->GetProperty("file").asString(), pItem.get());
+    key.Process(mediaContainer.GetURL(), "manifestPath", pItem->GetProperty("manifest").asString(), pItem.get());
 
     item.m_mediaItems.push_back(pItem);
   }

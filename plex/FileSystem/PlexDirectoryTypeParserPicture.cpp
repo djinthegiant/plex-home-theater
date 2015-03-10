@@ -9,6 +9,7 @@
 #include "PlexDirectoryTypeParserPicture.h"
 #include "PlexAttributeParser.h"
 #include "pictures/PictureInfoTag.h"
+#include "utils/StringUtils.h"
 
 void CPlexDirectoryTypeParserPicture::Process(CFileItem &item, CFileItem &mediaContainer, XML_ELEMENT *itemElement)
 {
@@ -18,13 +19,12 @@ void CPlexDirectoryTypeParserPicture::Process(CFileItem &item, CFileItem &mediaC
     CFileItemPtr media = item.m_mediaItems[0];
     /* Pass the path URL via the transcoder, because XBMC raw file reader sucks */
     CPlexAttributeParserMediaUrl mUrl;
-    mUrl.Process(item.GetPath(), "picture", media->m_mediaParts[0]->GetProperty("unprocessed_key").asString(), &item);
+    mUrl.Process(item.GetURL(), "picture", media->m_mediaParts[0]->GetProperty("unprocessed_key").asString(), &item);
     item.SetPath(item.GetArt("picture"));
 
     CPictureInfoTag* tag = item.GetPictureInfoTag();
 
-    CStdString res;
-    res.Format("%s,%s", media->GetProperty("width").asString(), media->GetProperty("height").asString());
+    std::string res = StringUtils::Format("%s,%s", media->GetProperty("width").asString().c_str(), media->GetProperty("height").asString().c_str());
     tag->SetInfo(SLIDE_RESOLUTION, res);
 
     if (media->HasProperty("aperture"))

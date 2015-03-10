@@ -21,7 +21,7 @@
 #include <boost/scoped_array.hpp>
 
 #include "PlexTypes.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 
 #include "utils/log.h"
 
@@ -42,8 +42,8 @@ namespace XFILE
     }
 
     // make it easy to override network access in tests.
-    virtual bool GetXMLData(CStdString& data);
-    bool GetDirectory(const CURL& url, CFileItemList& items);
+    virtual bool GetXMLData(std::string& data);
+    virtual bool GetDirectory(const CURL& url, CFileItemList& items);
 
     /* plexserver://shared */
     bool GetSharedServerDirectory(CFileItemList& items);
@@ -58,29 +58,29 @@ namespace XFILE
     bool GetPlayQueueDirectory(ePlexMediaType type, CFileItemList& items, bool unplayed = false);
     
     /* plexserver://playlists */
-    bool GetPlaylistsDirectory(CFileItemList& items, CStdString options);
+    bool GetPlaylistsDirectory(CFileItemList& items, std::string options);
 
-    virtual bool GetDirectory(const CStdString& strPath, CFileItemList& items)
+    bool GetDirectory(const std::string& strPath, CFileItemList& items)
     {
       return GetDirectory(CURL(strPath), items);
     }
 
     virtual void CancelDirectory();
 
-    static EPlexDirectoryType GetDirectoryType(const CStdString& typeStr);
-    static CStdString GetDirectoryTypeString(EPlexDirectoryType typeNr);
+    static EPlexDirectoryType GetDirectoryType(const std::string& typeStr);
+    static std::string GetDirectoryTypeString(EPlexDirectoryType typeNr);
 
-    static CStdString GetContentFromType(EPlexDirectoryType typeNr);
+    static std::string GetContentFromType(EPlexDirectoryType typeNr);
 
-    void SetHTTPVerb(const CStdString& verb)
+    void SetHTTPVerb(const std::string& verb)
     {
       m_verb = verb;
     }
     
-    inline CStdString getHTTPVerb() { return m_verb; };
+    inline std::string getHTTPVerb() { return m_verb; };
 
     /* Legacy functions we need to revisit */
-    void SetBody(const CStdString& body)
+    void SetBody(const std::string& body)
     {
       m_body = body;
     }
@@ -90,7 +90,7 @@ namespace XFILE
       return CFileItemListPtr();
     }
 
-    CStdString GetData() const
+    std::string GetData() const
     {
       return m_data;
     }
@@ -111,14 +111,16 @@ namespace XFILE
       return m_file.IsTokenInvalid();
     }
 
-    virtual DIR_CACHE_TYPE GetCacheType(const CStdString& strPath) const;
+    virtual DIR_CACHE_TYPE GetCacheType(const CURL& url) const;
 
-    virtual bool IsAllowed(const CStdString& strFile) const
+    virtual bool IsAllowed(const CURL& url) const
     {
       return true;
     }
 
-    static bool CachePath(const CStdString& path);
+    virtual bool AllowAll() const { return true; }
+
+    static bool CachePath(const std::string& path);
 
     inline void SetCacheStrategy(CPlexDirectoryCache::CacheStrategies Strategy) { m_cacheStrategy = Strategy; }
 
@@ -129,15 +131,15 @@ namespace XFILE
     inline bool ShouldShowErrors()  { return m_showErrors; }
 
   private:
-    CStdString m_body;
-    CStdString m_data;
+    std::string m_body;
+    std::string m_data;
     boost::scoped_array<char> m_xmlData;
     CURL m_url;
     CPlexDirectoryCache::CacheStrategies m_cacheStrategy;
 
     CPlexFile m_file;
 
-    CStdString m_verb;
+    std::string m_verb;
     bool m_showErrors;
   };
 }

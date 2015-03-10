@@ -11,7 +11,7 @@
 
 #include "PlexDirectoryTypeParser.h"
 #include "PlexDirectoryTypeParserVideo.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 
 class CPlexDirectoryTypeParserAlbum : public CPlexDirectoryTypeParserBase
 {

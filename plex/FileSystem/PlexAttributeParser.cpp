@@ -14,22 +14,22 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 
 #include "Client/PlexServer.h"
 #include "Client/PlexServerManager.h"
-#include "StringUtils.h"
+#include "utils/StringUtils.h"
 #include "URL.h"
 #include "PlexApplication.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserBase::Process(const CURL& url, const CStdString& key, const CStdString& value, CFileItem *item)
+void CPlexAttributeParserBase::Process(const CURL& url, const std::string& key, const std::string& value, CFileItem *item)
 {
   item->SetProperty(key, value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int64_t CPlexAttributeParserInt::GetInt(const CStdString &value)
+int64_t CPlexAttributeParserInt::GetInt(const std::string &value)
 {
   int64_t intval;
   try { intval = boost::lexical_cast<int64_t>(value); }
@@ -37,7 +37,7 @@ int64_t CPlexAttributeParserInt::GetInt(const CStdString &value)
   return intval;
 }
 
-void CPlexAttributeParserInt::Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserInt::Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item)
 {
   item->SetProperty("unprocessed_" + key, value);
 
@@ -49,7 +49,7 @@ void CPlexAttributeParserInt::Process(const CURL& url, const CStdString &key, co
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserBool::Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserBool::Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item)
 {
   int64_t intval = GetInt(value);
 
@@ -64,7 +64,7 @@ void CPlexAttributeParserBool::Process(const CURL& url, const CStdString &key, c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserKey::Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserKey::Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item)
 {
   CURL keyUrl(url);
 
@@ -76,7 +76,7 @@ void CPlexAttributeParserKey::Process(const CURL& url, const CStdString &key, co
   }
   else if (boost::starts_with(value, "http://") || boost::starts_with(value, "https://"))
   {
-    keyUrl = value;
+    keyUrl = CURL(value);
     if (keyUrl.GetHostName() == "node.plexapp.com")
     {
       keyUrl.SetProtocol("plexserver");
@@ -94,7 +94,7 @@ void CPlexAttributeParserKey::Process(const CURL& url, const CStdString &key, co
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexAttributeParserMediaUrl::GetImageURL(const CURL &url, const CStdString &source, int height, int width)
+std::string CPlexAttributeParserMediaUrl::GetImageURL(const CURL &url, const std::string &source, int height, int width)
 {
   CURL mediaUrl(url);
   CURL imageURL;
@@ -129,7 +129,7 @@ CStdString CPlexAttributeParserMediaUrl::GetImageURL(const CURL &url, const CStd
     CURL sourceURL("http://localhost" + source);
     imageURL = server->BuildURL(sourceURL.GetFileName());
 
-    std::map<CStdString, CStdString> options;
+    std::map<std::string, std::string> options;
     sourceURL.GetOptions(options);
 
     BOOST_FOREACH(const PlexStringPair& values, options)
@@ -157,12 +157,12 @@ CStdString CPlexAttributeParserMediaUrl::GetImageURL(const CURL &url, const CStd
       imageURL.SetFileName(source);
   }
 
-  CStdString swidth = "320", sheight = "320";
+  std::string swidth = "320", sheight = "320";
 
   try
   {
-    swidth = boost::lexical_cast<CStdString>(width);
-    sheight = boost::lexical_cast<CStdString>(height);
+    swidth = boost::lexical_cast<std::string>(width);
+    sheight = boost::lexical_cast<std::string>(height);
   }
   catch (boost::bad_lexical_cast)
   {
@@ -193,7 +193,7 @@ CStdString CPlexAttributeParserMediaUrl::GetImageURL(const CURL &url, const CStd
 #define LARGE_SIZE 2048
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserMediaUrl::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserMediaUrl::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
   if (key == "thumb")
   {
@@ -225,7 +225,7 @@ void CPlexAttributeParserMediaUrl::Process(const CURL &url, const CStdString &ke
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserMediaFlag::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserMediaFlag::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
   static std::map<std::string, std::string> FlagsMap;
   static CCriticalSection FlagsMapSection;
@@ -252,10 +252,10 @@ void CPlexAttributeParserMediaFlag::Process(const CURL &url, const CStdString &k
       return;
     }
 
-    CStdString mediaTagPrefix = item->GetProperty("mediaTagPrefix").asString();
-    CStdString mediaTagVersion = item->GetProperty("mediaTagVersion").asString();
+    std::string mediaTagPrefix = item->GetProperty("mediaTagPrefix").asString();
+    std::string mediaTagVersion = item->GetProperty("mediaTagVersion").asString();
 
-    CStdString flagUrl = mediaTagPrefix;
+    std::string flagUrl = mediaTagPrefix;
 
     flagUrl = PlexUtils::AppendPathToURL(flagUrl, key);
     flagUrl = PlexUtils::AppendPathToURL(flagUrl, CURL::Encode(value));
@@ -278,9 +278,9 @@ void CPlexAttributeParserMediaFlag::Process(const CURL &url, const CStdString &k
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserType::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserType::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
-  CStdString lookupVal = boost::algorithm::to_lower_copy(std::string(value));
+  std::string lookupVal = boost::algorithm::to_lower_copy(std::string(value));
 
   // This is a hack to appease Sebastian :)
   // basically it's refered to as song everywhere but from the server it's called
@@ -308,16 +308,16 @@ void CPlexAttributeParserType::Process(const CURL &url, const CStdString &key, c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserLabel::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserLabel::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
   item->SetLabel(value);
   item->SetProperty(key, value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserDateTime::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserDateTime::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
-  CStdString XBMCFormat = value + " 00:00:00";
+  std::string XBMCFormat = value + " 00:00:00";
   CDateTime time;
 
   time.SetFromDBDate(XBMCFormat);
@@ -330,7 +330,7 @@ void CPlexAttributeParserDateTime::Process(const CURL &url, const CStdString &ke
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexAttributeParserTitleSort::Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item)
+void CPlexAttributeParserTitleSort::Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item)
 {
   item->SetSortLabel(value);
   item->SetProperty(key, value);

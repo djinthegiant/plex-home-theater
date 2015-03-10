@@ -13,7 +13,7 @@
 #include "PlexTypes.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "guilib/LocalizeStrings.h"
 
 #include "music/tags/MusicInfoTag.h"
@@ -154,15 +154,15 @@ CPlexDirectoryTypeParserVideo::Process(CFileItem &item, CFileItem &mediaContaine
   if (item.m_mediaItems.size() > 0)
   {
     CFileItemPtr firstMedia = item.m_mediaItems[0];
-    const boost::unordered_map<CStdString, CVariant> pMap = firstMedia->GetAllProperties();
-    std::pair<CStdString, CVariant> p;
+    const CGUIListItem::PropertyMap pMap = firstMedia->GetAllProperties();
+    std::pair<std::string, CVariant> p;
     BOOST_FOREACH(p, pMap)
     {
       if (!item.HasProperty(p.first))
         item.SetProperty(p.first, p.second);
     }
 
-    /* also forward art, this is the mediaTags */
+    ///* also forward art, this is the mediaTags */
     item.AppendArt(firstMedia->GetArt());
   }
   
@@ -201,7 +201,7 @@ CPlexDirectoryTypeParserVideo::ParseMediaNodes(CFileItem &item, XML_ELEMENT *ele
   for (XML_ELEMENT* media = element->first_node(); media; media = media->next_sibling())
 #endif
   {
-    CFileItemPtr mediaItem = CPlexDirectory::NewPlexElement(media, item, item.GetPath());
+    CFileItemPtr mediaItem = CPlexDirectory::NewPlexElement(media, item, item.GetURL());
 
     if (mediaItem->GetPlexDirectoryType() == PLEX_DIR_TYPE_GENRE ||
         mediaItem->GetPlexDirectoryType() == PLEX_DIR_TYPE_WRITER ||
@@ -249,7 +249,7 @@ void CPlexDirectoryTypeParserVideo::ParseMediaParts(CFileItem &mediaItem, XML_EL
   for (XML_ELEMENT* part = element->first_node(); part; part = part->next_sibling())
 #endif
   {
-    CFileItemPtr mediaPart = CPlexDirectory::NewPlexElement(part, mediaItem, mediaItem.GetPath());
+    CFileItemPtr mediaPart = CPlexDirectory::NewPlexElement(part, mediaItem, mediaItem.GetURL());
     mediaPart->SetProperty("partIndex", partIndex ++);
 
     ParseMediaStreams(*mediaPart, part);
@@ -258,7 +258,7 @@ void CPlexDirectoryTypeParserVideo::ParseMediaParts(CFileItem &mediaItem, XML_EL
         (mediaPart->HasProperty("accessible") && !mediaPart->GetProperty("accessible").asBoolean()))
       mediaItem.SetProperty("unavailable", true);
     
-    if (mediaPart->IsDVDImage() || mediaPart->IsDVD() || mediaPart->IsDVDFile())
+    if (mediaPart->IsDiscImage() || mediaPart->IsDVD() || mediaPart->IsDVDFile())
       mediaItem.SetProperty("isdvd", true);
 
     mediaItem.m_mediaParts.push_back(mediaPart);
@@ -273,9 +273,9 @@ void CPlexDirectoryTypeParserVideo::ParseMediaStreams(CFileItem &mediaPart, XML_
   for (XML_ELEMENT* stream = element->first_node(); stream; stream = stream->next_sibling())
 #endif
   {
-    CFileItemPtr mediaStream = CPlexDirectory::NewPlexElement(stream, mediaPart, mediaPart.GetPath());
+    CFileItemPtr mediaStream = CPlexDirectory::NewPlexElement(stream, mediaPart, mediaPart.GetURL());
 
-    CStdString streamName = PlexUtils::GetPrettyStreamNameFromStreamItem(mediaStream);
+    std::string streamName = PlexUtils::GetPrettyStreamNameFromStreamItem(mediaStream);
     mediaStream->SetLabel(streamName);
 
     /* FIXME: legacy, calling code should check if the
@@ -301,7 +301,7 @@ void CPlexDirectoryTypeParserVideo::ParseTag(CFileItem &item, CFileItem &tagItem
     return;
 
   CVideoInfoTag* tag = item.GetVideoInfoTag();
-  CStdString tagVal = tagItem.GetProperty("tag").asString();
+  std::string tagVal = tagItem.GetProperty("tag").asString();
   switch(tagItem.GetPlexDirectoryType())
   {
     case PLEX_DIR_TYPE_GENRE:

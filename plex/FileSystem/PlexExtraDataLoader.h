@@ -3,7 +3,7 @@
 
 #include <string>
 #include "xbmc/FileItem.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 
 using namespace std;
 

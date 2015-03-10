@@ -8,10 +8,10 @@
 
 #include "PlexDirectory.h"
 #include "filesystem/FileFactory.h"
-#include "File.h"
-#include "XBMCTinyXML.h"
+#include "filesystem/File.h"
+#include "utils/XBMCTinyXML.h"
 #include "utils/log.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 
 #include "PlexAttributeParser.h"
 #include "PlexDirectoryTypeParser.h"
@@ -31,24 +31,24 @@
 #include <boost/foreach.hpp>
 #include <map>
 
-#include "Stopwatch.h"
+#include "utils/Stopwatch.h"
 
 #include "Client/PlexServerDataLoader.h"
 #include "Client/MyPlex/MyPlexManager.h"
 #include "Playlists/PlexPlayQueueManager.h"
 
-#include "GUIViewState.h"
+#include "view/GUIViewState.h"
 
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "PlexApplication.h"
 
-#include "DirectoryCache.h"
+#include "filesystem/DirectoryCache.h"
 
 #include "XMLChoice.h"
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "PlexDirectoryCache.h"
 #include "Client/PlexServerVersion.h"
-#include "StringUtils.h"
+#include "utils/StringUtils.h"
 
 
 using namespace XFILE;
@@ -58,7 +58,7 @@ using namespace rapidxml;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexDirectory::GetXMLData(CStdString& data)
+bool CPlexDirectory::GetXMLData(std::string& data)
 {
   bool httpSuccess;
   CStopWatch httpTimer;
@@ -66,19 +66,19 @@ bool CPlexDirectory::GetXMLData(CStdString& data)
 
   if (m_verb == "POST" || !m_body.empty())
   {
-    httpSuccess = m_file.Post(m_url.Get(), m_body, data);
+    httpSuccess = m_file.Post(m_url, m_body, data);
   }
   else if (m_verb == "GET")
   {
-    httpSuccess = m_file.Get(m_url.Get(), data);
+    httpSuccess = m_file.Get(m_url, data);
   }
   else if (m_verb == "PUT")
   {
-    httpSuccess = m_file.Put(m_url.Get(), data);
+    httpSuccess = m_file.Put(m_url, data);
   }
   else if (m_verb == "DELETE")
   {
-    httpSuccess = m_file.Delete(m_url.Get(), data);
+    httpSuccess = m_file.Delete(m_url, data);
   }
   else
   {
@@ -135,14 +135,14 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList& fileItems)
     if (url.GetFileName() == "audio")
       return GetPlayQueueDirectory(PLEX_MEDIA_TYPE_MUSIC, fileItems, unplayed);
     
-    if (url.GetFileName().IsEmpty())
+    if (url.GetFileName().empty())
     {
       CPlexPlayQueuePtr pq = g_plexApplication.playQueueManager->getPlayingPlayQueue();
       if (pq)
         return pq->get(fileItems);
     }
   }
-  else if ((url.GetHostName() == "playlists") && (url.GetFileName().IsEmpty() || url.GetFileName() == "all"))
+  else if ((url.GetHostName() == "playlists") && (url.GetFileName().empty() || url.GetFileName() == "all"))
   {
     return GetPlaylistsDirectory(fileItems, url.GetOptions());
   }
@@ -248,7 +248,7 @@ void CPlexDirectory::CancelDirectory()
   m_file.Cancel();
 }
 
-typedef boost::bimap<EPlexDirectoryType, CStdString> DirectoryTypeMap;
+typedef boost::bimap<EPlexDirectoryType, std::string> DirectoryTypeMap;
 static DirectoryTypeMap g_typeMap = boost::assign::list_of<DirectoryTypeMap::relation>
                                     (PLEX_DIR_TYPE_UNKNOWN, "unknown")
                                     (PLEX_DIR_TYPE_MOVIE, "movie")
@@ -308,8 +308,8 @@ CPlexAttributeParserBase *g_parserMediaFlag = new CPlexAttributeParserMediaFlag;
 CPlexAttributeParserBase *g_parserDateTime = new CPlexAttributeParserDateTime;
 CPlexAttributeParserBase *g_parserTitleSort = new CPlexAttributeParserTitleSort;
 
-typedef std::map<CStdString, CPlexAttributeParserBase*> AttributeMap;
-typedef std::pair<CStdString, CPlexAttributeParserBase*> AttributePair;
+typedef std::map<std::string, CPlexAttributeParserBase*> AttributeMap;
+typedef std::pair<std::string, CPlexAttributeParserBase*> AttributePair;
 static AttributeMap g_attributeMap = boost::assign::list_of<AttributePair>
                                      ("size", g_parserInt)
                                      ("channels", g_parserInt)
@@ -398,8 +398,8 @@ void CPlexDirectory::CopyAttributes(XML_ELEMENT* el, CFileItem* item, const CURL
 
   while (attr)
   {
-    CStdString key = attr->NameTStr();
-    CStdString valStr = CStdString(attr->Value());
+    std::string key = attr->NameTStr();
+    std::string valStr = std::string(attr->Value());
 
     if (g_attributeMap.find(key) != g_attributeMap.end())
     {
@@ -418,8 +418,8 @@ void CPlexDirectory::CopyAttributes(XML_ELEMENT* el, CFileItem* item, const CURL
 
   while (attr)
   {
-    CStdString key = attr->name();
-    CStdString valStr = CStdString(attr->value());
+    std::string key = attr->name();
+    std::string valStr = std::string(attr->value());
 
     if (g_attributeMap.find(key) != g_attributeMap.end())
     {
@@ -464,7 +464,7 @@ CFileItemPtr CPlexDirectory::NewPlexElement(XML_ELEMENT *element, const CFileIte
 #ifndef USE_RAPIDXML
     g_parserType->Process(baseUrl, "type", element->ValueStr(), newItem.get());
 #else
-    g_parserType->Process(baseUrl, "type", CStdString(element->name()), newItem.get());
+    g_parserType->Process(baseUrl, "type", std::string(element->name()), newItem.get());
 #endif
 
   }
@@ -479,7 +479,7 @@ CFileItemPtr CPlexDirectory::NewPlexElement(XML_ELEMENT *element, const CFileIte
 #else
     xml_attribute<> *pA = element->first_attribute("key");
 
-    if (pA)	t.Process(baseUrl, "art", CStdString(pA->value()), newItem.get());
+    if (pA)	t.Process(baseUrl, "art", std::string(pA->value()), newItem.get());
     else    t.Process(baseUrl, "art", "", newItem.get());
 #endif
 
@@ -575,7 +575,7 @@ bool CPlexDirectory::ReadMediaContainer(XML_ELEMENT* root, CFileItemList& mediaC
 #ifndef USE_RAPIDXML
   if (root->ValueStr() != "MediaContainer" && root->ValueStr() != "ASContainer")
 #else
-  if (CStdString(root->name()) != "MediaContainer" && CStdString(root->name()) != "ASContainer")
+  if (std::string(root->name()) != "MediaContainer" && std::string(root->name()) != "ASContainer")
 #endif
   {
     CLog::Log(LOGWARNING, "CPlexDirectory::ReadMediaContainer got XML document without mediaContainer as root at %s", m_url.Get().c_str());
@@ -666,19 +666,19 @@ bool CPlexDirectory::ReadMediaContainer(XML_ELEMENT* root, CFileItemList& mediaC
     mediaContainer.SetContent("empty");
   else
   {
-    CStdString content = CPlexDirectory::GetContentFromType(mediaContainer.GetPlexDirectoryType());
+    std::string content = CPlexDirectory::GetContentFromType(mediaContainer.GetPlexDirectoryType());
     if (!content.empty())
       mediaContainer.SetContent(content);
   }
   
   /* set the sort method to none, this means that we respect the order from the server */
-  mediaContainer.AddSortMethod(SORT_METHOD_NONE, 553, LABEL_MASKS());
+  mediaContainer.AddSortMethod(SortByNone, 553, LABEL_MASKS());
 
   return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-EPlexDirectoryType CPlexDirectory::GetDirectoryType(const CStdString &typeStr)
+EPlexDirectoryType CPlexDirectory::GetDirectoryType(const std::string &typeStr)
 {
   DirectoryTypeMap::right_const_iterator it = g_typeMap.right.find(typeStr);
   if (it != g_typeMap.right.end())
@@ -687,7 +687,7 @@ EPlexDirectoryType CPlexDirectory::GetDirectoryType(const CStdString &typeStr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexDirectory::GetDirectoryTypeString(EPlexDirectoryType typeNr)
+std::string CPlexDirectory::GetDirectoryTypeString(EPlexDirectoryType typeNr)
 {
   DirectoryTypeMap::left_const_iterator it = g_typeMap.left.find(typeNr);
   if (it != g_typeMap.left.end())
@@ -697,9 +697,9 @@ CStdString CPlexDirectory::GetDirectoryTypeString(EPlexDirectoryType typeNr)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexDirectory::GetContentFromType(EPlexDirectoryType typeNr)
+std::string CPlexDirectory::GetContentFromType(EPlexDirectoryType typeNr)
 {
-  CStdString content;
+  std::string content;
 
   switch(typeNr)
   {
@@ -753,11 +753,10 @@ CStdString CPlexDirectory::GetContentFromType(EPlexDirectoryType typeNr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CStdString &strPath) const
+DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CURL &url) const
 {
   /* We really don't want to agressively cache stuff, so let's just start by caching remote servers */
-  CURL u(strPath);
-  CPlexServerPtr server = g_plexApplication.serverManager->FindByUUID(u.GetHostName());
+  CPlexServerPtr server = g_plexApplication.serverManager->FindByUUID(url.GetHostName());
 
   if (server && server->GetActiveConnection())
   {
@@ -774,7 +773,7 @@ DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CStdString &strPath) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexDirectory::CachePath(const CStdString &path)
+bool CPlexDirectory::CachePath(const std::string &path)
 {
   CPlexDirectory dir;
   CFileItemList list;
@@ -797,7 +796,7 @@ bool CPlexDirectory::IsFolder(const CFileItemPtr& item, XML_ELEMENT* element)
   if (element->ValueStr() == "Directory")
     return true;
 #else
-  if (CStdString(element->name()) == "Directory")
+  if (std::string(element->name()) == "Directory")
     return true;
 #endif
 
@@ -869,7 +868,7 @@ bool CPlexDirectory::GetChannelDirectory(CFileItemList &items)
   {
     CFileItemPtr channel = channels->Get(i);
     
-    CStdString window, type;
+    std::string window, type;
     CURL p(channel->GetPath());
     /* figure out what type of plugin this is so we can open it correctly */
     if (boost::starts_with(p.GetFileName(), "video"))
@@ -921,12 +920,12 @@ bool CPlexDirectory::GetOnlineChannelDirectory(CFileItemList &items)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexDirectory::GetPlaylistsDirectory(CFileItemList &items, CStdString options)
+bool CPlexDirectory::GetPlaylistsDirectory(CFileItemList &items, std::string options)
 {
   items.SetPlexDirectoryType(PLEX_DIR_TYPE_PLAYLIST);
   items.SetProperty("PlexContent", PlexUtils::GetPlexContent(items));
   items.SetPath("plexserver://playlists/");
-  items.AddSortMethod(SORT_METHOD_NONE, 553, LABEL_MASKS());
+  items.AddSortMethod(SortByNone, 553, LABEL_MASKS());
   
   CPlexServerVersion playlistVersion("0.9.9.12.0");
   PlexServerList list = g_plexApplication.serverManager->GetAllServers(CPlexServerManager::SERVER_OWNED, true);

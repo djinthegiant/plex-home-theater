@@ -4,7 +4,7 @@
 //#define USE_RAPIDXML
 
 #ifndef USE_RAPIDXML
-	#include "XBMCTinyXML.h"
+	#include "utils/XBMCTinyXML.h"
 	#define XML_ELEMENT TiXmlElement
 	#define XML_ATTRIBUTE TiXmlAttribute
 #else

@@ -1,13 +1,13 @@
 #include "PlexFile.h"
 #include "Client/PlexServerManager.h"
 #include "utils/log.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "boost/lexical_cast.hpp"
 #include <boost/assign.hpp>
 #include <boost/foreach.hpp>
 #include <string>
-#include "Mime.h"
-#include "URIUtils.h"
+#include "utils/Mime.h"
+#include "utils/URIUtils.h"
 
 #include "PlexApplication.h"
 #include "GUIInfoManager.h"
@@ -24,10 +24,10 @@ vector<stringPair> CPlexFile::GetHeaderList()
   std::vector<std::pair<std::string, std::string> > hdrs;
   
   hdrs.push_back(stringPair("X-Plex-Version", g_infoManager.GetVersion()));
-  hdrs.push_back(stringPair("X-Plex-Client-Identifier", g_guiSettings.GetString("system.uuid")));
+  hdrs.push_back(stringPair("X-Plex-Client-Identifier", CSettings::Get().GetString("system.uuid")));
   hdrs.push_back(stringPair("X-Plex-Provides", "player"));
   hdrs.push_back(stringPair("X-Plex-Product", "Plex Home Theater"));
-  hdrs.push_back(stringPair("X-Plex-Device-Name", g_guiSettings.GetString("services.devicename")));
+  hdrs.push_back(stringPair("X-Plex-Device-Name", CSettings::Get().GetString("services.devicename")));
   hdrs.push_back(stringPair("X-Plex-Platform", "Plex Home Theater"));
   hdrs.push_back(stringPair("X-Plex-Model", PlexUtils::GetMachinePlatform()));
 #ifdef TARGET_RPI
@@ -44,12 +44,12 @@ vector<stringPair> CPlexFile::GetHeaderList()
   // want PMS to select the correct audio track for us.
   CStdString protocols = "protocols=shoutcast,http-video;videoDecoders=h264{profile:high&resolution:1080&level:51};audioDecoders=mp3,aac";
   
-  if (AUDIO_IS_BITSTREAM(g_guiSettings.GetInt("audiooutput.mode")))
+  //MERGE: if (AUDIO_IS_BITSTREAM(CSettings::Get().GetInt("audiooutput.mode")))
   {
-    if (g_guiSettings.GetBool("audiooutput.dtspassthrough"))
+    if (CSettings::Get().GetBool("audiooutput.dtspassthrough"))
       protocols += ",dts{bitrate:800000&channels:8}";
     
-    if (g_guiSettings.GetBool("audiooutput.ac3passthrough"))
+    if (CSettings::Get().GetBool("audiooutput.ac3passthrough"))
       protocols += ",ac3{bitrate:800000&channels:8}";
   }
   
@@ -72,6 +72,62 @@ CPlexFile::CPlexFile(void) : CCurlFile()
   SetUserAgent(PLEX_HOME_THEATER_USER_AGENT);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool CPlexFile::Get(const CURL &url, std::string& data)
+{
+  CLog::Log(LOGDEBUG, "%s - %s", __FUNCTION__, url.GetRedacted().c_str());
+
+  m_customrequest.clear();
+  m_postdata.clear();
+  m_postdataset = false;
+  CURL newUrl(url);
+  if (BuildHTTPURL(newUrl))
+    return Service(newUrl.Get(), data);
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool CPlexFile::Put(const CURL &url, std::string& data)
+{
+  CLog::Log(LOGDEBUG, "%s - %s", __FUNCTION__, url.GetRedacted().c_str());
+
+  m_customrequest = "PUT";
+  m_postdata.clear();
+  m_postdataset = false;
+  CURL newUrl(url);
+  if (BuildHTTPURL(newUrl))
+    return Service(newUrl.Get(), data);
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool CPlexFile::Post(const CURL &url, const std::string& postData, std::string& data)
+{
+  CLog::Log(LOGDEBUG, "%s - %s", __FUNCTION__, url.GetRedacted().c_str());
+
+  m_customrequest.clear();
+  m_postdata = postData;
+  m_postdataset = true;
+  CURL newUrl(url);
+  if (BuildHTTPURL(newUrl))
+    return Service(newUrl.Get(), data);
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool CPlexFile::Delete(const CURL &url, std::string& data)
+{
+  CLog::Log(LOGDEBUG, "%s - %s", __FUNCTION__, url.GetRedacted().c_str());
+
+  m_customrequest = "DELETE";
+  m_postdata.clear();
+  m_postdataset = false;
+  CURL newUrl(url);
+  if (BuildHTTPURL(newUrl))
+    return Service(newUrl.Get(), data);
+  return false;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CPlexFile::BuildHTTPURL(CURL& url)
 {
@@ -162,13 +218,13 @@ bool CPlexFile::Exists(const CURL &url)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexFile::GetMimeType(const CURL& url)
+std::string CPlexFile::GetMimeType(const CURL& url)
 {
   /* we only handle plexserver:// stuff here */
   if (url.GetProtocol() != "plexserver")
     return "";
 
-  CStdString path = url.GetFileName();
+  std::string path = url.GetFileName();
 
   if (boost::starts_with(path, "/video"))
     return "video/unknown";
@@ -177,7 +233,7 @@ CStdString CPlexFile::GetMimeType(const CURL& url)
   if (boost::starts_with(path, "/photo"))
     return "image/unknown";
 
-  CStdString extension = URIUtils::GetExtension(path);
+  std::string extension = URIUtils::GetExtension(path);
   return CMime::GetMimeType(extension);
 }
 
@@ -191,7 +247,7 @@ int CPlexFile::IoControl(EIoControl request, void* param)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexFile::Service(const CStdString &strURL, CStdString &strHTML)
+bool CPlexFile::Service(const std::string &strURL, std::string &strHTML)
 {
   bool ret = CCurlFile::Service(strURL, strHTML);
   m_tokenInvalid = false;

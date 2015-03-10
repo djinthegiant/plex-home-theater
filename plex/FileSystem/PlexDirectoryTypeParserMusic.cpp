@@ -21,7 +21,7 @@ CPlexDirectoryTypeParserAlbum::Process(CFileItem &item, CFileItem &mediaContaine
 {
   CAlbum album;
 
-  CStdString albumName = item.GetLabel();
+  std::string albumName = item.GetLabel();
   if (albumName.empty() && item.HasProperty("album"))
   {
     albumName = item.GetProperty("album").asString();
@@ -55,7 +55,7 @@ CPlexDirectoryTypeParserAlbum::Process(CFileItem &item, CFileItem &mediaContaine
   for (XML_ELEMENT *el = itemElement->FirstChildElement(); el; el = el->NextSiblingElement())
   #endif
   {
-    CFileItemPtr tagItem = XFILE::CPlexDirectory::NewPlexElement(el, item, item.GetPath());
+    CFileItemPtr tagItem = XFILE::CPlexDirectory::NewPlexElement(el, item, item.GetURL());
 
     if (tagItem &&
         tagItem->GetPlexDirectoryType() == PLEX_DIR_TYPE_GENRE)
@@ -69,7 +69,7 @@ void CPlexDirectoryTypeParserAlbum::ParseTag(CFileItem &item, CFileItem &tagItem
     return;
 
   CMusicInfoTag* tag = item.GetMusicInfoTag();
-  CStdString tagVal = tagItem.GetProperty("tag").asString();
+  std::string tagVal = tagItem.GetProperty("tag").asString();
   switch(tagItem.GetPlexDirectoryType())
   {
     case PLEX_DIR_TYPE_GENRE:
@@ -90,7 +90,7 @@ CPlexDirectoryTypeParserTrack::Process(CFileItem &item, CFileItem &mediaContaine
 {
   CSong song;
 
-  CStdString songName = item.GetLabel();
+  std::string songName = item.GetLabel();
   if (songName.empty() && item.HasProperty("track"))
   {
     songName = item.GetProperty("track").asString();
@@ -142,8 +142,8 @@ CPlexDirectoryTypeParserTrack::Process(CFileItem &item, CFileItem &mediaContaine
   if (item.m_mediaItems.size() > 0)
   {
     CFileItemPtr firstMedia = item.m_mediaItems[0];
-    const PropertyMap pMap = firstMedia->GetAllProperties();
-    std::pair<CStdString, CVariant> p;
+    const CGUIListItem::PropertyMap pMap = firstMedia->GetAllProperties();
+    std::pair<std::string, CVariant> p;
     BOOST_FOREACH(p, pMap)
       item.SetProperty(p.first, p.second);
 
@@ -175,7 +175,7 @@ void CPlexDirectoryTypeParserArtist::Process(CFileItem &item, CFileItem &mediaCo
 {
   CArtist artist;
 
-  CStdString artistName = item.GetLabel();
+  std::string artistName = item.GetLabel();
   if (item.GetLabel().empty() && item.HasProperty("artist"))
   {
     artistName = item.GetProperty("artist").asString();
@@ -194,7 +194,7 @@ void CPlexDirectoryTypeParserArtist::Process(CFileItem &item, CFileItem &mediaCo
   for (XML_ELEMENT *el = itemElement->FirstChildElement(); el; el = el->NextSiblingElement())
   #endif
   {
-    CFileItemPtr tagItem = XFILE::CPlexDirectory::NewPlexElement(el, item, item.GetPath());
+    CFileItemPtr tagItem = XFILE::CPlexDirectory::NewPlexElement(el, item, item.GetURL());
 
     if (tagItem &&
         tagItem->GetPlexDirectoryType() == PLEX_DIR_TYPE_GENRE)

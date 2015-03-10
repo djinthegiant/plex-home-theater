@@ -21,63 +21,63 @@ class CPlexAttributeParserBase
 {
   public:
     CPlexAttributeParserBase() {}
-    virtual void Process(const CURL& url, const CStdString& key, const CStdString& value, CFileItem *item);
+    virtual void Process(const CURL& url, const std::string& key, const std::string& value, CFileItem *item);
 };
 
 class CPlexAttributeParserInt : public CPlexAttributeParserBase
 {
   public:
-    int64_t GetInt(const CStdString& value);
-    virtual void Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item);
+    int64_t GetInt(const std::string& value);
+    virtual void Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserBool : public CPlexAttributeParserInt
 {
   public:
-    virtual void Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserKey : public CPlexAttributeParserBase
 {
   public:
-    virtual void Process(const CURL& url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL& url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserMediaUrl : public CPlexAttributeParserBase
 {
   public:
-    virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
-    static CStdString GetImageURL(const CURL &url, const CStdString &source, int height, int width);
+    virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
+    static std::string GetImageURL(const CURL &url, const std::string &source, int height, int width);
 };
 
 class CPlexAttributeParserMediaFlag : public CPlexAttributeParserMediaUrl
 {
   public:
-    virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserType : public CPlexAttributeParserInt
 {
   public:
-    virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserLabel : public CPlexAttributeParserBase
 {
   public:
-    virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserDateTime : public CPlexAttributeParserBase
 {
   public:
-    virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
+    virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 class CPlexAttributeParserTitleSort : public CPlexAttributeParserBase
 {
 public:
-  virtual void Process(const CURL &url, const CStdString &key, const CStdString &value, CFileItem *item);
+  virtual void Process(const CURL &url, const std::string &key, const std::string &value, CFileItem *item);
 };
 
 
