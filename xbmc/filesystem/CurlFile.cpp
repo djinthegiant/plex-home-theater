@@ -521,7 +521,7 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   // setup any requested authentication
   if( !m_ftpauth.empty() )
   {
-    g_curlInterface.easy_setopt(h, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+    g_curlInterface.easy_setopt(h, CURLOPT_USE_SSL, CURLUSESSL_TRY);
     if( m_ftpauth == "any" )
       g_curlInterface.easy_setopt(h, CURLOPT_FTPSSLAUTH, CURLFTPAUTH_DEFAULT);
     else if( m_ftpauth == "ssl" )
@@ -557,7 +557,7 @@ void CCurlFile::SetCommonOptions(CReadState* state)
 
   // setup Content-Encoding if requested
   if( !m_contentencoding.empty() )
-    g_curlInterface.easy_setopt(h, CURLOPT_ENCODING, m_contentencoding.c_str());
+    g_curlInterface.easy_setopt(h, CURLOPT_ACCEPT_ENCODING, m_contentencoding.c_str());
 
   if (!m_useOldHttpVersion && !m_acceptCharset.empty())
     SetRequestHeader("Accept-Charset", m_acceptCharset);
