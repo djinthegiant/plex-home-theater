@@ -380,6 +380,9 @@ public:
 
   void SetLoggingIn(bool loggingIn) { m_loggingIn = loggingIn; }
 
+  /* PLEX */
+  CFileItemPtr& CurrentFileItemPtr() { return m_itemCurrentFile; };
+  /* END PLEX */
 protected:
   virtual bool OnSettingsSaving() const;
 

@@ -111,6 +111,10 @@ namespace INFO
 #define PLAYER_TITLE                 53
 #define PLAYER_ISINTERNETSTREAM      54
 #define PLAYER_FILENAME              55
+/* PLEX */
+#define PLAYER_ONNEW                 56
+#define PLAYER_PLAYLIST              57
+/* END PLEX */
 
 #define WEATHER_CONDITIONS          100
 #define WEATHER_TEMPERATURE         101
@@ -284,6 +288,15 @@ namespace INFO
 #define VIDEOPLAYER_SUB_CHANNEL_NUMBER 314
 #define VIDEOPLAYER_CHANNEL_NUMBER_LBL 315
 
+/* PLEX */
+#define VIDEOPLAYER_AUDIOSTREAM       316
+#define VIDEOPLAYER_SUBTITLESTREAM    317
+#define VIDEOPLAYER_DURATION_STRING   318
+#define VIDEOPLAYER_PLEXCONTENT       319
+#define VIDEOPLAYER_PLEXCONTENT_STRING 320
+#define VIDEOPLAYER_HASNEXT           321
+/* END PLEX */
+
 #define CONTAINER_CAN_FILTER         342
 #define CONTAINER_CAN_FILTERADVANCED 343
 #define CONTAINER_FILTERED           344
@@ -308,6 +321,9 @@ namespace INFO
 #define CONTAINER_CONTENT           362
 #define CONTAINER_HAS_THUMB         363
 #define CONTAINER_SORT_METHOD       364
+/* PLEX */
+#define CONTAINER_THUMB               365
+/* END PLEX */
 
 #define CONTAINER_HAS_FOCUS         367
 #define CONTAINER_ROW               368
@@ -395,6 +411,9 @@ namespace INFO
 #define SYSTEM_SCREENSAVER_ACTIVE   717
 #define SYSTEM_ADDON_VERSION        718
 #define SYSTEM_DPMS_ACTIVE          719
+/* PLEX */
+//#define SYSTEM_PLEX_PLAYQUEUE       718
+/* END PLEX */
 
 #define LIBRARY_HAS_MUSIC           720
 #define LIBRARY_HAS_VIDEO           721
@@ -687,26 +706,43 @@ namespace EPG { class CEpgInfoTag; }
 class GUIInfo
 {
 public:
-  GUIInfo(int info, uint32_t data1 = 0, int data2 = 0, uint32_t flag = 0)
+  //GUIInfo(int info, uint32_t data1 = 0, int data2 = 0, uint32_t flag = 0)
+  /* PLEX */
+  GUIInfo(int info, uint32_t data1 = 0, int data2 = 0, uint32_t flag = 0, int secondCondition = 0)
+  /* END PLEX */
   {
     m_info = info;
     m_data1 = data1;
     m_data2 = data2;
     if (flag)
       SetInfoFlag(flag);
+    /* PLEX */
+    m_secondCondition = secondCondition;
+    /* END PLEX */
   }
   bool operator ==(const GUIInfo &right) const
   {
-    return (m_info == right.m_info && m_data1 == right.m_data1 && m_data2 == right.m_data2);
+    //return (m_info == right.m_info && m_data1 == right.m_data1 && m_data2 == right.m_data2);
+    /* PLEX */
+    return (m_info == right.m_info && m_data1 == right.m_data1 && m_data2 == right.m_data2 && m_secondCondition == right.m_secondCondition);
+    /* END PLEX */
   };
   uint32_t GetInfoFlag() const;
   uint32_t GetData1() const;
   int GetData2() const;
   int m_info;
+
+  /* PLEX */
+  int GetSecondCondition() const { return m_secondCondition; }
+  /* END PLEX */
 private:
   void SetInfoFlag(uint32_t flag);
   uint32_t m_data1;
   int m_data2;
+
+  /* PLEX */
+  int m_secondCondition;
+  /* END PLEX */
 };
 
 /*!
@@ -879,7 +915,9 @@ protected:
   int TranslateListItem(const Property &info);
   int TranslateMusicPlayerString(const CStdString &info) const;
   TIME_FORMAT TranslateTimeFormat(const CStdString &format);
+#ifndef __PLEX__
   bool GetItemBool(const CGUIListItem *item, int condition) const;
+#endif
 
   /*! \brief Split an info string into it's constituent parts and parameters
    Format is:
@@ -956,6 +994,10 @@ protected:
   SPlayerAudioStreamInfo m_audioInfo;
 
   CCriticalSection m_critInfo;
+
+  /* PLEX */
+  bool GetItemBool(const CGUIListItem *item, int condition, int secondCondition=0) const;
+  /* END PLEX */
 };
 
 /*!

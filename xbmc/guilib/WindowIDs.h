@@ -172,3 +172,6 @@
 #define WINDOW_ADDON_START                14000
 #define WINDOW_ADDON_END                  14099
 
+/* PLEX */
+#define WINDOW_DIALOG_SETTINGS_MENU       14997
+/* END PLEX */

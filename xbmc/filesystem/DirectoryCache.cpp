@@ -26,6 +26,11 @@
 #include "utils/StringUtils.h"
 #include "climits"
 
+/* PLEX */
+#include "URL.h"
+#include <boost/foreach.hpp>
+/* END PLEX */
+
 using namespace std;
 using namespace XFILE;
 
@@ -167,6 +172,7 @@ void CDirectoryCache::AddFile(const std::string& strFile)
   }
 }
 
+#ifndef __PLEX__
 bool CDirectoryCache::FileExists(const std::string& strFile, bool& bInCache)
 {
   CSingleLock lock (m_cs);
@@ -193,6 +199,52 @@ bool CDirectoryCache::FileExists(const std::string& strFile, bool& bInCache)
 #endif
   return false;
 }
+#else
+
+std::string CDirectoryCache::DirPathOfFile(const std::string& strPath)
+{
+  CSingleLock lock(m_cs);
+
+  CURL u(strPath);
+  std::string machineId = u.GetHostName();
+  std::pair<CStdString, CDir*> p;
+
+  BOOST_FOREACH(p, m_cache)
+  {
+    CURL k(p.first);
+    if (k.GetHostName() == machineId)
+    {
+      p.second->SetLastAccess(m_accessCounter);
+#ifdef _DEBUG
+      m_cacheHits ++;
+#endif
+      if (p.second->m_Items->Contains(strPath))
+        return p.first;
+    }
+  }
+
+#ifdef _DEBUG
+  m_cacheMisses ++;
+#endif
+
+  return "";
+}
+
+bool CDirectoryCache::FileExists(const std::string &strPath, bool &bInCache)
+{
+  std::string dirPath = DirPathOfFile(strPath);
+  bInCache = !dirPath.empty();
+  return bInCache;
+}
+
+void CDirectoryCache::ClearDirWithFile(const std::string& strPath)
+{
+  std::string dirPath = DirPathOfFile(strPath);
+  if (!dirPath.empty())
+    ClearDirectory(dirPath);
+}
+
+#endif
 
 void CDirectoryCache::Clear()
 {

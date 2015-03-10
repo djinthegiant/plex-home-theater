@@ -68,6 +68,10 @@
 #include "utils/RssReader.h"
 #include "Util.h"
 
+/* PLEX */
+#include "plex/GUI/GUIFilterOrderButtonControl.h"
+/* END PLEX */
+
 using namespace std;
 using namespace EPG;
 
@@ -113,6 +117,9 @@ static const ControlMapping controls[] =
     {"wraplist",          CGUIControl::GUICONTAINER_WRAPLIST},
     {"fixedlist",         CGUIControl::GUICONTAINER_FIXEDLIST},
     {"epggrid",           CGUIControl::GUICONTAINER_EPGGRID},
+    /* PLEX */
+    {"filterorderbutton", CGUIControl::GUICONTROL_FILTERORDER},
+    /* END PLEX */
     {"panel",             CGUIControl::GUICONTAINER_PANEL}};
 
 CGUIControl::GUICONTROLTYPES CGUIControlFactory::TranslateControlType(const CStdString &type)
@@ -716,6 +723,9 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   CTextureInfo textureRadioOffFocus, textureRadioOffNoFocus;
   CTextureInfo imageNoFocus, imageFocus;
   CTextureInfo textureProgressIndicator;
+  /* PLEX */
+  CTextureInfo textureOrderOff, textureOrderAsc, textureOrderDesc;
+  /* END PLEX */
   CGUIInfoLabel texturePath;
   CRect borderSize;
 
@@ -924,6 +934,12 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
     GetTexture(pControlNode, "textureradiooff", textureRadioOffFocus);
     textureRadioOffNoFocus = textureRadioOffFocus;
   }
+
+  /* PLEX */
+  GetTexture(pControlNode, "textureorderoff", textureOrderOff);
+  GetTexture(pControlNode, "textureorderascending", textureOrderAsc);
+  GetTexture(pControlNode, "textureorderdescending", textureOrderDesc);
+  /* END PLEX */
 
   GetTexture(pControlNode, "texturesliderbackground", textureBackground);
   GetTexture(pControlNode, "texturesliderbar", textureBar);
@@ -1231,6 +1247,22 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
     ((CGUIRadioButtonControl *)control)->SetFocusActions(focusActions);
     ((CGUIRadioButtonControl *)control)->SetUnFocusActions(unfocusActions);
   }
+  /* PLEX */
+  else if (type == CGUIControl::GUICONTROL_FILTERORDER)
+  {
+    control = new CGUIFilterOrderButtonControl(
+                parentID, id, posX, posY, width, height,
+                textureFocus, textureNoFocus,
+                labelInfo,
+                textureOrderOff, textureOrderAsc, textureOrderDesc);
+
+    ((CGUIFilterOrderButtonControl*)control)->SetLabel(strLabel);
+    ((CGUIFilterOrderButtonControl*)control)->SetRadioDimensions(radioPosX, radioPosY, radioWidth, radioHeight);
+    ((CGUIFilterOrderButtonControl*)control)->SetClickActions(clickActions);
+    ((CGUIFilterOrderButtonControl*)control)->SetFocusActions(focusActions);
+    ((CGUIFilterOrderButtonControl*)control)->SetUnFocusActions(unfocusActions);
+  }
+  /* END PLEX */
   else if (type == CGUIControl::GUICONTROL_MULTISELECT)
   {
     CGUIInfoLabel label;
@@ -1317,6 +1349,15 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   }
   else if (type == CGUIControl::GUICONTROL_MULTI_IMAGE)
   {
+    /* PLEX */
+    TiXmlElement *info = pControlNode->FirstChildElement("info");
+    if (info)
+    {
+      if (info->Attribute("background") && strcmp(info->Attribute("background"), "true") == 0)
+        texture.useLarge = true;
+    }
+    /* END PLEX */
+
     control = new CGUIMultiImage(
       parentID, id, posX, posY, width, height, texture, timePerImage, fadeTime, randomized, loop, timeToPauseAtEnd);
     ((CGUIMultiImage *)control)->SetInfo(texturePath);

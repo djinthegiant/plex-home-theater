@@ -156,7 +156,7 @@ public:
    */
   bool Export(const CStdString &image, const CStdString &destination, bool overwrite);
   bool Export(const CStdString &image, const CStdString &destination); // TODO: BACKWARD COMPATIBILITY FOR MUSIC THUMBS
-private:
+protected: // PLEX
   // private construction, and no assignements; use the provided singleton methods
   CTextureCache();
   CTextureCache(const CTextureCache&);

@@ -110,10 +110,12 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
   if (url.IsProtocol("androidapp"))
     return new CGUIViewStateWindowPrograms(items);
 
+#ifndef __PLEX__
   if (windowId==WINDOW_MUSIC_NAV)
     return new CGUIViewStateWindowMusicNav(items);
+#endif
 
-  if (windowId==WINDOW_MUSIC_FILES)
+  if (windowId==WINDOW_MUSIC_FILES || windowId==WINDOW_MUSIC_NAV)
     return new CGUIViewStateWindowMusicSongs(items);
 
   if (windowId==WINDOW_MUSIC_PLAYLIST)
@@ -122,11 +124,13 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
   if (windowId==WINDOW_MUSIC_PLAYLIST_EDITOR)
     return new CGUIViewStateWindowMusicSongs(items);
 
-  if (windowId==WINDOW_VIDEO_FILES)
+  if (windowId==WINDOW_VIDEO_FILES || windowId==WINDOW_VIDEO_NAV)
     return new CGUIViewStateWindowVideoFiles(items);
 
+#ifndef __PLEX__
   if (windowId==WINDOW_VIDEO_NAV)
     return new CGUIViewStateWindowVideoNav(items);
+#endif
 
   if (windowId==WINDOW_VIDEO_PLAYLIST)
     return new CGUIViewStateWindowVideoPlaylist(items);
@@ -353,7 +357,11 @@ bool CGUIViewState::HideExtensions()
 
 bool CGUIViewState::HideParentDirItems()
 {
+#ifndef __PLEX__
   return !CSettings::Get().GetBool("filelists.showparentdiritems");
+#else
+  return true;
+#endif
 }
 
 bool CGUIViewState::DisableAddSourceButtons()
@@ -490,6 +498,7 @@ void CGUIViewState::SetSortOrder(SortOrder sortOrder)
 
 void CGUIViewState::LoadViewState(const std::string &path, int windowID)
 { // get our view state from the db
+#ifndef __PLEX__
   CViewDatabase db;
   if (db.Open())
   {
@@ -503,10 +512,12 @@ void CGUIViewState::LoadViewState(const std::string &path, int windowID)
     }
     db.Close();
   }
+#endif
 }
 
 void CGUIViewState::SaveViewToDb(const std::string &path, int windowID, CViewState *viewState)
 {
+#ifndef __PLEX__
   CViewDatabase db;
   if (db.Open())
   {
@@ -519,6 +530,7 @@ void CGUIViewState::SaveViewToDb(const std::string &path, int windowID, CViewSta
     if (viewState)
       CSettings::Get().Save();
   }
+#endif
 }
 
 void CGUIViewState::AddPlaylistOrder(const CFileItemList &items, LABEL_MASKS label_masks)

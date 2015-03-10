@@ -72,6 +72,12 @@
 #endif
 #include "FileItemListModification.h"
 
+/* PLEX */
+#include "plex/Client/PlexMediaServerClient.h"
+#include "plex/PlexApplication.h"
+#include "plex/GUI/GUIDialogPlexError.h"
+/* END PLEX */
+
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
 #define CONTROL_BTNSORTASC           4
@@ -90,7 +96,11 @@ CGUIMediaWindow::CGUIMediaWindow(int id, const char *xmlFile)
     : CGUIWindow(id, xmlFile)
 {
   m_loadType = KEEP_IN_MEMORY;
+#ifndef __PLEX__
   m_vecItems = new CFileItemList;
+#else
+  m_vecItems = CFileItemListPtr(new CFileItemList);
+#endif
   m_unfilteredItems = new CFileItemList;
   m_vecItems->SetPath("?");
   m_iLastControl = -1;
@@ -102,7 +112,9 @@ CGUIMediaWindow::CGUIMediaWindow(int id, const char *xmlFile)
 
 CGUIMediaWindow::~CGUIMediaWindow()
 {
+#ifndef __PLEX__
   delete m_vecItems;
+#endif
   delete m_unfilteredItems;
 }
 
@@ -360,6 +372,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       }
       else if (message.GetParam1()==GUI_MSG_UPDATE_SOURCES)
       { // State of the sources changed, so update our view
+#ifndef __PLEX__
         if ((m_vecItems->IsVirtualDirectoryRoot() ||
              m_vecItems->IsSourcesPath()) && IsActive())
         {
@@ -368,6 +381,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
           m_viewControl.SetSelectedItem(iItem);
         }
         return true;
+#endif
       }
       else if (message.GetParam1()==GUI_MSG_UPDATE && IsActive())
       {
@@ -454,8 +468,10 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       else if (message.GetParam2())
         viewMode = m_viewControl.GetNextViewMode((int)message.GetParam2());
 
+#ifndef __PLEX__
       if (m_guiState.get())
         m_guiState->SaveViewAsControl(viewMode);
+#endif
       UpdateButtons();
       return true;
     }
@@ -509,7 +525,11 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       }
       if (message.GetParam1() != WINDOW_INVALID)
       { // first time to this window - make sure we set the root path
+#ifndef __PLEX__
         m_startDirectory = returning ? dir : "";
+#else
+        m_startDirectory = dir;
+#endif
       }
     }
     break;
@@ -566,6 +586,7 @@ void CGUIMediaWindow::ClearFileItems()
 // \brief Sorts Fileitems based on the sort method and sort oder provided by guiViewState
 void CGUIMediaWindow::SortItems(CFileItemList &items)
 {
+#ifndef __PLEX__
   auto_ptr<CGUIViewState> guiState(CGUIViewState::GetViewState(GetID(), items));
 
   if (guiState.get())
@@ -595,6 +616,7 @@ void CGUIMediaWindow::SortItems(CFileItemList &items)
 
     items.Sort(sorting);
   }
+#endif
 }
 
 // \brief Formats item labels based on the formatting provided by guiViewState
@@ -678,6 +700,14 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
       m_history.RemoveParentPath();
   }
 
+  /* PLEX */
+  if (items.GetPlexDirectoryType() == PLEX_DIR_TYPE_MESSAGE)
+  {
+    CGUIDialogOK::ShowAndGetInput(items.GetProperty("header"), "", items.GetProperty("message"), "");
+    return false;
+  }
+  /* END PLEX */
+
   // update the view state to the currently fetched items
   // TODO we should remove the second call m_guiState.reset() in Update() and pass the right file item ref here
   m_guiState.reset(CGUIViewState::GetViewState(GetID(), items));
@@ -753,9 +783,45 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
     directory = RemoveParameterFromPath(directory, "filter");
 
   CFileItemList items;
+#ifndef __PLEX__
   if (!GetDirectory(directory, items))
+#else
+  CURL newUrl(strDirectory);
+  CURL currentURL(m_vecItems->GetPath());
+
+  if (newUrl.GetUrlWithoutOptions() != currentURL.GetUrlWithoutOptions())
   {
+    ClearFileItems();
+    m_vecItems->ClearProperties();
+  }
+
+  if (!GetDirectory(strDirectory, items) || (items.m_displayMessage && items.Size() == 0))
+  {
+    if (items.m_displayMessage)
+      CGUIDialogOK::ShowAndGetInput(items.m_displayMessageTitle, items.m_displayMessageContents, "", "");
+
+    if (items.m_wasListingCancelled == true)
+    {
+      // Fast path.
+      if (strDirectory != directory)
+        m_history.RemoveParentPath();
+
+      return true;
+    }
+
+    if ((items.m_wasListingCancelled == false) && (items.GetPlexDirectoryType() != PLEX_DIR_TYPE_MESSAGE))
+    {
+      CLog::Log(LOGERROR, "CGUIMediaWindow::GetDirectory(%s) failed", url.GetRedacted().c_str());
+      CGUIDialogPlexError::ShowError("GetDirectory Failed for :", strDirectory,"","");
+    }
+    else
+    {
+      CLog::Log(LOGINFO, "CGUIMediaWindow::GetDirectory(%s) was canceled", url.GetRedacted().c_str());
+    }
+#endif
+#ifndef __PLEX__
     CLog::Log(LOGERROR,"CGUIMediaWindow::GetDirectory(%s) failed", url.GetRedacted().c_str());
+#endif
     // Try to return to the previous directory, if not the same
     // else fallback to root
     if (URIUtils::PathEquals(strDirectory, strCurrentDirectory) || !Update(m_history.RemoveParentPath()))
@@ -766,11 +832,24 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
     return false;
   }
 
+  /* PLEX */
+  CheckPlexFilters(items);
+  /* END PLEX */
+
   if (items.GetLabel().empty())
     items.SetLabel(CUtil::GetTitleFromPath(items.GetPath(), true));
   
   ClearFileItems();
+#ifdef __PLEX__
+  // Copy resets the m_vecItems properties and we dont want this
+  m_vecItems->Assign(items);
+#else
   m_vecItems->Copy(items);
+#endif
+  /* PLEX */
+  CLog::Log(LOGDEBUG, "CGUIMediaWindow::Update viewMode = %lld %s", items.GetProperty("viewMode").asInteger(), items.GetPath().c_str());
+  m_vecItems->SetProperty("viewMode", items.GetProperty("viewMode"));
+  /* END PLEX */
 
   // check the given path for filter data
   UpdateFilterPath(strDirectory, items, updateFilterPath);
@@ -802,6 +881,7 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
     showLabel = 1026;
   if (showLabel && (m_vecItems->Size() == 0 || !m_guiState->DisableAddSourceButtons())) // add 'add source button'
   {
+#ifndef __PLEX__
     std::string strLabel = g_localizeStrings.Get(showLabel);
     CFileItemPtr pItem(new CFileItem(strLabel));
     pItem->SetPath("add");
@@ -811,6 +891,7 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
     pItem->m_bIsFolder = true;
     pItem->SetSpecialSort(SortSpecialOnBottom);
     m_vecItems->Add(pItem);
+#endif
   }
   m_iLastControl = GetFocusedControlID();
 
@@ -1249,6 +1330,7 @@ void CGUIMediaWindow::SetHistoryForPath(const std::string& strDirectory)
   SetupShares();
   if (!strDirectory.empty())
   {
+#ifndef __PLEX__
     // Build the directory history for default path
     std::string strPath, strParentPath;
     strPath = strDirectory;
@@ -1298,6 +1380,9 @@ void CGUIMediaWindow::SetHistoryForPath(const std::string& strDirectory)
       strPath = strParentPath;
       URIUtils::RemoveSlashAtEnd(strPath);
     }
+#else
+    m_history.AddPath(strDirectory);
+#endif
   }
   else
     m_history.ClearPathHistory();
@@ -1436,6 +1521,7 @@ void CGUIMediaWindow::UpdateFileList()
   }
 }
 
+#ifndef __PLEX__
 void CGUIMediaWindow::OnDeleteItem(int iItem)
 {
   if ( iItem < 0 || iItem >= m_vecItems->Size()) return;
@@ -1453,6 +1539,20 @@ void CGUIMediaWindow::OnDeleteItem(int iItem)
   Refresh(true);
   m_viewControl.SetSelectedItem(iItem);
 }
+#else // PLEX version of the delete dialog
+void CGUIMediaWindow::OnDeleteItem(int iItem)
+{
+  if ( iItem < 0 || iItem >= m_vecItems->Size()) return;
+  CFileItemPtr item = m_vecItems->Get(iItem);
+
+  // Confirm.
+  if (!CGUIDialogYesNo::ShowAndGetInput(122, 125, 0, 0))
+    return;
+  
+  g_plexApplication.mediaServerClient->deleteItem(item);
+
+}
+#endif
 
 void CGUIMediaWindow::OnRenameItem(int iItem)
 {
@@ -1561,6 +1661,7 @@ void CGUIMediaWindow::GetContextButtons(int itemNumber, CContextButtons &buttons
     buttons.Add((CONTEXT_BUTTON)i, item->GetProperty(label).asString());
   }
 
+#ifndef __PLEX__
   if (item->GetProperty("pluginreplacecontextitems").asBoolean())
     return;
 
@@ -1578,12 +1679,14 @@ void CGUIMediaWindow::GetContextButtons(int itemNumber, CContextButtons &buttons
   if (item->IsFileFolder(EFILEFOLDER_MASK_ONBROWSE))
     buttons.Add(CONTEXT_BUTTON_BROWSE_INTO, 37015);
 
+#endif
 }
 
 bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
   switch (button)
   {
+#ifndef __PLEX__
   case CONTEXT_BUTTON_MARK_WATCHED:
   case CONTEXT_BUTTON_MARK_UNWATCHED:
     {
@@ -1598,6 +1701,7 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       XFILE::CFavouritesDirectory::AddOrRemove(item.get(), GetID());
       return true;
     }
+#endif
   case CONTEXT_BUTTON_PLUGIN_SETTINGS:
     {
       CFileItemPtr item = m_vecItems->Get(itemNumber);
@@ -1761,7 +1865,9 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
       m_strFilterPath = items.GetPath();
   }
   
+#ifndef __PLEX__
   GetGroupedItems(*m_vecItems);
+#endif
   FormatAndSort(*m_vecItems);
 
   // get the "filter" option
@@ -1779,12 +1885,14 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
     // the filtered item to be able to keep the applied filters
     if (pItem->m_bIsFolder)
     {
+#ifndef __PLEX__
       CURL itemUrl(pItem->GetPath());
       if (!filterOption.empty())
         itemUrl.SetOption("filter", filterOption);
       else
         itemUrl.RemoveOption("filter");
       pItem->SetPath(itemUrl.Get());
+#endif
     }
   }
 
@@ -1809,6 +1917,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
   // The idea here is to ensure we have something to focus if our file list
   // is empty.  As such, this check MUST be last and ignore the hide parent
   // fileitems settings.
+#ifndef __PLEX__
   if (m_vecItems->IsEmpty())
   {
     CFileItemPtr pItem(new CFileItem(".."));
@@ -1817,6 +1926,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
     pItem->m_bIsShareOrDrive = false;
     m_vecItems->AddFront(pItem, 0);
   }
+#endif
 
   // and update our view control + buttons
   m_viewControl.SetItems(*m_vecItems);

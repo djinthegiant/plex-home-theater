@@ -104,6 +104,8 @@
 #include "utils/StringUtils.h"
 #include "network/WakeOnAccess.h"
 
+#include "FileSystem/PlexFile.h"
+
 using namespace XFILE;
 
 CFileFactory::CFileFactory()
@@ -166,6 +168,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
     ||  url.IsProtocol("ftps")
     ||  url.IsProtocol("rss")) return new CCurlFile();
     else if (url.IsProtocol("http") ||  url.IsProtocol("https")) return new CHTTPFile();
+    else if (url.IsProtocol("plexserver")) return new CPlexFile(); // PLEX
     else if (url.IsProtocol("dav") || url.IsProtocol("davs")) return new CDAVFile();
 #ifdef HAS_FILESYSTEM_SFTP
     else if (url.IsProtocol("sftp") || url.IsProtocol("ssh")) return new CSFTPFile();

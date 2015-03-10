@@ -211,6 +211,10 @@ std::string CGUIListItem::GetOverlayImage() const
     return "OverlayWatched.png";
   case ICON_OVERLAY_HD:
     return "OverlayHD.png";
+  /* PLEX */
+  case ICON_OVERLAY_IN_PROGRESS:
+    return "OverlayInProgress.png";
+  /* END PLEX */
   default:
     return "";
   }

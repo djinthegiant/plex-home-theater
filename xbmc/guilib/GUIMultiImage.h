@@ -62,6 +62,19 @@ public:
   void SetInfo(const CGUIInfoLabel &info);
   void SetAspectRatio(const CAspectRatio &ratio);
 
+  /* PLEX */
+  std::string GetCurrentPlexLabel()
+  {
+    if (m_files.size() < 1)
+      return "";
+
+    std::string path = m_files[m_currentImage];
+    if (m_plexLabels.find(path) != m_plexLabels.end())
+      return m_plexLabels[m_files[m_currentImage]];
+    return "";
+  }
+  /* END PLEX */
+
 protected:
   void LoadDirectory();
   void OnDirectoryLoaded();
@@ -98,5 +111,10 @@ protected:
   CCriticalSection m_section;
   DIRECTORY_STATUS m_directoryStatus;
   unsigned int m_jobID;
+  
+  /* PLEX */
+  std::vector<std::string> m_plexFiles;
+  std::map<std::string, std::string> m_plexLabels;
+  /* END PLEX */
 };
 #endif

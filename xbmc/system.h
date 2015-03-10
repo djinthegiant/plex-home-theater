@@ -275,5 +275,5 @@
 #if defined(HAS_TOUCH_SKIN) && defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_IOS_ATV2)
 #define DEFAULT_SKIN          "skin.re-touched"
 #else
-#define DEFAULT_SKIN          "skin.confluence"
+#define DEFAULT_SKIN          "skin.plex" // PLEX
 #endif

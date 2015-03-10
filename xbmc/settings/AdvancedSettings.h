@@ -409,6 +409,12 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
 
     CStdString m_userAgent;
 
+    /* PLEX */
+    bool m_bEnableGDM;
+    bool m_bHideFanouts;
+    bool m_bForceJpegImageFormat;
+    bool m_bUseMatroskaTranscodes;
+    /* END PLEX */
   private:
     void setExtraLogLevel(const std::vector<CVariant> &components);
 };

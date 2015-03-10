@@ -18,6 +18,8 @@
  *
  */
 
+#ifndef __PLEX__
+
 #include "MusicThumbLoader.h"
 #include "FileItem.h"
 #include "TextureDatabase.h"
@@ -246,3 +248,5 @@ bool CMusicThumbLoader::GetEmbeddedThumb(const std::string &path, EmbeddedArt &a
 
   return !art.empty();
 }
+
+#endif

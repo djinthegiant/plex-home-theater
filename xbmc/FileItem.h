@@ -36,6 +36,18 @@
 #include <vector>
 #include "boost/shared_ptr.hpp"
 
+/* PLEX */
+#include <boost/enable_shared_from_this.hpp>
+
+class CFileItem;
+typedef boost::shared_ptr<CFileItem> CFileItemPtr;
+
+class CFileItemList;
+typedef boost::shared_ptr<CFileItemList> CFileItemListPtr;
+
+#include "plex/PlexTypes.h"
+/* END PLEX */
+
 namespace MUSIC_INFO
 {
   class CMusicInfoTag;
@@ -83,7 +95,7 @@ enum EFileFolderType {
   \sa CFileItemList
   */
 class CFileItem :
-  public CGUIListItem, public IArchivable, public ISerializable, public ISortable
+  public CGUIListItem, public IArchivable, public ISerializable, public ISortable, public boost::enable_shared_from_this<CFileItem> //PLEX
 {
 public:
   CFileItem(void);
@@ -461,6 +473,33 @@ public:
   int m_iHasLock; // 0 - no lock 1 - lock, but unlocked 2 - locked
   int m_iBadPwdCount;
 
+  /* PLEX */
+  std::vector<CFileItemPtr> m_contextItems;
+
+  /* Video->Media->mediaParts->mediaPartStreams */
+  std::vector<CFileItemPtr> m_mediaItems;
+  std::vector<CFileItemPtr> m_mediaParts;
+  std::vector<CFileItemPtr> m_mediaPartStreams;
+
+  CFileItemPtr m_selectedMediaPart;
+
+  bool IsPlexMediaServer() const;
+  bool IsRemoteSharedPlexMediaServerLibrary() const;
+  bool IsRemotePlexMediaServerLibrary() const;
+  virtual bool IsPlexMediaServerMusic() const;
+  bool IsPlexMediaServerLibrary() const;
+  bool IsPlexWebkit() const;
+  bool IsHomeMovie() const;
+
+  void SetEpisodeData(int total, int watchedCount);
+
+  void MarkAsWatched(bool sendMessage=false);
+  void MarkAsUnWatched(bool sendMessage=false);
+
+  EPlexDirectoryType GetPlexDirectoryType() const { return m_plexDirectoryType; }
+  void SetPlexDirectoryType(EPlexDirectoryType dirType) { m_plexDirectoryType = dirType; }
+  /* END PLEX */
+
 private:
   /*! \brief initialize all members of this class (not CGUIListItem members) to default values.
    Called from constructors, and from Reset()
@@ -484,6 +523,11 @@ private:
   PVR::CPVRTimerInfoTag * m_pvrTimerInfoTag;
   CPictureInfoTag* m_pictureInfoTag;
   bool m_bIsAlbum;
+
+  /* PLEX */
+protected:
+  EPlexDirectoryType m_plexDirectoryType;
+  /* END PLEX */
 };
 
 /*!
@@ -654,6 +698,17 @@ public:
   const std::string &GetContent() const { return m_content; };
 
   void ClearSortState();
+
+  /* PLEX */
+  int IndexOfItem(const std::string &path);
+  void Insert(int iIndex, CFileItemPtr pItem);
+  virtual bool IsPlexMediaServerMusic() const;
+  bool m_wasListingCancelled;
+  bool m_displayMessage;
+  std::string m_displayMessageTitle;
+  std::string m_displayMessageContents;
+  /* END PLEX */
+
 private:
   void Sort(FILEITEMLISTCOMPARISONFUNC func);
   void FillSortFields(FILEITEMFILLFUNC func);

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <section id="services">
+    <category id="plex" label="10" help="10">
+      <group id="1">
+        <setting id="system.uuid" type="string" label="99999" help="99999">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+      </group>
+      <group id="2">
+        <setting id="myplex.uid" type="string" label="99999" help="99999">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="myplex.token" type="string" label="99999" help="99999">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="myplex.status" type="string" label="15000" help="15000">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="plexmediaserver.manualaddress" type="boolean" label="40211" help="40211">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="services.plexplayer" type="boolean" label="44300" help="44300">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>

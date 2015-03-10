@@ -28,6 +28,8 @@
 #include "dialogs/GUIDialogContextMenu.h"
 #include "playlists/SmartPlayList.h"
 
+#include "FileItem.h"
+
 class CFileItemList;
 
 // base class for all media windows
@@ -48,6 +50,10 @@ public:
   virtual bool HasListItems() const { return true; };
   virtual CFileItemPtr GetCurrentListItem(int offset = 0);
   const CGUIViewState *GetViewState() const;
+
+  /* PLEX */
+  virtual void CheckPlexFilters(CFileItemList& list) {};
+  /* END PLEX */
 
   virtual bool CanFilterAdvanced() { return m_canFilterAdvanced; }
   virtual bool IsFiltered();
@@ -161,7 +167,7 @@ protected:
   CGUIViewControl m_viewControl;
 
   // current path and history
-  CFileItemList* m_vecItems;
+  CFileItemListPtr m_vecItems;
   CFileItemList* m_unfilteredItems;        ///< \brief items prior to filtering using FilterItems()
   CDirectoryHistory m_history;
   std::auto_ptr<CGUIViewState> m_guiState;

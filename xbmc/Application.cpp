@@ -336,6 +336,37 @@
 #include "input/SDLJoystick.h"
 #endif
 
+/* PLEX */
+#include "plex/PlexApplication.h"
+#include "plex/Client/PlexMediaServerClient.h"
+#include "plex/Client/PlexServerManager.h"
+#include "plex/GUI/GUIDialogRating.h"
+#include "plex/GUI/GUIWindowSharedContent.h"
+#include "plex/GUI/GUIDialogTimer.h"
+#include "plex/GUI/GUIWindowNowPlaying.h"
+#include "plex/GUI/GUIWindowPlexSearch.h"
+#include "plex/GUI/GUIPlexMediaWindow.h"
+#include "plex/GUI/GUIDialogFilterSort.h"
+#include "plex/GUI/GUIWindowMyPlex.h"
+#include "plex/GUI/GUIDialogPlexPluginSettings.h"
+#include "plex/GUI/GUIWindowPlexPreplayVideo.h"
+#include "plex/GUI/GUIWindowPlexMyChannels.h"
+#include "plex/PlexMediaDecisionEngine.h"
+#include "plex/GUI/GUIDialogPlexSettingsMenu.h"
+#include "plex/GUI/GUIDialogPlexAudioSubtitlePicker.h"
+#include "plex/GUI/GUIWindowPlexStartupHelper.h"
+#include "plex/GUI/GUIPlexScreenSaverPhoto.h"
+#include "plex/Client/PlexTranscoderClient.h"
+#include "plex/GUI/GUIWindowPlexPlayQueue.h"
+#include "plex/Playlists/GUIDialogPlexPlayQueue.h"
+#include "plex/GUI/GUIDialogPlexError.h"
+#include "plex/GUI/GUIDialogPlexGlobalCacher.h"
+#include "plex/GUI/GUIDialogPlexVideoOSD.h"
+#include "plex/GUI/GUIWindowPlexPlaylistSelection.h"
+#include "plex/GUI/GUIDialogPlayListSelection.h"
+#include "plex/GUI/GUIDialogPlexUserSelect.h"
+/* END PLEX */
+
 #if defined(TARGET_ANDROID)
 #include "android/activity/XBMCApp.h"
 #include "android/activity/AndroidFeatures.h"
@@ -793,6 +824,12 @@ bool CApplication::Create()
   }
   CSettings::Get().SetLoaded();
 
+
+  /* PLEX */
+  CDirectory::Create("special://masterprofile/plexprofiles");
+  CDirectory::Create("special://plexprofile");
+  /* END PLEX */
+
   CLog::Log(LOGINFO, "creating subdirectories");
   CLog::Log(LOGINFO, "userdata folder: %s", CProfilesManager::Get().GetProfileUserDataFolder().c_str());
   CLog::Log(LOGINFO, "recording folder: %s", CSettings::Get().GetString("audiocds.recordingpath").c_str());
@@ -880,6 +917,10 @@ bool CApplication::Create()
   CUtil::InitRandomSeed();
 
   g_mediaManager.Initialize();
+
+  /* PLEX */
+  g_plexApplication.Start();
+  /* END PLEX */
 
   m_lastFrameTime = XbmcThreads::SystemClockMillis();
   m_lastRenderTime = m_lastFrameTime;
@@ -1343,10 +1384,14 @@ bool CApplication::Initialize()
 
     g_windowManager.Add(new CGUIWindowHome);
     g_windowManager.Add(new CGUIWindowPrograms);
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIWindowPictures);
     g_windowManager.Add(new CGUIWindowFileManager);
+#endif
     g_windowManager.Add(new CGUIWindowSettings);
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIWindowSystemInfo);
+#endif
 #ifdef HAS_GL
     g_windowManager.Add(new CGUIWindowTestPatternGL);
 #endif
@@ -1355,12 +1400,18 @@ bool CApplication::Initialize()
 #endif
     g_windowManager.Add(new CGUIWindowSettingsScreenCalibration);
     g_windowManager.Add(new CGUIWindowSettingsCategory);
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIWindowVideoNav);
     g_windowManager.Add(new CGUIWindowVideoPlaylist);
+#else
+    g_windowManager.Add(new CGUIDialogPlexSettingsMenu);
+#endif
     g_windowManager.Add(new CGUIWindowLoginScreen);
     g_windowManager.Add(new CGUIWindowSettingsProfile);
     g_windowManager.Add(new CGUIWindow(WINDOW_SKIN_SETTINGS, "SkinSettings.xml"));
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIWindowAddonBrowser);
+#endif
     g_windowManager.Add(new CGUIWindowScreensaverDim);
     g_windowManager.Add(new CGUIWindowDebugInfo);
     g_windowManager.Add(new CGUIWindowPointer);
@@ -1375,9 +1426,13 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIDialogKaiToast);
     g_windowManager.Add(new CGUIDialogNumeric);
     g_windowManager.Add(new CGUIDialogGamepad);
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIDialogButtonMenu);
+#endif
     g_windowManager.Add(new CGUIDialogMuteBug);
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIDialogPlayerControls);
+#endif
 #ifdef HAS_KARAOKE
     g_windowManager.Add(new CGUIDialogKaraokeSongSelectorSmall);
     g_windowManager.Add(new CGUIDialogKaraokeSongSelectorLarge);
@@ -1415,13 +1470,15 @@ bool CApplication::Initialize()
     
     g_windowManager.Add(new CGUIDialogMediaFilter);
     g_windowManager.Add(new CGUIDialogSubtitles);
-
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIWindowMusicPlayList);
     g_windowManager.Add(new CGUIWindowMusicSongs);
     g_windowManager.Add(new CGUIWindowMusicNav);
     g_windowManager.Add(new CGUIWindowMusicPlaylistEditor);
+#endif
 
     /* Load PVR related Windows and Dialogs */
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIDialogTeletext);
     g_windowManager.Add(new CGUIWindowPVRChannels(false));
     g_windowManager.Add(new CGUIWindowPVRRecordings(false));
@@ -1443,6 +1500,7 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIDialogPVRGuideOSD);
     g_windowManager.Add(new CGUIDialogPVRDirectorOSD);
     g_windowManager.Add(new CGUIDialogPVRCutterOSD);
+#endif
 
     g_windowManager.Add(new CGUIDialogSelect);
     g_windowManager.Add(new CGUIDialogMusicInfo);
@@ -1457,12 +1515,41 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIWindowKaraokeLyrics);
 #endif
 
+#ifndef __PLEX__
     g_windowManager.Add(new CGUIDialogVideoOSD);
+#endif
     g_windowManager.Add(new CGUIDialogMusicOverlay);
     g_windowManager.Add(new CGUIDialogVideoOverlay);
     g_windowManager.Add(new CGUIWindowScreensaver);
     g_windowManager.Add(new CGUIWindowWeather);
     g_windowManager.Add(new CGUIWindowStartup);
+
+    /* PLEX */
+    g_windowManager.Add(new CGUIWindowSharedContent);
+    g_windowManager.Add(new CGUIWindowNowPlaying);         // window id = 50
+    g_windowManager.Add(new CGUIWindowPlexSearch);         // window id = 51
+    g_windowManager.Add(new CGUIDialogRating);                 // window id = 200
+    g_windowManager.Add(new CGUIDialogTimer);                 // window id = 201
+    g_windowManager.Add(new CGUIDialogFilterSort);
+    g_windowManager.Add(new CGUIPlexMediaWindow);
+    g_windowManager.Add(new CGUIPlexMusicWindow);
+    g_windowManager.Add(new CGUIWindowPlexPreplayVideo);
+    g_windowManager.Add(new CGUIWindowMyPlex);
+    g_windowManager.Add(new CGUIDialogPlexPluginSettings);
+    g_windowManager.Add(new CGUIWindowPlexMyChannels);
+    g_windowManager.Add(new CGUIDialogPlexAudioPicker);
+    g_windowManager.Add(new CGUIDialogPlexSubtitlePicker);
+    g_windowManager.Add(new CGUIWindowPlexStartupHelper);
+    g_windowManager.Add(new CGUIPlexPictureWindow);
+    g_windowManager.Add(new CGUIPlexScreenSaverPhoto);
+    g_windowManager.Add(new CGUIWindowPlexPlayQueue);
+    g_windowManager.Add(new CGUIDialogPlexPlayQueue);
+    g_windowManager.Add(new CGUIDialogPlexGlobalCacher);
+    g_windowManager.Add(new CGUIDialogPlexVideoOSD);
+    g_windowManager.Add(new CGUIWindowPlexPlaylistSelection);
+    g_windowManager.Add(new CGUIDialogPlaylistSelection);
+    g_windowManager.Add(new CGUIDialogPlexUserSelect);
+    /* END PLEX */
 
     /* window id's 3000 - 3100 are reserved for python */
 
@@ -1477,12 +1564,14 @@ bool CApplication::Initialize()
     if (g_advancedSettings.m_splashImage)
       SAFE_DELETE(m_splash);
 
+#ifndef __PLEX__
     if (CSettings::Get().GetBool("masterlock.startuplock") &&
         CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
        !CProfilesManager::Get().GetMasterProfile().getLockCode().empty())
     {
        g_passwordManager.CheckStartUpLock();
     }
+#endif
 
     // check if we should use the login screen
     if (CProfilesManager::Get().UsingLoginScreen())
@@ -3308,6 +3397,22 @@ bool CApplication::Cleanup()
 {
   try
   {
+    /* PLEX */
+    g_windowManager.Delete(WINDOW_PLEX_MYCHANNELS);
+    g_windowManager.Delete(WINDOW_SHARED_CONTENT);
+    g_windowManager.Delete(WINDOW_NOW_PLAYING);
+    g_windowManager.Delete(WINDOW_PLEX_SEARCH);
+    g_windowManager.Delete(WINDOW_DIALOG_TIMER);
+    g_windowManager.Delete(WINDOW_DIALOG_RATING);
+    g_windowManager.Delete(WINDOW_DIALOG_FILTER_SORT);
+    g_windowManager.Delete(WINDOW_DIALOG_PLEX_AUDIO_PICKER);
+    g_windowManager.Delete(WINDOW_DIALOG_PLEX_SUBTITLE_PICKER);
+    g_windowManager.Delete(WINDOW_PLEX_STARTUP_HELPER);
+    g_windowManager.Delete(WINDOW_PLEX_PLAY_QUEUE);
+    g_windowManager.Delete(WINDOW_DIALOG_PLEX_PLAYQUEUE);
+    g_windowManager.Delete(WINDOW_PLEX_PLAYLIST_SELECTION);
+    /* END PLEX */
+
     g_windowManager.Delete(WINDOW_MUSIC_PLAYLIST);
     g_windowManager.Delete(WINDOW_MUSIC_PLAYLIST_EDITOR);
     g_windowManager.Delete(WINDOW_MUSIC_FILES);
@@ -3534,6 +3639,11 @@ void CApplication::Stop(int exitCode)
     StopPVRManager();
     StopServices();
     //Sleep(5000);
+
+    /* PLEX */
+    g_plexApplication.preShutdown();
+    g_plexApplication.Shutdown();
+    /* END PLEX */
 
 #if HAS_FILESYTEM_DAAP
     CLog::Log(LOGNOTICE, "stop daap clients");
@@ -3833,8 +3943,10 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
   return PLAYBACK_FAIL;
 }
 
-PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
+PlayBackRet CApplication::PlayFile(const CFileItem& item_, bool bRestart)
 {
+  CFileItem item(item_);
+
   // Ensure the MIME type has been retrieved for http:// and shout:// streams
   if (item.GetMimeType().empty())
     const_cast<CFileItem&>(item).FillInMimeType();
@@ -3905,6 +4017,60 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
     return PLAYBACK_FAIL;
   }
 #endif
+
+  /* PLEX */
+  if (item.IsPlexMediaServer())
+  {
+    CFileItem newItem;
+    CPlexMediaDecisionEngine plexMDE;
+    if (plexMDE.resolveItem(item, newItem))
+    {
+      // Matroska seeking check
+      CPlexTranscoderClient::PlexTranscodeMode mode = CPlexTranscoderClient::getItemTranscodeMode(item);
+
+      if (mode == CPlexTranscoderClient::PLEX_TRANSCODE_MODE_MKV)
+      {
+        if (item.HasProperty("viewOffsetSeek"))
+        {
+          // for Matroska seeking, redefine viewOffset from seeeking value and update item offset
+          int64_t offsetSeek = item.GetProperty("viewOffsetSeek").asInteger();
+
+          newItem.SetProperty("viewOffset", offsetSeek);
+          newItem.m_lStartOffset = item.m_lStartOffset = ((offsetSeek / 10) - newItem.m_lEndOffset) * 0.75;
+        }
+        else if (mode == CPlexTranscoderClient::PLEX_TRANSCODE_MODE_HLS && newItem.m_lStartOffset == STARTOFFSET_RESUME)
+        {
+          CPlexServerPtr server = g_plexApplication.serverManager->FindByUUID(newItem.GetProperty("plexserver").asString());
+          
+          CStdString transcodeURL = CPlexTranscoderClient::GetTranscodeURL(server, newItem).Get();
+          newItem.SetPath(transcodeURL);
+        }
+      }
+
+      item = newItem;
+
+      if (!m_itemCurrentFile->IsStack())
+        *m_itemCurrentFile = newItem;
+    }
+    else
+      return PLAYBACK_FAIL;
+
+    /* let's set some options if we need to */
+    CFileItemPtr mediaPart = CPlexMediaDecisionEngine::getMediaPart(newItem);
+    if (mediaPart)
+    {
+      CFileItemPtr videoStream = PlexUtils::GetSelectedStreamOfType(mediaPart, PLEX_STREAM_VIDEO);
+      if (videoStream)
+      {
+        if (videoStream->GetProperty("scanType").asString() == "interlaced")
+        {
+          CLog::Log(LOGDEBUG, "CApplication::PlayFile interlaced video found, switching player options to de-interlacing");
+          CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode = VS_DEINTERLACEMODE_FORCE;
+        }
+      }
+    }
+  }
+  /* END PLEX */
 
   // if we have a stacked set of files, we need to setup our stack routines for
   // "seamless" seeking and total time of the movie etc.

@@ -103,6 +103,11 @@ namespace XFILE
       /* static function that will get cookies stored by CURL in RFC 2109 format */
       static bool GetCookies(const CURL &url, std::string &cookies);
 
+      /* PLEX */
+      long GetLastHTTPResponseCode() const { return m_httpresponse; }
+      bool DidCancel() const { return m_state->m_cancelled; }
+      /* END PLEX */
+
       class CReadState
       {
       public:

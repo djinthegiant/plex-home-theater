@@ -331,6 +331,12 @@ void CURL::SetFileName(const std::string& strFileName)
 {
   m_strFileName = strFileName;
 
+  /* PLEX */
+  /* Plex media server hates double // */
+  if (m_strProtocol == "plexserver" && m_strFileName.find_first_of("/") == 0)
+    m_strFileName = m_strFileName.substr(1);
+  /* END PLEX */
+
   int slash = m_strFileName.find_last_of(GetDirectorySeparator());
   int period = m_strFileName.find_last_of('.');
   if(period != -1 && (slash == -1 || period > slash))
@@ -459,7 +465,8 @@ const std::string CURL::GetTranslatedProtocol() const
    || IsProtocol("daap")
    || IsProtocol("dav")
    || IsProtocol("tuxbox")
-   || IsProtocol("rss"))
+   || IsProtocol("rss")
+   || IsProtocol("plexserver")) // PLEX
     return "http";
 
   if (IsProtocol("davs"))
@@ -818,6 +825,27 @@ void CURL::RemoveOption(const std::string &key)
   m_options.RemoveOption(key);
   SetOptions(m_options.GetOptionsString(true));
 }
+
+/* PLEX */
+std::string CURL::GetUrlWithoutOptions() const
+{
+  CURL t(Get());
+  t.SetProtocolOptions("");
+  t.SetOptions("");
+
+  CLog::Log(LOGDEBUG, "CURL::GetUrlWithoutOptions %s > %s", Get().c_str(), t.Get().c_str());
+
+  return t.Get();
+}
+
+void CURL::AddOptions(const CUrlOptions &options)
+{
+  for (CUrlOptions::UrlOptions::const_iterator option = options.GetOptions().begin(); option != options.GetOptions().end(); option++)
+    m_options.AddOption(option->first, option->second.asString());
+
+  SetOptions(m_options.GetOptionsString(true));
+}
+/* END PLEX */
 
 void CURL::GetProtocolOptions(std::map<std::string, std::string> &options) const
 {

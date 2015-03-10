@@ -36,6 +36,10 @@ class CGUIListItemLayout;
 class CArchive;
 class CVariant;
 
+/* PLEX */
+#include "PlexTypes.h"
+/* END PLEX */
+
 /*!
  \ingroup controls
  \brief
@@ -51,6 +55,9 @@ public:
                         ICON_OVERLAY_LOCKED,
                         ICON_OVERLAY_UNWATCHED,
                         ICON_OVERLAY_WATCHED,
+                        /* PLEX */
+                        ICON_OVERLAY_IN_PROGRESS,
+                        /* END PLEX */
                         ICON_OVERLAY_HD};
 
   CGUIListItem(void);
@@ -170,6 +177,9 @@ public:
 
   CVariant   GetProperty(const std::string &strKey) const;
 
+  /* PLEX */
+  int GetOverlayImageID() const { return m_overlayIcon; }
+  /* END PLEX */
 protected:
   std::string m_strLabel2;     // text of column2
   std::string m_strIcon;      // filename of icon
@@ -179,12 +189,14 @@ protected:
   CGUIListItemLayout *m_focusedLayout;
   bool m_bSelected;     // item is selected or not
 
+public:
   struct icompare
   {
     bool operator()(const std::string &s1, const std::string &s2) const;
   };
 
   typedef std::map<std::string, CVariant, icompare> PropertyMap;
+protected:
   PropertyMap m_mapProperties;
 private:
   std::wstring m_sortLabel;    // text for sorting. Need to be UTF16 for proper sorting
@@ -192,6 +204,11 @@ private:
 
   ArtMap m_art;
   ArtMap m_artFallbacks;
+  
+  /* PLEX */
+public:
+  const PropertyMap& GetAllProperties() const { return m_mapProperties; }
+  /* END PLEX */
 };
 #endif
 

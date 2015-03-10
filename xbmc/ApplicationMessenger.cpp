@@ -73,6 +73,14 @@
   #include "xbmc/android/activity/XBMCApp.h"
 #endif
 
+/* PLEX */
+#include "PlexApplication.h"
+#include "Playlists/PlexPlayQueueManager.h"
+#include "Client/PlexServerCacheDatabase.h"
+#include "Utility/PlexBusyIndicator.h"
+#include "Utility/PlexJobs.h"
+/* END PLEX */
+
 using namespace PVR;
 using namespace std;
 using namespace MUSIC_INFO;
@@ -864,6 +872,33 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
 #endif
       break;
     }
+
+    /* PLEX */
+    case TMSG_MEDIA_RESTART_WITH_NEW_PLAYER:
+      {
+        //MERGE: g_application.RestartWithNewPlayer((CGUIDialogCache* )pMsg->lpVoid, pMsg->strParam);
+      }
+      break;
+    case TMSG_PLEX_PLAY_QUEUE_UPDATED:
+    {
+      g_plexApplication.playQueueManager->playQueueUpdated((ePlexMediaType)pMsg->param1,
+                                                           (bool)pMsg->param2);
+      break;
+    }
+    case TMSG_PLEX_SAVE_SERVER_CACHE:
+    {
+      if (!g_application.IsPlayingFullScreenVideo())
+      {
+        CPlexServerCacheDatabase db;
+        if (db.Open())
+        {
+          db.cacheServers();
+          db.Close();
+        }
+      }
+    }
+    /* END PLEX */
+
   }
 }
 
@@ -1412,3 +1447,30 @@ void CApplicationMessenger::CECStandby()
   ThreadMessage tMsg = {TMSG_CECSTANDBY};
   SendMessage(tMsg, false);
 }
+
+/* PLEX */
+void CApplicationMessenger::PlexUpdatePlayQueue(ePlexMediaType type, bool startPlaying)
+{
+  ThreadMessage tMsg = {TMSG_PLEX_PLAY_QUEUE_UPDATED};
+  tMsg.param1 = (int)type;
+  tMsg.param2 = (int)startPlaying;
+  SendMessage(tMsg, false);
+}
+
+void CApplicationMessenger::PictureSlideShow(string pathname, bool addTBN, const string& index, bool shuffle)
+{
+  ThreadMessage tMsg = {TMSG_PICTURE_SLIDESHOW};
+  tMsg.strParam = pathname;
+  tMsg.param1 = addTBN ? 1 : 0;
+  tMsg.param2 = shuffle ? 1 : 0;
+  tMsg.params.push_back(index);
+  SendMessage(tMsg);
+}
+
+void CApplicationMessenger::PlexSaveServerCache()
+{
+  ThreadMessage tMsg = {TMSG_PLEX_SAVE_SERVER_CACHE};
+  SendMessage(tMsg, false);
+}
+
+/* END PLEX */

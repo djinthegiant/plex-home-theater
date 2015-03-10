@@ -18,6 +18,8 @@
  *
  */
 
+#ifndef __PLEX__
+
 #include "GUIWindowStartup.h"
 #include "guilib/Key.h"
 #include "guilib/WindowIDs.h"
@@ -37,3 +39,5 @@ bool CGUIWindowStartup::OnAction(const CAction &action)
     return true;
   return CGUIWindow::OnAction(action);
 }
+
+#endif

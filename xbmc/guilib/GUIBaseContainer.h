@@ -93,6 +93,10 @@ public:
   void ResetAutoScrolling();
   void UpdateAutoScrolling(unsigned int currentTime);
 
+  /* PLEX */
+  std::vector<CGUIListItemPtr>& GetItems() { return m_items; }
+  /* END PLEX */
+
 #ifdef _DEBUG
   virtual void DumpTextureUse();
 #endif

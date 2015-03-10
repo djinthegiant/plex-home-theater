@@ -148,4 +148,12 @@ public:
   void  SetVolume(float volume);
   bool  SwitchChannel(PVR::CPVRChannel &channel);
   void  ToFFRW(int iSpeed = 0);
+
+  /* PLEX */
+  void SetSubtitleStreamPlexID(int plexID);
+  void SetAudioStreamPlexID(int plexID);
+  int GetSubtitlePlexID();
+  int GetAudioStreamPlexID();
+  int GetPlexMediaPartID();
+  /* END PLEX */
 };

@@ -23,6 +23,10 @@
 #include "utils/JobManager.h"
 #include "ThumbLoader.h"
 
+#ifdef __PLEX__
+#include "plex/Owned/PictureThumbLoader.h"
+#else
+
 class CPictureThumbLoader : public CThumbLoader, public CJobQueue
 {
 public:
@@ -50,3 +54,5 @@ protected:
 private:
   bool m_regenerateThumbs;
 };
+
+#endif

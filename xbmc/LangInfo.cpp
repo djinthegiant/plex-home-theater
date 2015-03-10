@@ -442,7 +442,12 @@ std::string CLangInfo::GetSubtitleCharSet() const
 {
   std::string strCharSet=CSettings::Get().GetString("subtitles.charset");
   if (strCharSet=="DEFAULT")
+#ifdef __PLEX__
+    /* if default, set the Subtitle charset to UTF-8 since we get it from the server */
+    strCharSet = "UTF-8";
+#else
     strCharSet=m_currentRegion->m_strSubtitleCharSet;
+#endif
 
   return strCharSet;
 }

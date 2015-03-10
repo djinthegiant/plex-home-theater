@@ -675,3 +675,46 @@ int CApplicationPlayer::GetPlaySpeed() const
 {
   return m_iPlaySpeed;
 }
+
+/* PLEX */
+void CApplicationPlayer::SetSubtitleStreamPlexID(int plexID)
+{
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->SetSubtitleStreamPlexID(plexID);
+}
+
+void CApplicationPlayer::SetAudioStreamPlexID(int plexID)
+{
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->SetAudioStreamPlexID(plexID);
+}
+
+int CApplicationPlayer::GetSubtitlePlexID()
+{
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    return player->GetSubtitlePlexID();
+  else
+    return -1;
+}
+
+int CApplicationPlayer::GetAudioStreamPlexID()
+{
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    return player->GetAudioStreamPlexID();
+  else
+    return -1;
+}
+
+int CApplicationPlayer::GetPlexMediaPartID()
+{
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    return player->GetPlexMediaPartID();
+  else
+    return -1;
+}
+/* END PLEX */

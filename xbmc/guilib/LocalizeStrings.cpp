@@ -191,6 +191,18 @@ bool CLocalizeStrings::Load(const std::string& strPathName, const std::string& s
   CSingleLock lock(m_critSection);
   Clear();
 
+  /* PLEX */
+  /* If the user requests English we try to load English_plex and then English,
+   * If the user requests German we try to load German_plex and then German and then English_plex and then English :) */
+
+  if (LoadStr2Mem(strPathName, strLanguage + "_plex", encoding))
+  {
+    CLog::Log(LOGDEBUG, "Managed to load %s_plex", strLanguage.c_str());
+  }
+  else
+    CLog::Log(LOGDEBUG, "Did not find %s_plex", strLanguage.c_str());
+  /* END PLEX */
+
   if (!LoadStr2Mem(strPathName, strLanguage, encoding))
   {
     // try loading the fallback
@@ -201,7 +213,12 @@ bool CLocalizeStrings::Load(const std::string& strPathName, const std::string& s
   }
 
   if (bLoadFallback)
+  {
+    /* PLEX */
+    LoadStr2Mem(strPathName, SOURCE_LANGUAGE + "_plex", encoding);
+    /* END PLEX */
     LoadStr2Mem(strPathName, SOURCE_LANGUAGE, encoding);
+  }
 
   // fill in the constant strings
   m_strings[20022].strTranslated = "";

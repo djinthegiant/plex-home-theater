@@ -19,6 +19,10 @@
  *
  */
 
+#ifdef __PLEX__
+#include "plex/Owned/VideoThumbLoader.h"
+#else
+
 #include <map>
 #include "ThumbLoader.h"
 #include "utils/JobManager.h"
@@ -134,3 +138,5 @@ protected:
    */
   void DetectAndAddMissingItemData(CFileItem &item);
 };
+
+#endif

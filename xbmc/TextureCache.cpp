@@ -31,11 +31,17 @@
 #include "URL.h"
 #include "utils/StringUtils.h"
 
+#include "plex/PlexTextureCache.h"
+
 using namespace XFILE;
 
 CTextureCache &CTextureCache::Get()
 {
+#ifdef __PLEX__
+  static CPlexTextureCache s_cache;
+#else
   static CTextureCache s_cache;
+#endif
   return s_cache;
 }
 

@@ -38,6 +38,10 @@
 #include "Util.h"
 #include <boost/shared_ptr.hpp>
 
+/* PLEX */
+#include "PlexTypes.h"
+/* END PLEX */
+
 #if defined(TARGET_WINDOWS)
 #include "input/windows/WINJoystick.h"
 #elif defined(HAS_SDL_JOYSTICK) || defined(HAS_EVENT_SERVER)
@@ -268,6 +272,15 @@ static const ActionMapping actions[] =
         {"swiperight"        , ACTION_GESTURE_SWIPE_RIGHT},
         {"swipeup"           , ACTION_GESTURE_SWIPE_UP},
         {"swipedown"         , ACTION_GESTURE_SWIPE_DOWN},
+  
+        /* PLEX */
+        {"markaswatched"        , ACTION_MARK_AS_WATCHED},
+        {"markasunwatched"      , ACTION_MARK_AS_UNWATCHED},
+        {"clearfilters"         , ACTION_CLEAR_FILTERS},
+        {"cycleprimaryfilter"   , ACTION_PLEX_CYCLE_PRIMARY_FILTER},
+        {"toggleunwatchedfilter", ACTION_PLEX_TOGGLE_UNWATCHED_FILTER},
+        {"playtrailer"          , ACTION_PLEX_PLAY_TRAILER},
+        /* END PLEX */
 
         // Do nothing action
         { "noop"             , ACTION_NOOP}
@@ -275,6 +288,22 @@ static const ActionMapping actions[] =
 
 static const ActionMapping windows[] =
        {{"home"                     , WINDOW_HOME},
+        /* PLEX */
+        {"channels"                 , WINDOW_PLEX_MYCHANNELS},
+        {"sharedcontent"            , WINDOW_SHARED_CONTENT},
+        {"nowplaying"               , WINDOW_NOW_PLAYING},
+        {"plexsearch"               , WINDOW_PLEX_SEARCH},
+        {"plexpreplayvideo"         , WINDOW_PLEX_PREPLAY_VIDEO},
+        {"plexpreplaymusic"         , WINDOW_PLEX_PREPLAY_MUSIC},
+        {"plexlogin"                , WINDOW_MYPLEX_LOGIN},
+        {"filterdialog"             , WINDOW_DIALOG_FILTER_SORT},
+        {"plexsubtitlepicker"       , WINDOW_DIALOG_PLEX_SUBTITLE_PICKER},
+        {"plexaudiopicker"          , WINDOW_DIALOG_PLEX_AUDIO_PICKER },        
+        {"plexplayqueue"            , WINDOW_PLEX_PLAY_QUEUE },
+        {"plexextras"               , WINDOW_DIALOG_PLEX_EXTRAS },
+        {"plexplaylistselection"    , WINDOW_PLEX_PLAYLIST_SELECTION },
+        {"selectuser"               , WINDOW_DIALOG_PLEX_USER_SELECT },
+        /* END PLEX */
         {"programs"                 , WINDOW_PROGRAMS},
         {"pictures"                 , WINDOW_PICTURES},
         {"filemanager"              , WINDOW_FILES},

@@ -97,6 +97,10 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/DisplaySettings.h"
 
+/* PLEX */
+#include "PlexApplication.h"
+/* END PLEX */
+
 using namespace std;
 using namespace XFILE;
 using namespace ADDON;
@@ -113,6 +117,13 @@ typedef struct
 } BUILT_IN;
 
 const BUILT_IN commands[] = {
+  /* PLEX */
+  { "UpdateAndRestart",           false,  "Update PHT and restart" },
+  { "PlayAll",                    false,  "Play all files in this container" },
+  { "ShuffleAll",                 false,  "Shuffle all files in this container" },
+  { "NextItem",                   false,  "Move to the next item. Good for preplay" },
+  { "PrevItem",                   false,  "Move to previous item, good for preplay" },
+  /* END PLEX */
   { "Help",                       false,  "This help message" },
   { "Reboot",                     false,  "Reboot the system" },
   { "Restart",                    false,  "Restart the system (same as reboot)" },
@@ -707,8 +718,10 @@ int CBuiltins::Execute(const std::string& execString)
 
     if ( askToResume == true )
     {
+#ifndef __PLEX__
       if ( CGUIWindowVideoBase::ShowResumeMenu(item) == false )
         return false;
+#endif
     }
     if (item.m_bIsFolder)
     {
@@ -1802,6 +1815,24 @@ int CBuiltins::Execute(const std::string& execString)
       return -2;
     }
   }
+  /* PLEX */
+  else if (execute == "updateandrestart")
+  {
+#ifdef ENABLE_AUTOUPDATE
+    g_plexApplication.autoUpdater->UpdateAndRestart();
+#endif
+  }
+  else if (execute == "togglewatched")
+    g_application.OnAction(CAction(ACTION_TOGGLE_WATCHED));
+  else if (execute == "playall")
+    g_application.OnAction(CAction(ACTION_PLEX_PLAY_ALL));
+  else if (execute == "shuffleall")
+    g_application.OnAction(CAction(ACTION_PLEX_SHUFFLE_ALL));
+  else if (execute == "nextitem")
+    g_application.OnAction(CAction(ACTION_PLEX_MOVE_NEXT_ITEM));
+  else if (execute == "previtem")
+    g_application.OnAction(CAction(ACTION_PLEX_MOVE_PREV_ITEM));
+  /* END PLEX */
   else
     return -1;
   return 0;

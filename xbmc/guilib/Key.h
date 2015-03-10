@@ -348,6 +348,24 @@
 #define ACTION_TRIGGER_OSD            243 // show autoclosing OSD. Can b used in videoFullScreen.xml window id=2005
 #define ACTION_INPUT_TEXT             244
 
+/* PLEX */
+#define ACTION_MARK_AS_UNWATCHED      300
+#define ACTION_MARK_AS_WATCHED        301
+#define ACTION_CLEAR_FILTERS          302
+#define ACTION_PLEX_CYCLE_PRIMARY_FILTER 303
+#define ACTION_PLEX_TOGGLE_UNWATCHED_FILTER 304
+#define ACTION_PLEX_PLAY_ALL          305
+#define ACTION_PLEX_SHUFFLE_ALL       306
+#define ACTION_PLEX_MOVE_NEXT_ITEM    307
+#define ACTION_PLEX_MOVE_PREV_ITEM    308
+#define ACTION_PLEX_PLAY_TRAILER      309
+#define ACTION_PLEX_NOW_PLAYING       310
+#define ACTION_PLEX_PQ_CLEAR          311
+#define ACTION_PLEX_PQ_ADDUPTONEXT    312
+#define ACTION_PLEX_PL_ADDTO          313
+#define ACTION_PLEX_PL_CREATE         314
+/* END PLEX */
+
 // touch actions
 #define ACTION_TOUCH_TAP              401
 #define ACTION_TOUCH_TAP_TEN          410

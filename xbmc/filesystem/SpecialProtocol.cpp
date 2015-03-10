@@ -33,6 +33,12 @@
 #include <dirent.h>
 #endif
 
+/* PLEX */
+#include "PlexApplication.h"
+#include "Client/MyPlex/MyPlexManager.h"
+#include <boost/lexical_cast.hpp>
+/* END PLEX */
+
 using namespace std;
 
 map<std::string, std::string> CSpecialProtocol::m_pathMap;
@@ -149,6 +155,20 @@ std::string CSpecialProtocol::TranslatePath(const CURL &url)
     translatedPath = URIUtils::AddFileToFolder(g_graphicsContext.GetMediaDir(), FileName);
   else if (RootDir == "logpath")
     translatedPath = URIUtils::AddFileToFolder(g_advancedSettings.m_logFolder, FileName);
+  /* PLEX */
+  else if (RootDir == "plexprofile")
+  {
+    std::string path = "special://masterprofile/plexprofiles/";
+    if (g_plexApplication.myPlexManager && g_plexApplication.myPlexManager->IsSignedIn())
+      path += boost::lexical_cast<std::string>(g_plexApplication.myPlexManager->GetCurrentUserInfo().id);
+    else if (!CSettings::Get().GetString("myplex.uid").empty())
+      path += CSettings::Get().GetString("myplex.uid");
+    else
+      path += "default";
+    
+    translatedPath = URIUtils::AddFileToFolder(TranslatePath(path), FileName);
+  }
+  /* END PLEX */
 
 
   // from here on, we have our "real" special paths

@@ -1071,7 +1071,7 @@ void CUtil::SplitExecFunction(const std::string &execString, std::string &functi
 
   // remove any whitespace, and the standard prefix (if it exists)
   StringUtils::Trim(function);
-  if( StringUtils::StartsWithNoCase(function, "xbmc.") )
+  if( StringUtils::StartsWithNoCase(function, "xbmc.") || StringUtils::StartsWithNoCase(function, "plex.") ) // PLEX
     function.erase(0, 5);
 
   SplitParams(paramString, parameters);

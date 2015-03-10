@@ -18,6 +18,8 @@
  *
  */
 
+#ifndef __PLEX__
+
 #include "VideoThumbLoader.h"
 #include "filesystem/StackDirectory.h"
 #include "utils/URIUtils.h"
@@ -565,3 +567,5 @@ void CVideoThumbLoader::DetectAndAddMissingItemData(CFileItem &item)
   if (!stereoMode.empty())
     item.SetProperty("stereomode", CStereoscopicsManager::Get().NormalizeStereoMode(stereoMode));
 }
+
+#endif

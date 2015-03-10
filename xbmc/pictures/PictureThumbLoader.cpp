@@ -18,6 +18,8 @@
  *
  */
 
+#ifndef __PLEX__
+
 #include "PictureThumbLoader.h"
 #include "Picture.h"
 #include "filesystem/File.h"
@@ -254,3 +256,5 @@ void CPictureThumbLoader::ProcessFoldersAndArchives(CFileItem *pItem)
     pItem->FillInDefaultIcon();
   }
 }
+
+#endif

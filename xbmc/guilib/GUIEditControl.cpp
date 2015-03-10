@@ -31,6 +31,11 @@
 #include "utils/md5.h"
 #include "GUIUserMessages.h"
 
+/* PLEX */
+#include "PlexApplication.h"
+#include "Client/PlexTimelineManager.h"
+/* END PLEX */
+
 #if defined(TARGET_DARWIN)
 #include "osx/CocoaInterface.h"
 #endif

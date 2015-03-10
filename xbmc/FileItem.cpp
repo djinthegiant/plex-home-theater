@@ -62,6 +62,17 @@
 #include "cores/paplayer/ASAPCodec.h"
 #endif
 
+/* PLEX */
+#include "plex/PlexTypes.h"
+#include "plex/PlexApplication.h"
+#include "filesystem/DirectoryCache.h"
+#include "plex/FileSystem/PlexFile.h"
+#include <boost/foreach.hpp>
+#include "plex/Client/PlexServerManager.h"
+#include "plex/Client/PlexMediaServerClient.h"
+#include "plex/Client/PlexConnection.h"
+/* END PLEX */
+
 using namespace std;
 using namespace XFILE;
 using namespace PLAYLIST;
@@ -321,6 +332,14 @@ CFileItem::~CFileItem(void)
   m_pvrRecordingInfoTag = NULL;
   m_pvrTimerInfoTag = NULL;
   m_pictureInfoTag = NULL;
+
+  /* PLEX */
+  m_contextItems.clear();
+  m_mediaParts.clear();
+  m_mediaItems.clear();
+  m_mediaPartStreams.clear();
+  m_selectedMediaPart.reset();
+  /* END PLEX */
 }
 
 const CFileItem& CFileItem::operator=(const CFileItem& item)
@@ -443,6 +462,24 @@ const CFileItem& CFileItem::operator=(const CFileItem& item)
   m_extrainfo = item.m_extrainfo;
   m_specialSort = item.m_specialSort;
   m_bIsAlbum = item.m_bIsAlbum;
+
+  /* PLEX */
+  m_contextItems.clear();
+  for (unsigned int i=0; i < item.m_contextItems.size(); ++i)
+  {
+    m_contextItems.push_back(item.m_contextItems[i]);
+  }
+
+  m_mapProperties.clear();
+  m_mapProperties = item.m_mapProperties;
+  m_mediaParts = item.m_mediaParts;
+  m_mediaItems = item.m_mediaItems;
+  m_mediaPartStreams = item.m_mediaPartStreams;
+
+  m_plexDirectoryType = item.m_plexDirectoryType;
+  m_selectedMediaPart = item.m_selectedMediaPart;
+  /* END PLEX */
+
   return *this;
 }
 
@@ -471,6 +508,9 @@ void CFileItem::Initialize()
   m_iHasLock = 0;
   m_bCanQueue=true;
   m_specialSort = SortSpecialNone;
+  /* PLEX */
+  m_plexDirectoryType = PLEX_DIR_TYPE_UNKNOWN;
+  /* END PLEX */
 }
 
 void CFileItem::Reset()
@@ -505,6 +545,13 @@ void CFileItem::Reset()
   m_pictureInfoTag=NULL;
   m_extrainfo.clear();
   ClearProperties();
+
+  /* PLEX */
+  m_mediaItems.clear();
+  m_mediaParts.clear();
+  m_mediaPartStreams.clear();
+  m_selectedMediaPart.reset();
+  /* END PLEX */
 
   Initialize();
   SetInvalid();
@@ -560,6 +607,15 @@ void CFileItem::Archive(CArchive& ar)
     }
     else
       ar << 0;
+
+    /* PLEX */
+    ar << (int)(m_contextItems.size());
+    for (unsigned int i=0; i < m_contextItems.size(); ++i)
+    {
+      CFileItemPtr pContextItem = m_contextItems[i];
+      ar << *pContextItem;
+    }
+    /* END PLEX */
   }
   else
   {
@@ -599,6 +655,21 @@ void CFileItem::Archive(CArchive& ar)
     ar >> iType;
     if (iType == 1)
       ar >> *GetPictureInfoTag();
+
+    /* PLEX */
+    int iContextMenuSize = 0;
+    ar >> iContextMenuSize;
+    if (iContextMenuSize > 0)
+    {
+      m_contextItems.reserve(iContextMenuSize);
+      for (int i=0; i < iContextMenuSize; ++i)
+      {
+        CFileItemPtr pItem(new CFileItem);
+        ar >> *pItem;
+        m_contextItems.push_back(pItem);
+      }
+    }
+    /* END PLEX */
 
     SetInvalid();
   }
@@ -715,6 +786,15 @@ bool CFileItem::Exists(bool bUseCache /* = true */) const
 
 bool CFileItem::IsVideo() const
 {
+  /* PLEX */
+  string type = GetProperty("type").asString();
+  if (type == "episode" || type == "movie" || type == "clip")
+    return true;
+
+  if (type == "photo")
+    return false;
+  /* END PLEX */
+
   /* check preset mime type */
   if( StringUtils::StartsWithNoCase(m_mimetype, "video/") )
     return true;
@@ -739,6 +819,15 @@ bool CFileItem::IsVideo() const
 
   return URIUtils::HasExtension(m_strPath, g_advancedSettings.m_videoExtensions);
 }
+
+/* PLEX */
+bool CFileItem::IsHomeMovie() const
+{
+  CURL url(GetProperty("guid").asString());
+  return  ((url.GetProtocol() == "com.plexapp.agents.none") &&
+           (GetPlexDirectoryType() == PLEX_DIR_TYPE_MOVIE));
+}
+/* END PLEX */
 
 bool CFileItem::IsEPG() const
 {
@@ -777,6 +866,13 @@ bool CFileItem::IsDiscStub() const
 
 bool CFileItem::IsAudio() const
 {
+  /* PLEX */
+  if (m_plexDirectoryType == PLEX_DIR_TYPE_TRACK ||
+      m_plexDirectoryType == PLEX_DIR_TYPE_ALBUM ||
+      m_plexDirectoryType == PLEX_DIR_TYPE_ARTIST)
+    return true;
+  /* END PLEX */
+
   /* check preset mime type */
   if( StringUtils::StartsWithNoCase(m_mimetype, "audio/") )
     return true;
@@ -810,6 +906,10 @@ bool CFileItem::IsPicture() const
 {
   if( StringUtils::StartsWithNoCase(m_mimetype, "image/") )
     return true;
+
+  /* PLEX */
+  if (GetProperty("type") == "image" || GetProperty("type") == "photo") return true;
+  /* END PLEX */
 
   if (HasPictureInfoTag()) return true;
   if (HasMusicInfoTag()) return false;
@@ -1552,6 +1652,13 @@ CFileItemList::CFileItemList()
   m_cacheToDisc = CACHE_IF_SLOW;
   m_sortIgnoreFolders = false;
   m_replaceListing = false;
+
+  /* PLEX */
+  m_wasListingCancelled = false;
+  m_displayMessage = false;
+  m_displayMessageTitle = "";
+  m_displayMessageContents = "";
+  /* END PLEX */
 }
 
 CFileItemList::CFileItemList(const std::string& strPath) : CFileItem(strPath, true)
@@ -1560,6 +1667,13 @@ CFileItemList::CFileItemList(const std::string& strPath) : CFileItem(strPath, tr
   m_cacheToDisc = CACHE_IF_SLOW;
   m_sortIgnoreFolders = false;
   m_replaceListing = false;
+
+  /* PLEX */
+  m_wasListingCancelled = false;
+  m_displayMessage = false;
+  m_displayMessageTitle = "";
+  m_displayMessageContents = "";
+  /* END PLEX */
 }
 
 CFileItemList::~CFileItemList()
@@ -1635,6 +1749,13 @@ void CFileItemList::Clear()
   m_sortDetails.clear();
   m_replaceListing = false;
   m_content.clear();
+
+  /* PLEX */
+  m_wasListingCancelled = false;
+  m_displayMessage = false;
+  m_displayMessageTitle = "";
+  m_displayMessageContents = "";
+  /* END PLEX */
 }
 
 void CFileItemList::ClearItems()
@@ -1735,6 +1856,14 @@ void CFileItemList::Assign(const CFileItemList& itemlist, bool append)
   m_content = itemlist.m_content;
   m_mapProperties = itemlist.m_mapProperties;
   m_cacheToDisc = itemlist.m_cacheToDisc;
+
+  /* PLEX */
+  m_wasListingCancelled = itemlist.m_wasListingCancelled;
+  m_displayMessage = itemlist.m_displayMessage;
+  m_displayMessageTitle = itemlist.m_displayMessageTitle;
+  m_displayMessageContents = itemlist.m_displayMessageContents;
+  m_plexDirectoryType = itemlist.m_plexDirectoryType;
+  /* END PLEX */
 }
 
 bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */)
@@ -1750,6 +1879,14 @@ bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */
   m_sortDetails     = items.m_sortDetails;
   m_sortDescription = items.m_sortDescription;
   m_sortIgnoreFolders = items.m_sortIgnoreFolders;
+
+  /* PLEX */
+  m_wasListingCancelled = items.m_wasListingCancelled;
+  m_displayMessage = items.m_displayMessage;
+  m_displayMessageTitle = items.m_displayMessageTitle;
+  m_displayMessageContents = items.m_displayMessageContents;
+  m_plexDirectoryType = items.m_plexDirectoryType;
+  /* END PLEX */
 
   if (copyItems)
   {
@@ -2569,6 +2706,7 @@ bool CFileItemList::Load(int windowID)
 
 bool CFileItemList::Save(int windowID)
 {
+#ifndef __PLEX__
   int iSize = Size();
   if (iSize <= 0)
     return false;
@@ -2585,6 +2723,7 @@ bool CFileItemList::Save(int windowID)
     file.Close();
     return true;
   }
+#endif
 
   return false;
 }
@@ -2886,6 +3025,10 @@ std::string CFileItem::GetBaseMoviePath(bool bUseFolderNames) const
 
 std::string CFileItem::GetLocalFanart() const
 {
+  /* PLEX */
+  return "";
+  /* END PLEX */
+
   if (IsVideoDb())
   {
     if (!HasVideoInfoTag())
@@ -3289,3 +3432,184 @@ double CFileItem::GetCurrentResumeTime() const
   // Resume from start when resume points are invalid or the PVR server returns an error
   return 0;
 }
+
+/* PLEX */
+bool CFileItem::IsPlexMediaServer() const
+{
+  if (HasProperty("plex") && GetProperty("plex").asBoolean())
+    return true;
+  return PlexUtils::IsPlexMediaServer(m_strPath);
+}
+
+bool CFileItem::IsRemoteSharedPlexMediaServerLibrary() const
+{
+  CPlexServerPtr server = g_plexApplication.serverManager->FindFromItem(*this);
+  if (server && IsRemotePlexMediaServerLibrary())
+    return server->IsShared();
+  return false;
+}
+
+bool CFileItem::IsRemotePlexMediaServerLibrary() const
+{
+  CPlexServerPtr server = g_plexApplication.serverManager->FindFromItem(*this);
+  if (server && !server->GetActiveConnection()->IsLocal() && IsPlexMediaServerLibrary())
+      return true;
+
+  return false;
+}
+
+bool CFileItem::IsPlexMediaServerLibrary() const
+{
+  if (IsPlexMediaServer() == false)
+    return false;
+
+  if (GetProperty("unprocessed_key").asString().find("/library/parts/") != std::string::npos ||
+      GetProperty("unprocessed_key").asString().find("/library/metadata/") != std::string::npos ||
+      GetProperty("unprocessed_key").asString().find("/library/sections/") != std::string::npos)
+  {
+    // extras are considerered not to be plex MediaServerLibrary items
+    if (!GetProperty("extraType").asString().empty())
+      return false;
+    else
+      return true;
+  }
+
+  return false;
+}
+
+bool CFileItem::IsPlexMediaServerMusic() const
+{
+  bool ret = false;
+
+  if (IsPlexMediaServer() == false)
+  {
+    ret = false;
+  }
+  else
+  {
+    // Look for plex://xxx/music.
+    std::string str = m_strPath;
+    int firstSlash = str.find('/');
+    firstSlash = str.find('/', firstSlash + 2);
+    if (firstSlash > 0)
+    {
+      str = str.substr(firstSlash);
+      if (str.find("/music/") == 0)
+        ret = true;
+    }
+
+    if (GetProperty("type") == "song")
+      ret = true;
+  }
+
+  return ret;
+}
+
+bool CFileItem::IsPlexWebkit() const
+{
+  return PlexUtils::IsPlexWebKit(m_strPath);
+}
+
+void CFileItem::SetEpisodeData(int total, int watchedCount)
+{
+  SetProperty("watchedepisodes", watchedCount);
+  SetProperty("unwatchedepisodes", total - watchedCount);
+
+  if (total - watchedCount == 1)
+    SetProperty("singularepisodecount", 1);
+  else if (total == 1)
+    SetProperty("singularepisodecount", 1);
+  else
+    ClearProperty("singularepisodecount");
+
+  if (total - watchedCount == 0)
+    SetProperty("zeroepisodecount", 1);
+  else
+    ClearProperty("zeroepisodecount");
+}
+
+bool CFileItemList::IsPlexMediaServerMusic() const
+{
+  if (GetContent() == "song" || GetContent() == "songs")
+    return true;
+
+  return CFileItem::IsPlexMediaServerMusic();
+}
+
+//Add Mark a Title as watched
+void CFileItem::MarkAsWatched(bool sendMessage)
+{
+  g_plexApplication.mediaServerClient->SetItemWatched(shared_from_this(), sendMessage);
+
+  // Change the item.
+  SetOverlayImage(CGUIListItem::ICON_OVERLAY_WATCHED);
+  if (GetVideoInfoTag())
+  {
+    GetVideoInfoTag()->m_playCount++;
+    ClearProperty("viewOffset");
+  }
+
+  // Fix numbers.
+  if (HasProperty("watchedepisodes"))
+  {
+    int watched = GetProperty("watchedepisodes").asInteger();
+    int unwatched = GetProperty("unwatchedepisodes").asInteger();
+
+    SetEpisodeData(watched+unwatched, watched+unwatched);
+  }
+
+  g_directoryCache.ClearDirectory(GetPath());
+}
+
+
+void CFileItem::MarkAsUnWatched(bool sendMessage)
+{
+  g_plexApplication.mediaServerClient->SetItemUnWatched(shared_from_this(), sendMessage);
+  SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED);
+  if (GetVideoInfoTag())
+  {
+    GetVideoInfoTag()->m_playCount = 0;
+    ClearProperty("viewOffset");
+  }
+
+  // Fix numbers.
+  if (HasProperty("watchedepisodes"))
+  {
+    int watched = GetProperty("watchedepisodes").asInteger();
+    int unwatched = GetProperty("unwatchedepisodes").asInteger();
+
+    SetEpisodeData(watched+unwatched, 0);
+  }
+
+  g_directoryCache.ClearDirectory(GetPath());
+}
+
+void CFileItemList::Insert(int iIndex, CFileItemPtr pItem)
+{
+  CSingleLock lock(m_lock);
+  
+  if (iIndex > m_items.size())
+    m_items.push_back(pItem);
+  else
+    m_items.insert(m_items.begin() + iIndex, pItem);
+
+  if (m_fastLookup)
+  {
+    m_map.insert(MAPFILEITEMSPAIR(pItem->GetPath(), pItem));
+  }
+}
+
+int CFileItemList::IndexOfItem(const std::string& path)
+{
+  CSingleLock lk(m_lock);
+  int i = 0;
+  BOOST_FOREACH(CFileItemPtr item, m_items)
+  {
+    if (item->GetPath() == path)
+      return i;
+    i ++;
+  }
+
+  return -1;
+}
+/* END PLEX */

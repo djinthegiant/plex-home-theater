@@ -18,6 +18,8 @@
  *
  */
 
+#ifndef __PLEX__
+
 #include "GUIWindowHome.h"
 #include "guilib/Key.h"
 #include "guilib/WindowIDs.h"
@@ -179,3 +181,5 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
 
   return CGUIWindow::OnMessage(message);
 }
+
+#endif

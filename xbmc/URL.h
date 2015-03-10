@@ -115,6 +115,11 @@ public:
   void SetOption(const std::string &key, const std::string &value);
   void RemoveOption(const std::string &key);
 
+  /* PLEX */
+  std::string GetUrlWithoutOptions() const;
+  void AddOptions(const CUrlOptions &options);
+  /* END PLEX */
+
   void GetProtocolOptions(std::map<std::string, std::string> &options) const;
   bool HasProtocolOption(const std::string &key) const;
   bool GetProtocolOption(const std::string &key, std::string &value) const;

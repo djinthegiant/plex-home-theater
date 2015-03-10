@@ -22,6 +22,10 @@
 #include <map>
 #include "ThumbLoader.h"
 
+#ifdef __PLEX__
+#include "plex/Owned/MusicThumbLoader.h"
+#else
+
 class CFileItem;
 class CMusicDatabase;
 
@@ -64,3 +68,5 @@ protected:
   typedef std::map<int, std::map<std::string, std::string> > ArtCache;
   ArtCache m_albumArt;
 };
+
+#endif

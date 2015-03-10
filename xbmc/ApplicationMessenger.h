@@ -144,6 +144,11 @@ struct ThreadMessageCallback
   void *userptr;
 };
 
+/* PLEX */
+class CGUIDialogCache;
+#include "PlexTypes.h"
+/* END PLEX */
+
 class CApplicationMessenger;
 namespace xbmcutil
 {
@@ -256,6 +261,13 @@ public:
   bool SetupDisplay();
   bool DestroyDisplay();
   void StartAndroidActivity(const std::vector<std::string> &params);
+
+  /* PLEX */
+  void RestartWithNewPlayer(CGUIDialogCache* dlg, const std::string& newURL);
+  void PlexUpdatePlayQueue(ePlexMediaType type, bool startPlaying);
+  void PictureSlideShow(std::string pathname, bool addTBN, const std::string &index, bool shuffle = false);
+  void PlexSaveServerCache();
+  /* END PLEX */
 
   virtual ~CApplicationMessenger();
 private:

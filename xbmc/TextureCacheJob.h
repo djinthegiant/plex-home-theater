@@ -80,6 +80,7 @@ public:
   CTextureDetails m_details;
 private:
   friend class CEdenVideoArtUpdater;
+protected: // PLEX
 
   /*! \brief retrieve a hash for the given image
    Combines the size, ctime and mtime of the image file into a "unique" hash

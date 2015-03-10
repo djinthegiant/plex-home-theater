@@ -95,6 +95,15 @@
 static CLinuxResourceCounter m_resourceCounter;
 #endif
 
+/* PLEX */
+#include "GUI/GUIWindowPlexSearch.h"
+#include "GUI/GUIWindowNowPlaying.h"
+#include "plex/Client/PlexServerManager.h"
+#include "plex/PlexApplication.h"
+#include "GUI/GUIPlexMediaWindow.h"
+#include "Playlists/PlexPlayQueueManager.h"
+/* END PLEX */
+
 #define SYSHEATUPDATEINTERVAL 60000
 
 using namespace std;
@@ -169,6 +178,11 @@ typedef struct
 } infomap;
 
 const infomap player_labels[] =  {{ "hasmedia",         PLAYER_HAS_MEDIA },           // bools from here
+                                  /* PLEX */
+                                  { "hasmusicplaylist",       PLAYER_HAS_MUSIC_PLAYLIST },
+                                  { "onnew",            PLAYER_ONNEW },
+                                  { "playlist",         PLAYER_PLAYLIST },
+                                  /* END PLEX */
                                   { "hasaudio",         PLAYER_HAS_AUDIO },
                                   { "hasvideo",         PLAYER_HAS_VIDEO },
                                   { "playing",          PLAYER_PLAYING },
@@ -234,6 +248,17 @@ const infomap weather[] =        {{ "isfetched",        WEATHER_IS_FETCHED },
                                   { "plugin",           WEATHER_PLUGIN }};
 
 const infomap system_labels[] =  {{ "hasnetwork",       SYSTEM_ETHERNET_LINK_ACTIVE },
+                                  /* PLEX */
+                                  { "searchinprogress", SYSTEM_SEARCH_IN_PROGRESS },
+                                  { "selectedplexmediaserver", SYSTEM_SELECTED_PLEX_MEDIA_SERVER },
+                                  { "updateisavailable", SYSTEM_UPDATE_IS_AVAILABLE },
+                                  { "userisrestricted", SYSTEM_USER_ISRESTRICTED },
+                                  { "issignedin",       SYSTEM_IS_SIGNED_IN },
+                                  { "userisinhome",     SYSTEM_USER_IS_IN_HOME },
+                                  { "noplexservers",    SYSTEM_NO_PLEX_SERVERS },
+                                  { "currentuser",      SYSTEM_CURRENT_USER },
+                                  { "currentuserthumb", SYSTEM_CURRENT_USER_THUMB },
+                                  /* END PLEX */
                                   { "hasmediadvd",      SYSTEM_MEDIA_DVD },
                                   { "dvdready",         SYSTEM_DVDREADY },
                                   { "trayopen",         SYSTEM_TRAYOPEN },
@@ -299,6 +324,9 @@ const infomap system_param[] =   {{ "hasalarm",         SYSTEM_HAS_ALARM },
                                   { "hascoreid",        SYSTEM_HAS_CORE_ID },
                                   { "setting",          SYSTEM_SETTING },
                                   { "hasaddon",         SYSTEM_HAS_ADDON },
+                                  /* PLEX */
+                                  //{ "plexplayqueue",    SYSTEM_PLEX_PLAYQUEUE },
+                                  /* END PLEX */
                                   { "coreusage",        SYSTEM_GET_CORE_USAGE }};
 
 const infomap network_labels[] = {{ "isdhcp",            NETWORK_IS_DHCP },
@@ -320,6 +348,12 @@ const infomap musicpartymode[] = {{ "enabled",           MUSICPM_ENABLED },
                                   { "randomsongspicked", MUSICPM_RANDOMSONGSPICKED }};
 
 const infomap musicplayer[] =    {{ "title",            MUSICPLAYER_TITLE },
+                                  /* PLEX */
+                                  { "hasnewcovernext",  MUSICPLAYER_HAS_NEW_COVER_NEXT },
+                                  { "nextnewcover",     MUSICPLAYER_NEXT_NEW_COVER },
+                                  { "nowplayingflipped",MUSICPLAYER_NOW_PLAYING_FLIPPED },
+                                  { "musicplayerfanart",MUSICPLAYER_FANART },
+                                  /* END PLEX */
                                   { "album",            MUSICPLAYER_ALBUM },
                                   { "artist",           MUSICPLAYER_ARTIST },
                                   { "albumartist",      MUSICPLAYER_ALBUM_ARTIST },
@@ -413,6 +447,13 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "parentalrating",   VIDEOPLAYER_PARENTAL_RATING },
                                   { "isstereoscopic",   VIDEOPLAYER_IS_STEREOSCOPIC },
                                   { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE }
+                                  /* PLEX */
+                                  //{ "audiostream",      VIDEOPLAYER_AUDIOSTREAM },
+                                  //{ "subtitlestream",   VIDEOPLAYER_SUBTITLESTREAM },
+                                  //{ "durationstr",      VIDEOPLAYER_DURATION_STRING },
+                                  //{ "plexcontentstr",   VIDEOPLAYER_PLEXCONTENT_STRING },
+                                  //{ "hasnext",          VIDEOPLAYER_HASNEXT },
+                                  /* END PLEX */
 };
 
 const infomap mediacontainer[] = {{ "hasfiles",         CONTAINER_HASFILES },
@@ -427,6 +468,9 @@ const infomap mediacontainer[] = {{ "hasfiles",         CONTAINER_HASFILES },
                                   { "viewmode",         CONTAINER_VIEWMODE },
                                   { "totaltime",        CONTAINER_TOTALTIME },
                                   { "hasthumb",         CONTAINER_HAS_THUMB },
+                                  /* PLEX */
+                                  //{ "thumb",            CONTAINER_THUMB },
+                                  /* END PLEX */
                                   { "sortmethod",       CONTAINER_SORT_METHOD },
                                   { "showplot",         CONTAINER_SHOWPLOT }};
 
@@ -452,9 +496,27 @@ const infomap container_ints[] = {{ "row",              CONTAINER_ROW },
                                   { "hasfocus",         CONTAINER_HAS_FOCUS }};
 
 const infomap container_str[]  = {{ "property",         CONTAINER_PROPERTY },
+                                  /* PLEX */
+                                  { "firsttitle",       CONTAINER_FIRST_TITLE },
+                                  { "secondtitle",      CONTAINER_SECOND_TITLE },
+                                  { "plexcontent",      CONTAINER_PLEXCONTENT },
+                                  { "plexfilter",       CONTAINER_PLEXFILTER },
+                                  { "uniformproperty",  CONTAINER_UNIFORM_PROPERTY },
+                                  /* END PLEX */
                                   { "content",          CONTAINER_CONTENT }};
 
 const infomap listitem_labels[]= {{ "thumb",            LISTITEM_THUMB },
+                                  /* PLEX */
+                                  { "type",             LISTITEM_TYPE },
+                                  { "status",           LISTITEM_STATUS },
+                                  { "banner",           LISTITEM_BANNER },
+                                  { "firstgenre",       LISTITEM_FIRST_GENRE },
+                                  { "stardiffuse",      LISTITEM_STAR_DIFFUSE },
+                                  { "grandparentthumb", LISTITEM_GRANDPARENT_THUMB },
+                                  { "durationstr",      LISTITEM_DURATION_STRING },
+                                  { "compositeimage",   LISTITEM_COMPOSITE_IMAGE },
+                                  { "plexprogress",     LISTITEM_PLEXPROGRESS },
+                                  /* END PLEX */
                                   { "icon",             LISTITEM_ICON },
                                   { "actualicon",       LISTITEM_ACTUAL_ICON },
                                   { "overlay",          LISTITEM_OVERLAY },
@@ -689,6 +751,9 @@ const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING
 const infomap slideshow[] =      {{ "ispaused",         SLIDESHOW_ISPAUSED },
                                   { "isactive",         SLIDESHOW_ISACTIVE },
                                   { "isvideo",          SLIDESHOW_ISVIDEO },
+                                  /* PLEX */
+                                  { "showdescription",  SLIDESHOW_SHOW_DESCRIPTION },
+                                  /* END PLEX */
                                   { "israndom",         SLIDESHOW_ISRANDOM }};
 
 const int picture_slide_map[]  = {/* LISTITEM_PICTURE_RESOLUTION => */ SLIDE_RESOLUTION,
@@ -956,6 +1021,13 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
           else if (param == "used.percent") return SYSTEM_USED_MEMORY_PERCENT;
           else if (param == "total") return SYSTEM_TOTAL_MEMORY;
         }
+        /* PLEX */
+        else if (prop.name == "issystem")
+        {
+          if (param == "rasplex") return SYSTEM_ISRASPLEX;
+          else if (param == "openelec") return SYSTEM_ISOPENELEC;
+        }
+        /* END PLEX */
         else if (prop.name == "addontitle")
         {
           int infoLabel = TranslateSingleString(param, listItemDependent);
@@ -1064,6 +1136,10 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
         if (prop.name == videoplayer[i].str)
           return videoplayer[i].val;
       }
+      /* PLEX */
+      if (prop.name == "plexcontent" && prop.num_params())
+        return AddMultiInfo(GUIInfo(VIDEOPLAYER_PLEXCONTENT, ConditionalStringParameter(prop.param()), 0));
+      /* END PLEX */
     }
     else if (cat.name == "slideshow")
     {
@@ -1118,6 +1194,12 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
       int ret = TranslateListItem(prop);
       if (ret)
         listItemDependent = true;
+      /* PLEX */
+      if (ret == LISTITEM_COMPOSITE_IMAGE)
+        return AddMultiInfo(GUIInfo(ret, ConditionalStringParameter(prop.param())));
+      if (ret == LISTITEM_TYPE || ret == LISTITEM_STATUS)
+        return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_WRAP, ConditionalStringParameter(prop.param())));
+      /* END PLEX */
       if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_WRAP));
       return ret;
@@ -1310,7 +1392,11 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
       else if (info[1].name == "listitem")
       {
         listItemDependent = true;
-        return AddMultiInfo(GUIInfo(TranslateListItem(info[2]), id, offset, INFOFLAG_LISTITEM_WRAP));
+        int ret = TranslateListItem(info[2]);
+        if (ret == LISTITEM_TYPE || ret == LISTITEM_STATUS)
+          return AddMultiInfo(GUIInfo(ret, id, offset, INFOFLAG_LISTITEM_WRAP, ConditionalStringParameter(info[2].param())));
+        else
+          return AddMultiInfo(GUIInfo(ret, id, offset, INFOFLAG_LISTITEM_WRAP));
       }
     }
   }
@@ -1581,6 +1667,9 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *f
   case MUSICPLAYER_CHANNEL_GROUP:
   case MUSICPLAYER_PLAYCOUNT:
   case MUSICPLAYER_LASTPLAYED:
+  /* PLEX */
+  case MUSICPLAYER_FANART:
+  /* PLEX */
     strLabel = GetMusicLabel(info);
   break;
   case VIDEOPLAYER_TITLE:
@@ -1625,6 +1714,12 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *f
   case VIDEOPLAYER_CHANNEL_GROUP:
   case VIDEOPLAYER_PARENTAL_RATING:
   case VIDEOPLAYER_PLAYCOUNT:
+  /* PLEX */
+  case VIDEOPLAYER_AUDIOSTREAM:
+  case VIDEOPLAYER_SUBTITLESTREAM:
+  case VIDEOPLAYER_DURATION_STRING:
+  case VIDEOPLAYER_PLEXCONTENT_STRING:
+  /* END PLEX */
   case VIDEOPLAYER_LASTPLAYED:
     strLabel = GetVideoLabel(info);
   break;
@@ -2059,6 +2154,25 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *f
   case SYSTEM_RENDER_VERSION:
     strLabel = g_Windowing.GetRenderVersionString();
     break;
+
+  /* PLEX */
+  case SYSTEM_SELECTED_PLEX_MEDIA_SERVER:
+  {
+    CStdString ret;
+    CPlexServerPtr server = g_plexApplication.serverManager->GetBestServer();
+    if (server)
+      ret = server->GetName();
+
+    return ret;
+  }
+  case SYSTEM_CURRENT_USER:
+    strLabel = g_plexApplication.myPlexManager->GetCurrentUserInfo().username;
+    break;
+  case SYSTEM_CURRENT_USER_THUMB:
+    strLabel = g_plexApplication.myPlexManager->GetCurrentUserInfo().thumb;
+    break;
+  /* END PLEX */
+
   }
 
   return strLabel;
@@ -2480,6 +2594,69 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     CGUIWindowSlideShow *slideShow = (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
     bReturn = (slideShow && slideShow->GetCurrentSlide() && slideShow->GetCurrentSlide()->IsVideo());
   }
+  /* PLEX */
+  else if (condition == SYSTEM_SEARCH_IN_PROGRESS)
+  {
+    CGUIWindowPlexSearch* searchWin = (CGUIWindowPlexSearch* )g_windowManager.GetWindow(WINDOW_PLEX_SEARCH);
+    if (searchWin && searchWin->InProgress())
+      bReturn = true;
+    else
+      bReturn = false;
+  }
+  else if (condition == SYSTEM_UPDATE_IS_AVAILABLE)
+  {
+#ifdef ENABLE_AUTOUPDATE
+    bReturn = g_plexApplication.autoUpdater->IsReadyToInstall();
+#else
+    return false;
+#endif
+  }
+  else if (condition == SYSTEM_NO_PLEX_SERVERS)
+  {
+    bReturn = !g_plexApplication.serverManager->HasAnyServerWithActiveConnection();
+  }
+  else if (condition == SYSTEM_ISRASPLEX)
+  {
+#ifdef TARGET_RASPBERRY_PI
+    bReturn = true;
+#else
+    bReturn = false;
+#endif
+  }
+  else if (condition == SYSTEM_ISOPENELEC)
+  {
+#ifdef OPENELEC
+    bReturn = true;
+#else
+    bReturn = false;
+#endif
+  }
+  else if (condition == VIDEOPLAYER_HASNEXT)
+  {
+    // requires current playlist be PLAYLIST_MUSIC
+    bReturn = false;
+    if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_VIDEO)
+      bReturn = (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO).size() - 1)); // not last song
+  }
+  else if (condition == SYSTEM_USER_ISRESTRICTED)
+  {
+    bReturn = false;
+    if (g_plexApplication.myPlexManager && g_plexApplication.myPlexManager->IsSignedIn())
+      bReturn = g_plexApplication.myPlexManager->GetCurrentUserInfo().restricted;
+  }
+  else if (condition == SYSTEM_IS_SIGNED_IN)
+  {
+    bReturn = false;
+    if (g_plexApplication.myPlexManager)
+      bReturn = g_plexApplication.myPlexManager->IsSignedIn();
+  }
+  else if (condition == SYSTEM_USER_IS_IN_HOME)
+  {
+    bReturn = false;
+    if (g_plexApplication.myPlexManager)
+      bReturn = g_plexApplication.myPlexManager->GetCurrentUserInfo().home;
+  }
+  /* END PLEX */
   else if (g_application.m_pPlayer->IsPlaying())
   {
     switch (condition)
@@ -2655,6 +2832,55 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
         bReturn = !m_videoInfo.stereoMode.empty();
       }
       break;
+
+    /* PLEX */
+    //case SLIDESHOW_SHOW_DESCRIPTION:
+    //  {
+    //    bReturn = m_slideshowShowDescription;
+    //  }
+    //  break;
+    case MUSICPLAYER_NOW_PLAYING_FLIPPED:
+      {
+        CGUIWindowNowPlaying *nowPlayingWindow = (CGUIWindowNowPlaying*)g_windowManager.GetWindow(WINDOW_NOW_PLAYING);
+        bReturn = (nowPlayingWindow != NULL ? nowPlayingWindow->IsFlipped() : false);
+        break;
+      }
+    case MUSICPLAYER_HAS_NEW_COVER_NEXT:
+      {
+        bReturn = false;
+        if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_MUSIC /*PLEX*/ && g_playlistPlayer.GetCurrentSong() >= 0 /* END PLEX */)
+        {
+          //if (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() - 1))
+          //{
+          //  CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
+          //  bReturn = !(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[g_playlistPlayer.GetNextSong()]->GetArt(PLEX_ART_THUMB));
+          //}
+        }
+        break;
+      }
+    case PLAYER_HAS_MUSIC_PLAYLIST:
+      bReturn = g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_MUSIC;
+      break;
+
+    //case PLAYER_ONNEW:
+    //  {
+    //    bReturn = false;
+    //    if (g_application.IsPlaying() && !g_application.IsPaused())
+    //    {
+    //      int seconds = 5;
+    //      if (g_application.CurrentFileItem().m_lStartOffset -1 &&
+    //          g_application.CurrentFileItem().HasProperty("viewOffset") &&
+    //          g_application.CurrentFileItem().IsVideo())
+    //        seconds += (int)(g_application.CurrentFileItem().GetProperty("viewOffset").asInteger() / 1000.0);
+
+    //      if (g_application.GetTime() < seconds)
+    //        bReturn = true;
+    //    }
+    //    break;
+    //  }
+
+    /* END PLEX */
+
     default: // default, use integer value different from 0 as true
       {
         int val;
@@ -2682,6 +2908,10 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
       if (!data1) // No container specified, so we lookup the current view container
       {
         window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_HAS_LIST_ITEMS);
+        /* PLEX */
+        if (window && (window->GetID() == WINDOW_PLEX_PREPLAY_VIDEO || window->GetID() == WINDOW_PLEX_PREPLAY_MUSIC))
+          item = window->GetCurrentListItem(info.GetData2()).get();
+        /* END PLEX */
         if (window && window->IsMediaWindow())
           data1 = ((CGUIMediaWindow*)(window))->GetViewContainerID();
       }
@@ -2697,7 +2927,9 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
       }
     }
     if (item) // If we got a valid item, do the lookup
-      bReturn = GetItemBool(item, condition); // Image prioritizes images over labels (in the case of music item ratings for instance)
+      /* PLEX */
+      bReturn = GetItemBool(item, condition, info.GetSecondCondition()); // Image prioritizes images over labels (in the case of music item ratings for instance)
+      /* END PLEX */
   }
   else
   {
@@ -3095,6 +3327,64 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
             bReturn = g_playlistPlayer.GetRepeat(playlistid) == PLAYLIST::REPEAT_ONE;
         }
         break;
+
+      /* PLEX */
+      case CONTAINER_PLEXCONTENT:
+        {
+          CStdString match = m_stringParameters[info.GetData2()];
+          CGUIWindow* window = dynamic_cast<CGUIPlexMediaWindow *>(GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW));
+          if (window)
+            bReturn = ((CGUIPlexMediaWindow *)window)->MatchPlexContent(match);
+        }
+        break;
+      case CONTAINER_PLEXFILTER:
+        {
+          CStdString match = m_stringParameters[info.GetData2()];
+          CGUIWindow* window = dynamic_cast<CGUIPlexMediaWindow *>(GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW));
+          if (window)
+            bReturn = ((CGUIPlexMediaWindow *)window)->MatchPlexFilter(match);
+        }
+        break;
+      case CONTAINER_UNIFORM_PROPERTY:
+        {
+          CStdString property = m_stringParameters[info.GetData2()];
+          CGUIWindow* window = dynamic_cast<CGUIPlexMediaWindow *>(GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW));
+          if (window)
+            bReturn = ((CGUIPlexMediaWindow *)window)->MatchUniformProperty(property);
+        }
+        break;
+      //case SYSTEM_PLEX_PLAYQUEUE:
+      //  {
+      //    CStdString pq = m_stringParameters[info.GetData1()];
+      //    boost::to_lower(pq);
+
+      //    if (pq == "music" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_MUSIC))
+      //      bReturn = true;
+      //    else if (pq == "clip" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) == PLEX_DIR_TYPE_CLIP)
+      //      bReturn = true;
+      //    else if (pq == "video" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) != PLEX_DIR_TYPE_CLIP)
+      //      bReturn = true;
+      //    else if (pq == "any" && g_plexApplication.playQueueManager->getPlayQueuesCount())
+      //      bReturn = true;
+      //  }
+      //case VIDEOPLAYER_PLEXCONTENT:
+      //{
+      //  CStdString matchStr = m_stringParameters[info.GetData1()];
+
+      //  CStdStringArray matchVec = StringUtils::SplitString(matchStr, ";");
+      //  CStdString content = PlexUtils::GetPlexContent(*m_currentFile);
+
+      //  BOOST_FOREACH(CStdString& match, matchVec)
+      //  {
+      //    match = StringUtils::Trim(match);
+      //    if(match.Equals(content))
+      //    {
+      //      bReturn = true;
+      //      break;
+      //    }
+      //  }
+      //}
+     /* END PLEX */
     }
   }
   return (info.m_info < 0) ? !bReturn : bReturn;
@@ -3409,6 +3699,14 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *f
     if (window)
       return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("season.thumb");
   }
+  /* PLEX */
+  //else if (info == CONTAINER_THUMB)
+  //{
+  //  CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+  //  if (window)
+  //    return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("thumb");
+  //}
+  /* END PLEX */
   else if (info == LISTITEM_THUMB || info == LISTITEM_ICON || info == LISTITEM_ACTUAL_ICON ||
           info == LISTITEM_OVERLAY || info == LISTITEM_RATING || info == LISTITEM_STAR_RATING)
   {
@@ -3420,6 +3718,25 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *f
         return GetItemImage(item.get(), info, fallback);
     }
   }
+  /* PLEX */
+  else if (info == MUSICPLAYER_NEXT_NEW_COVER)
+  {
+    if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_MUSIC)
+    {
+      if (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() - 1))
+      {
+        //CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
+        //for (int i=g_playlistPlayer.GetCurrentSong()+1; i < g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size(); i++)
+        //{
+        //  if (!(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[i]->GetArt(PLEX_ART_THUMB)))
+        //    return playlist[i]->GetArt(PLEX_ART_THUMB);
+        //}
+      }
+    }
+    return "";
+  }
+  /* END PLEX */
+
   return GetLabel(info, contextWindow, fallback);
 }
 
@@ -3753,6 +4070,12 @@ CStdString CGUIInfoManager::GetMusicTagLabel(int info, const CFileItem *item)
     return GetItemLabel(item, LISTITEM_PLAYCOUNT);
   case MUSICPLAYER_LASTPLAYED:
     return GetItemLabel(item, LISTITEM_LASTPLAYED);
+  /* PLEX */
+  case MUSICPLAYER_FANART:
+    if (item->HasProperty("fanart_fallback") == false)
+      return item->GetProperty("fanart_image").asString();
+    break;
+  /* END PLEX */
   }
   return "";
 }
@@ -4431,6 +4754,19 @@ bool CGUIInfoManager::GetItemInt(int &value, const CGUIListItem *item, int info)
     else
       value = 0;
     return true;
+
+    /* PLEX */
+    case LISTITEM_PLEXPROGRESS:
+    {
+      if (item->IsFileItem())
+      {
+        value = item->GetProperty("progress").asInteger();
+      }
+      return true;
+    }
+      break;
+    /* END PLEX */
+
   }
 
   value = 0;
@@ -4440,6 +4776,18 @@ bool CGUIInfoManager::GetItemInt(int &value, const CGUIListItem *item, int info)
 CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::string *fallback)
 {
   if (!item) return "";
+
+  /* PLEX */
+  if (info >= MULTI_INFO_START && info <= MULTI_INFO_END)
+  {
+    const GUIInfo multiInfo = m_multiInfo[info - MULTI_INFO_START];
+    if (multiInfo.m_info == LISTITEM_COMPOSITE_IMAGE)
+    {
+      CStdString args = m_stringParameters[multiInfo.GetData1()];
+      return PlexUtils::GetCompositeImageUrl(*item, args);
+    }
+  }
+  /* END PLEX */
 
   if (info >= CONDITIONAL_LABEL_START && info <= CONDITIONAL_LABEL_END)
     return GetSkinVariableString(info, false, item);
@@ -4485,6 +4833,9 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
       return item->GetVideoInfoTag()->m_strTitle;
     if (item->HasMusicInfoTag())
       return item->GetMusicInfoTag()->GetTitle();
+    /* PLEX */
+    return item->GetLabel();
+    /* END PLEX */
     break;
   case LISTITEM_ORIGINALTITLE:
     if (item->HasVideoInfoTag())
@@ -4513,6 +4864,11 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
     }
   case LISTITEM_TRACKNUMBER:
     {
+      /* PLEX */
+      if (item->HasProperty("index"))
+        return item->GetProperty("index").asString();
+      /* END PLEX */
+
       CStdString track;
       if (item->HasMusicInfoTag())
         track = StringUtils::Format("%i", item->GetMusicInfoTag()->GetTrackNumber());
@@ -4628,6 +4984,12 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
   case LISTITEM_RATING:
     {
       CStdString rating;
+      /* PLEX */
+      if (item->HasProperty("rating"))
+      {
+        rating = StringUtils::Format("%2.2f", item->GetProperty("rating").asDouble());
+      }
+      /* END PLEX */
       if (item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_fRating > 0.f) // movie rating
         rating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
       else if (item->HasMusicInfoTag() && item->GetMusicInfoTag()->GetRating() > '0')
@@ -4661,6 +5023,19 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
     {
       return StringUtils::Format("%i", item->m_iprogramCount);;
     }
+  /* PLEX */
+  case LISTITEM_DURATION_STRING:
+    {
+      if (item->HasVideoInfoTag())
+      {
+        if (item->GetVideoInfoTag()->GetDuration() > 0)
+          return StringUtils::SecondsToTimeString(item->GetVideoInfoTag()->GetDuration(), TIME_FORMAT_GUESS);
+      }
+      else
+        return GetItemLabel(item, LISTITEM_DURATION);
+    }
+  /* END PLEX */
+
   case LISTITEM_DURATION:
     {
       CStdString duration;
@@ -4761,6 +5136,14 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
     break;
   case LISTITEM_ACTUAL_ICON:
     return item->GetIconImage();
+
+  /* PLEX */
+  //case LISTITEM_BANNER:
+  //    return item->GetArt(PLEX_ART_BANNER);
+ case LISTITEM_GRANDPARENT_THUMB:
+    return item->GetArt(PLEX_ART_TVSHOW_THUMB);
+  /* END PLEX */
+
   case LISTITEM_ICON:
     {
       CStdString strThumb = item->GetArt("thumb");
@@ -5168,6 +5551,7 @@ CStdString CGUIInfoManager::GetItemImage(const CFileItem *item, int info, std::s
   return GetItemLabel(item, info, fallback);
 }
 
+#ifndef __PLEX__
 bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
 {
   if (!item) return false;
@@ -5285,6 +5669,7 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
 
   return false;
 }
+#endif
 
 void CGUIInfoManager::ResetCache()
 {
@@ -5622,6 +6007,85 @@ bool CGUIInfoManager::ConditionsChangedValues(const std::map<INFO::InfoPtr, bool
   }
   return false;
 }
+
+/* PLEX */
+bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition, int secondCondition) const
+{
+  if (!item) return false;
+  if (condition >= LISTITEM_PROPERTY_START && condition - LISTITEM_PROPERTY_START < (int)m_listitemProperties.size())
+  { // grab the property
+    CStdString property = m_listitemProperties[condition - LISTITEM_PROPERTY_START];
+    return item->GetProperty(property).asBoolean();
+  }
+  else if (condition == LISTITEM_ISPLAYING)
+  {
+    if (!g_application.m_pPlayer->IsPlaying())
+      return false;
+
+    CFileItemPtr gitem = g_application.CurrentFileItemPtr();
+    if (gitem)
+    {
+      if (item->IsFileItem())
+      {
+        const CFileItem* fitem = static_cast<const CFileItem*>(item);
+        if (fitem->HasMusicInfoTag() && gitem->HasMusicInfoTag())
+        {
+          if ((fitem->GetMusicInfoTag()->GetDatabaseId() == gitem->GetMusicInfoTag()->GetDatabaseId()) ||
+              (fitem->GetProperty("key").asString() == gitem->GetProperty("key").asString()))
+            return true;
+          else
+            return false;
+        }
+        else if (fitem->GetPlexDirectoryType() == PLEX_DIR_TYPE_PLAYLIST)
+        {
+          if (item->HasProperty("unprocessed_ratingkey"))
+          {
+            int plID = fitem->GetProperty("unprocessed_ratingkey").asInteger();
+            CPlexPlayQueuePtr pq = g_plexApplication.playQueueManager->getPlayingPlayQueue();
+            if ((pq) && (pq->getPlaylistID() == plID))
+              return true;
+          }
+        }
+        
+        return fitem->GetPath() == gitem->GetPath();
+      }
+    }
+    return false;
+  }
+  else if (condition == LISTITEM_TYPE)
+  {
+    uint32_t param = secondCondition > 0 ? secondCondition : condition;
+    if (param > m_stringParameters.size())
+      return false;
+    return item->GetProperty("type").asString() == m_stringParameters[param];
+  }
+  //else if (condition == LISTITEM_STATUS)
+  //{
+  //  CStdString lhs;
+  //  switch (item->GetOverlayImageID())
+  //  {
+  //  case CGUIListItem::ICON_OVERLAY_IN_PROGRESS: lhs = "inprogress"; break;
+  //  case CGUIListItem::ICON_OVERLAY_UNWATCHED: lhs = "unwatched"; break;
+  //  case CGUIListItem::ICON_OVERLAY_WATCHED: lhs = "watched"; break;
+  //  default: break;
+  //  }
+
+  //  uint32_t param = secondCondition > 0 ? secondCondition : condition;
+  //  if (param > m_stringParameters.size())
+  //    return false;
+  //  return lhs.CompareNoCase(m_stringParameters[param]) == 0;
+  //}
+  else if (condition == LISTITEM_ISSELECTED)
+    return item->IsSelected();
+  else if (condition == LISTITEM_IS_FOLDER)
+    return item->m_bIsFolder;
+  else if (condition == LISTITEM_IS_RESUMABLE)
+    return (item->IsFileItem() && ((const CFileItem *)item)->HasVideoInfoTag() && ((const CFileItem *)item)->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds > 0);
+  return false;
+}
+
+
+/* END PLEX */
 
 bool CGUIInfoManager::GetEpgInfoTag(CEpgInfoTag& tag) const
 {

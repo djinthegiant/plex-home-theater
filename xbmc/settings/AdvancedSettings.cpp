@@ -420,6 +420,13 @@ void CAdvancedSettings::Initialize()
 
   m_userAgent = g_sysinfo.GetUserAgent();
 
+  /* PLEX */
+  m_bEnableGDM = true;
+  m_bHideFanouts = false;
+  m_bForceJpegImageFormat = false;
+  m_bUseMatroskaTranscodes = true;
+  /* END PLEX */
+
   m_initialized = true;
 }
 
@@ -1177,6 +1184,13 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetInt(pElement, "algorithmdirtyregions",     m_guiAlgorithmDirtyRegions);
     XMLUtils::GetInt(pElement, "nofliptimeout",             m_guiDirtyRegionNoFlipTimeout);
   }
+
+  /* PLEX */
+  XMLUtils::GetBoolean(pRootElement, "enablegdm", m_bEnableGDM);
+  XMLUtils::GetBoolean(pRootElement, "hidefanouts", m_bHideFanouts);
+  XMLUtils::GetBoolean(pRootElement, "forcejpegimageformat", m_bForceJpegImageFormat);
+  XMLUtils::GetBoolean(pRootElement, "usematroskatranscode", m_bUseMatroskaTranscodes);
+  /* END PLEX */
 
   // load in the settings overrides
   CSettings::Get().Load(pRootElement, true);  // true to hide the settings we read in

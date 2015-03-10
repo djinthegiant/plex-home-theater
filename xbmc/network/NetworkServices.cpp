@@ -60,6 +60,9 @@
 #include "network/WebServer.h"
 #include "network/httprequesthandler/HTTPImageHandler.h"
 #include "network/httprequesthandler/HTTPVfsHandler.h"
+/* PLEX */
+#include "Remote/PlexHTTPRemoteHandler.h"
+/* END PLEX */
 #ifdef HAS_JSONRPC
 #include "network/httprequesthandler/HTTPJsonRpcHandler.h"
 #endif // HAS_JSONRPC
@@ -96,6 +99,9 @@ CNetworkServices::CNetworkServices()
   m_webserver(*new CWebServer),
   m_httpImageHandler(*new CHTTPImageHandler),
   m_httpVfsHandler(*new CHTTPVfsHandler)
+  /* PLEX */
+  , m_plexRemoteHandler(*new CPlexHTTPRemoteHandler)
+  /* END PLEX */
 #ifdef HAS_JSONRPC
   , m_httpJsonRpcHandler(*new CHTTPJsonRpcHandler)
 #endif // HAS_JSONRPC
@@ -108,6 +114,9 @@ CNetworkServices::CNetworkServices()
 #ifdef HAS_WEB_SERVER
   CWebServer::RegisterRequestHandler(&m_httpImageHandler);
   CWebServer::RegisterRequestHandler(&m_httpVfsHandler);
+  /* PLEX */
+  CWebServer::RegisterRequestHandler(&m_plexRemoteHandler);
+  /* END PLEX */
 #ifdef HAS_JSONRPC
   CWebServer::RegisterRequestHandler(&m_httpJsonRpcHandler);
 #endif // HAS_JSONRPC
@@ -125,6 +134,10 @@ CNetworkServices::~CNetworkServices()
   delete &m_httpImageHandler;
   CWebServer::UnregisterRequestHandler(&m_httpVfsHandler);
   delete &m_httpVfsHandler;
+  /* PLEX */
+  CWebServer::UnregisterRequestHandler(&m_plexRemoteHandler);
+  delete &m_plexRemoteHandler;
+  /* END PLEX */
 #ifdef HAS_JSONRPC
   CWebServer::UnregisterRequestHandler(&m_httpJsonRpcHandler);
   delete &m_httpJsonRpcHandler;

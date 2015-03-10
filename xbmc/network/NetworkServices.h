@@ -26,6 +26,9 @@
 class CWebServer;
 class CHTTPImageHandler;
 class CHTTPVfsHandler;
+/* PLEX */
+class CPlexHTTPRemoteHandler;
+/* END PLEX */
 #ifdef HAS_JSONRPC
 class CHTTPJsonRpcHandler;
 #endif // HAS_JSONRPC
@@ -99,6 +102,9 @@ private:
   CWebServer& m_webserver;
   CHTTPImageHandler& m_httpImageHandler;
   CHTTPVfsHandler& m_httpVfsHandler;
+  /* PLEX */
+  CPlexHTTPRemoteHandler& m_plexRemoteHandler;
+  /* END PLEX */
 #ifdef HAS_JSONRPC
   CHTTPJsonRpcHandler& m_httpJsonRpcHandler;
 #endif
