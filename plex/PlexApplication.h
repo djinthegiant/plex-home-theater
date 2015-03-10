@@ -13,17 +13,13 @@
 
 #include "guilib/IMsgTargetCallback.h"
 #include "threads/Thread.h"
-#include "GlobalsHandling.h"
+#include "utils/GlobalsHandling.h"
 #include "interfaces/IAnnouncer.h"
 #include "threads/Timer.h"
 #include "network/UdpClient.h"
 #include "FileItem.h"
 #include "Utility/PlexGlobalTimer.h"
-#include "PlexBusyIndicator.h"
-
-#ifdef TARGET_DARWIN_OSX
-#include "Helper/PlexHTHelper.h"
-#endif
+#include "Utility/PlexBusyIndicator.h"
 
 class CMyPlexManager;
 
@@ -37,14 +33,6 @@ typedef boost::shared_ptr<CPlexMediaServerClient> CPlexMediaServerClientPtr;
 
 class CPlexServerDataLoader;
 typedef boost::shared_ptr<CPlexServerDataLoader> CPlexServerDataLoaderPtr;
-
-#ifdef ENABLE_AUTOUPDATE
-class CPlexAutoUpdate;
-#endif
-
-class BackgroundMusicPlayer;
-
-class CPlexAnalytics;
 
 class CPlexServiceListener;
 typedef boost::shared_ptr<CPlexServiceListener> CPlexServiceListenerPtr;
@@ -76,14 +64,11 @@ typedef boost::shared_ptr<CGUIPlexDefaultActionHandler> CGUIPlexDefaultActionHan
 ///
 /// The hub of all Plex goodness.
 ///
-class PlexApplication : public IMsgTargetCallback,
-                        public ANNOUNCEMENT::IAnnouncer,
-                        public IPlexGlobalTimeout,
-                        public CUdpClient
+class PlexApplication : public ANNOUNCEMENT::IAnnouncer
 {
 public:
   PlexApplication()
-    : myPlexManager(NULL), remoteSubscriberManager(NULL), m_networkLoggingOn(false) {};
+    : myPlexManager(NULL), remoteSubscriberManager(NULL) {};
   void Start();
 
   /// Destructor
@@ -91,14 +76,6 @@ public:
   {
   }
 
-  /// Handle internal messages.
-  virtual bool OnMessage(CGUIMessage& message) { return false; };
-
-  void OnWakeUp();
-
-  void FailAddToPacketRender();
-
-  void ForceVersionCheck();
   CPlexServiceListenerPtr GetServiceListener() const
   {
     return m_serviceListener;
@@ -112,10 +89,6 @@ public:
   CPlexMediaServerClientPtr mediaServerClient;
   CPlexServerDataLoaderPtr dataLoader;
   CPlexThemeMusicPlayerPtr themeMusicPlayer;
-  CPlexAnalytics* analytics;
-#ifdef ENABLE_AUTOUPDATE
-  CPlexAutoUpdate* autoUpdater;
-#endif
   CPlexTimelineManagerPtr timelineManager;
   CPlexThumbCacher* thumbCacher;
   CPlexFilterManagerPtr filterManager;
@@ -127,21 +100,12 @@ public:
   CPlexDirectoryCachePtr directoryCache;
   CGUIPlexDefaultActionHandlerPtr defaultActionHandler;
 
-  void setNetworkLogging(bool);
-  void OnTimeout();
-  CStdString TimerName() const
-  {
-    return "plexApplication";
-  }
-  void sendNetworkLog(int level, const std::string& logline);
   void Shutdown();
   void preShutdown();
 
 private:
   /// Members
   CPlexServiceListenerPtr m_serviceListener;
-  CStdString m_ipAddress;
-  bool m_networkLoggingOn;
   bool m_triedToRestart;
 
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char* sender,

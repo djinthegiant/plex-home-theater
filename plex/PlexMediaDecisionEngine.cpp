@@ -9,9 +9,9 @@
 #include "PlexMediaDecisionEngine.h"
 
 #include "FileItem.h"
-#include "Variant.h"
+#include "utils/Variant.h"
 #include "FileSystem/PlexDirectory.h"
-#include "File.h"
+#include "filesystem/File.h"
 #include "Client/PlexTranscoderClient.h"
 #include "Client/PlexServerManager.h"
 #include "utils/StringUtils.h"
@@ -19,15 +19,15 @@
 #include "dialogs/GUIDialogBusy.h"
 #include "guilib/GUIWindowManager.h"
 #include "PlexApplication.h"
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "Client/PlexExtraInfoLoader.h"
 #include "dialogs/GUIDialogOK.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 #include "GUI/GUIDialogPlexMedia.h"
 #include "PlayListPlayer.h"
 #include "music/tags/MusicInfoTag.h"
-#include "GUISettings.h"
-#include "PlexPlayQueueManager.h"
+#include "settings/Settings.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "ApplicationMessenger.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ bool CPlexMediaDecisionEngine::resolveItem(const CFileItem& _item, CFileItem &re
 
     if ((CPlexTranscoderClient::getServerTranscodeMode(server) == CPlexTranscoderClient::PLEX_TRANSCODE_MODE_MKV))
     {
-      CStdString transcodeURL = CPlexTranscoderClient::GetTranscodeURL(server, item).Get();
+      std::string transcodeURL = CPlexTranscoderClient::GetTranscodeURL(server, item).Get();
       item.SetPath(transcodeURL);
     }
   }
@@ -89,7 +89,7 @@ bool CPlexMediaDecisionEngine::resolveItem(const CFileItem& _item, CFileItem &re
       offset = CGUIDialogPlexMedia::ProcessResumeChoice(item);
       
       // if we have trailers and that we restart movie from beginning, create a new PQ askign for trailers.
-      if (item.HasProperty("viewOffset") && (g_guiSettings.GetInt("videoplayer.playtrailercount") > 0) &&
+      if (item.HasProperty("viewOffset") && (CSettings::Get().GetInt("videoplayer.playtrailercount") > 0) &&
          (offset == 0) && !item.IsHomeMovie())
       {
         CPlexPlayQueuePtr pq = g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO);
@@ -262,20 +262,21 @@ CFileItemPtr CPlexMediaDecisionJob::ResolveIndirect(CFileItemPtr item)
   if (part->HasProperty("postURL"))
   {
     m_http.SetUserAgent(PLEX_HOME_THEATER_USER_AGENT);
-    m_http.ClearCookies();
+    //MERGE: m_http.ClearCookies();
 
     CLog::Log(LOGDEBUG, "CPlexMediaDecisionEngine::ResolveIndirect fetching PostURL");
-    CStdString postDataStr;
+    std::string postDataStr;
     if (!m_http.Get(part->GetProperty("postURL").asString(), postDataStr))
     {
       return CFileItemPtr();
     }
-    CHttpHeader headers = m_http.GetHttpHeader();
-    CStdString data = headers.GetHeaders() + postDataStr;
-    partUrl.SetOption("postURL", part->GetProperty("postURL").asString());
+    //MERGE: 
+    //CHttpHeader headers = m_http.GetHttpHeader();
+    //std::string data = headers.GetHeaders() + postDataStr;
+    //partUrl.SetOption("postURL", part->GetProperty("postURL").asString());
 
-    if (data.length() > 0)
-      m_dir.SetBody(data);
+    //if (data.length() > 0)
+    //  m_dir.SetBody(data);
 
     m_http.Reset();
   }
@@ -297,7 +298,7 @@ CFileItemPtr CPlexMediaDecisionJob::ResolveIndirect(CFileItemPtr item)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexMediaDecisionJob::AddHeaders()
 {
-  CStdString protocolOpts;
+  std::string protocolOpts;
   if (m_choosenMedia.HasProperty("httpHeaders"))
   {
     protocolOpts = m_choosenMedia.GetProperty("httpHeaders").asString();
@@ -312,7 +313,7 @@ void CPlexMediaDecisionJob::AddHeaders()
 
     if (m_choosenMedia.HasProperty("userAgent"))
     {
-      CStdString ua="User-Agent=" + CURL::Encode(m_choosenMedia.GetProperty("userAgent").asString());
+      std::string ua="User-Agent=" + CURL::Encode(m_choosenMedia.GetProperty("userAgent").asString());
       if (protocolOpts.empty())
         protocolOpts = ua;
       else
@@ -333,12 +334,12 @@ void CPlexMediaDecisionJob::AddHeaders()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexMediaDecisionJob::GetPartURL(CFileItemPtr mediaPart)
+std::string CPlexMediaDecisionJob::GetPartURL(CFileItemPtr mediaPart)
 {
-  CStdString unprocessed_key = mediaPart->GetProperty("unprocessed_key").asString();
+  std::string unprocessed_key = mediaPart->GetProperty("unprocessed_key").asString();
   if (mediaPart->HasProperty("file"))
   {
-    CStdString localPath = mediaPart->GetProperty("file").asString();
+    std::string localPath = mediaPart->GetProperty("file").asString();
     if (XFILE::CFile::Exists(localPath))
       return localPath;
     else if (boost::starts_with(unprocessed_key, "rtmp"))
@@ -350,7 +351,7 @@ CStdString CPlexMediaDecisionJob::GetPartURL(CFileItemPtr mediaPart)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CFileItemPtr CPlexMediaDecisionJob::GetUrl(const CStdString& url)
+CFileItemPtr CPlexMediaDecisionJob::GetUrl(const std::string& url)
 {
   CFileItemList list;
   if (m_dir.GetDirectory(url, list))
@@ -405,11 +406,11 @@ bool CPlexMediaDecisionJob::DoWork()
   if (mediaItem->m_mediaParts.size() > 1)
   {
     /* Multi-part video, now we build a stack URL */
-    CStdStringArray urls;
+    std::vector<std::string> urls;
     BOOST_FOREACH(CFileItemPtr mediaPart, mediaItem->m_mediaParts)
       urls.push_back(GetPartURL(mediaPart));
 
-    CStdString stackUrl;
+    std::string stackUrl;
     if (XFILE::CStackDirectory::ConstructStackPath(urls, stackUrl))
       m_choosenMedia.SetPath(stackUrl);
   }

@@ -1,10 +1,11 @@
-#include "URIUtils.h"
+#include "utils/URIUtils.h"
 #include "PlexUtils.h"
 #include "settings/Settings.h"
 #include "PlexTextureCache.h"
-#include "log.h"
-#include "File.h"
-#include "PlexJobs.h"
+#include "utils/log.h"
+#include "filesystem/File.h"
+#include "Utility/PlexJobs.h"
+#include "utils/StringUtils.h"
 
 using namespace XFILE;
 
@@ -37,7 +38,7 @@ CStdString CPlexTextureCache::CheckCachedImage(const CStdString &url, bool retur
   CTextureDetails details;
   CStdString cachedImage = GetCachedImage(url, details);
 
-  needsRecaching = (!cachedImage.IsEmpty());
+  needsRecaching = (!cachedImage.empty());
   return cachedImage;
 }
 
@@ -49,7 +50,7 @@ void CPlexTextureCache::BackgroundCacheImage(const CStdString &url)
     return; // image is already cached and doesn't need to be checked further
 
   // needs (re)caching
-  AddJob(new CPlexTextureCacheJob(UnwrapImageURL(url), details.hash));
+  AddJob(new CPlexTextureCacheJob(CTextureUtils::UnwrapImageURL(url), details.hash));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +71,7 @@ bool CPlexTextureCache::GetCachedTexture(const CStdString &url, CTextureDetails 
   if  (CFile::Exists(path + ".jpg"))
   {
     details.file = fileprefix + ".jpg";
-    details.hash = fileprefix.Right(8);
+    details.hash = StringUtils::Right(fileprefix, 8);
     return true;
   }
 
@@ -78,7 +79,7 @@ bool CPlexTextureCache::GetCachedTexture(const CStdString &url, CTextureDetails 
   if  (CFile::Exists(path + ".png"))
   {
     details.file = fileprefix + ".png";
-    details.hash = fileprefix.Right(8);
+    details.hash = StringUtils::Right(fileprefix, 8);
     return true;
   }
 
@@ -110,15 +111,16 @@ bool CPlexTextureCache::ClearCachedTexture(const CStdString &url, CStdString &ca
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexTextureCache::OnCachingComplete(bool success, CTextureCacheJob *job)
-{
-  // remove from our processing list
-  CSingleLock lock(m_processingSection);
-  std::set<CStdString>::iterator i = m_processing.find(job->m_url);
-  if (i != m_processing.end())
-    m_processing.erase(i);
-
-  m_completeEvent.Set();
-}
+//MERGE:
+//void CPlexTextureCache::OnCachingComplete(bool success, CTextureCacheJob *job)
+//{
+//  // remove from our processing list
+//  CSingleLock lock(m_processingSection);
+//  std::set<std::string>::iterator i = m_processing.find(job->m_url);
+//  if (i != m_processing.end())
+//    m_processing.erase(i);
+//
+//  m_completeEvent.Set();
+//}
 
 

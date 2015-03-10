@@ -7,8 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/algorithm/string.hpp>
-#include "Variant.h"
-#include "StdString.h"
+#include "utils/Variant.h"
 
 enum EPlexDirectoryType
 {
@@ -261,9 +260,6 @@ typedef std::map<std::string, CPlexServerPtr> PlexServerMap;
 typedef std::pair<std::string, CPlexServerPtr> PlexServerPair;
 
 #define PLEX_DEFAULT_PAGE_SIZE 50
-
-/* Property map definition */
-typedef boost::unordered_map<CStdString, CVariant> PropertyMap;
 
 #define PLEX_HOME_THEATER_CAPABILITY_STRING "navigation,playback,timeline,mirror,playqueues"
 #define PLEX_HOME_THEATER_USER_AGENT "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17"

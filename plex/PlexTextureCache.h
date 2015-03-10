@@ -23,7 +23,7 @@ public:
   virtual void IncrementUseCount(const CTextureDetails &details);
   virtual bool SetCachedTextureValid(const CStdString &url, bool updateable);
   virtual bool ClearCachedTexture(const CStdString &url, CStdString &cacheFile);
-  virtual void OnCachingComplete(bool success, CTextureCacheJob *job);
+  //MERGE: virtual void OnCachingComplete(bool success, CTextureCacheJob *job);
 };
 
 #endif // PLEXTEXTURECACHE_H

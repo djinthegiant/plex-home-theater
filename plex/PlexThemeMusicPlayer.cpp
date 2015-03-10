@@ -1,16 +1,16 @@
 #include "PlexThemeMusicPlayer.h"
 
-#include "playercorefactory/PlayerCoreFactory.h"
-#include "paplayer/PAPlayer.h"
-#include "settings/GUISettings.h"
+#include "cores/playercorefactory/PlayerCoreFactory.h"
+#include "cores/paplayer/PAPlayer.h"
+#include "settings/Settings.h"
 
 #include "cores/AudioEngine/AEFactory.h"
 
-#include "Directory.h"
+#include "filesystem/Directory.h"
 
-#include "Variant.h"
-#include "JobManager.h"
-#include "PlexJobs.h"
+#include "utils/Variant.h"
+#include "utils/JobManager.h"
+#include "Utility/PlexJobs.h"
 
 #include "Application.h"
 
@@ -24,10 +24,10 @@ void CPlexThemeMusicPlayer::initPlayer()
 {
   if (!m_player)
   {
-    m_player = CPlayerCoreFactory::CreatePlayer(EPC_PAPLAYER, *this);
-    m_player->RegisterAudioCallback(this);
-    m_player->SetVolume(g_guiSettings.GetInt("backgroundmusic.bgmusicvolume") / 100.0);
-    m_player->FadeOut(2 * 1000);
+    m_player = CPlayerCoreFactory::Get().CreatePlayer(EPC_PAPLAYER, *this);
+    ((PAPlayer*)m_player)->RegisterAudioCallback(this);
+    m_player->SetVolume(CSettings::Get().GetInt("backgroundmusic.bgmusicvolume") / 100.0);
+    //MERGE: m_player->FadeOut(2 * 1000);
   }
 }
 
@@ -37,7 +37,7 @@ void CPlexThemeMusicPlayer::destroy(int fadeOut)
   if (m_player)
   {
     CLog::Log(LOGDEBUG, "CPlexThemeMusicPlayer::OnJobComplete fading out during %d ms...", fadeOut);
-    m_player->FadeOut(fadeOut);
+    //MERGE: m_player->FadeOut(fadeOut);
     delete m_player;
     CLog::Log(LOGDEBUG, "CPlexThemeMusicPlayer::OnJobComplete fading out done...");
 
@@ -70,7 +70,7 @@ CFileItemPtr CPlexThemeMusicPlayer::getThemeItem(const CStdString &url)
 
 void CPlexThemeMusicPlayer::playForItem(const CFileItem &item)
 {
-  if (g_guiSettings.GetBool("backgroundmusic.thememusicenabled") && !g_application.IsPlaying())
+  if (CSettings::Get().GetBool("backgroundmusic.thememusicenabled") && !g_application.m_pPlayer->IsPlaying())
     CJobManager::GetInstance().AddJob(new CPlexThemeMusicPlayerJob(item.GetProperty("theme").asString()), this);
 }
 
@@ -99,7 +99,7 @@ void CPlexThemeMusicPlayer::OnJobComplete(unsigned int jobID, bool success, CJob
       m_player->OpenFile(*m_currentItem.get(), CPlayerOptions());
 
       // On some players like OMX, volume needs to be set after OpenFile
-      m_player->SetVolume(g_guiSettings.GetInt("backgroundmusic.bgmusicvolume") / 100.0);
+      m_player->SetVolume(CSettings::Get().GetInt("backgroundmusic.bgmusicvolume") / 100.0);
     }
   }
   else if (m_player && m_player->IsPlaying() && !m_player->IsPaused())

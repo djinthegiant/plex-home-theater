@@ -1,7 +1,10 @@
 #pragma once
 
+#ifndef PLEX_TARGET_NAME
+#define PLEX_TARGET_NAME "PlexHomeTheater"
+#endif
+
 #include <string>
-#include <StdString.h>
 #include "FileItem.h"
 #include "utils/XBMCTinyXML.h"
 #include "dialogs/GUIDialogBusy.h"
@@ -14,19 +17,19 @@ namespace PlexUtils
 {
   std::string GetHostName();
   bool IsValidIP(const std::string& address);
-  int FileAge(const CStdString &strFileName);
-  bool IsPlexMediaServer(const CStdString& strFile);
-  bool IsPlexWebKit(const CStdString& strFile);
-  bool IsStack(const CStdString& strFile);
+  int FileAge(const std::string &strFileName);
+  bool IsPlexMediaServer(const std::string& strFile);
+  bool IsPlexWebKit(const std::string& strFile);
+  bool IsStack(const std::string& strFile);
   std::string AppendPathToURL(const std::string& baseURL, const std::string& relativePath);
   void AppendPathToURL(CURL &baseURL, const std::string& relativePath);
-  int64_t Size(const CStdString& strFileName);
+  int64_t Size(const std::string& strFileName);
   std::string CacheImageUrl(const std::string& url);
   std::string CacheImageUrlAsync(const std::string &url);
 
   std::string GetMachinePlatform();
   std::string GetMachinePlatformVersion();
-  bool IsLocalNetworkIP(const CStdString &host);
+  bool IsLocalNetworkIP(const std::string &host);
 
   std::string GetStreamCodecName(CFileItemPtr item);
   std::string GetStreamChannelName(CFileItemPtr item);
@@ -41,13 +44,13 @@ namespace PlexUtils
   bool CurrentSkinHasFilters();
   
   std::string GetPlexCrashPath();
-  CStdString GetPrettyStreamNameFromStreamItem(CFileItemPtr stream);
-  CStdString GetPrettyStreamName(const CFileItem& fileItem, bool audio);
-  CStdString GetPrettyMediaItemName(const CFileItemPtr& mediaItem);
+  std::string GetPrettyStreamNameFromStreamItem(CFileItemPtr stream);
+  std::string GetPrettyStreamName(const CFileItem& fileItem, bool audio);
+  std::string GetPrettyMediaItemName(const CFileItemPtr& mediaItem);
 
-  CStdString GetSHA1SumFromURL(const CURL &url);
+  std::string GetSHA1SumFromURL(const CURL &url);
 
-  CStdString GetXMLString(const CXBMCTinyXML &document);
+  std::string GetXMLString(const CXBMCTinyXML &document);
 
   bool MakeWakeupPipe(SOCKET *pipe);
 
@@ -62,7 +65,7 @@ namespace PlexUtils
 
   unsigned long GetFastHash(std::string Data);
   bool IsPlayingPlaylist();
-  std::string GetCompositeImageUrl(const CFileItem& item, const CStdString& args);
+  std::string GetCompositeImageUrl(const CFileItem& item, const std::string& args);
   std::string GetPlexContent(const CFileItem& item);
   ePlexMediaFilterTypes GetFilterType(const CFileItem& item);
   ePlexMediaFilterTypes GetFilterType(EPlexDirectoryType type);
@@ -73,7 +76,7 @@ namespace PlexUtils
   int GetItemListID(const CFileItemPtr& item);
   int GetItemListID(const CFileItem& item);
   
-  std::string GetPlayListIDfromPath(CStdString plpath);
+  std::string GetPlayListIDfromPath(std::string plpath);
   void PrintItemProperties(CGUIListItemPtr item);
 
   CURL MakeUrlSecret(CURL url);

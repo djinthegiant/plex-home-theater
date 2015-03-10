@@ -7,54 +7,47 @@
  *
  */
 
+#include <boost/uuid/random_generator.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "Client/PlexNetworkServiceBrowser.h"
 #include "PlexApplication.h"
 #include "GUIUserMessages.h"
-#include "MediaSource.h"
-#include "plex/Helper/PlexHTHelper.h"
 #include "Client/MyPlex/MyPlexManager.h"
-#include "AdvancedSettings.h"
-#include "plex/CrashReporter/CrashSubmitter.h"
-
+#include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "Client/PlexServerManager.h"
 #include "Client/PlexServerDataLoader.h"
 #include "Remote/PlexRemoteSubscriberManager.h"
 #include "Client/PlexMediaServerClient.h"
-#include "PlexApplication.h"
 #include "interfaces/AnnouncementManager.h"
-#include "PlexAnalytics.h"
 #include "Client/PlexTimelineManager.h"
 #include "PlexThemeMusicPlayer.h"
-#include "VideoThumbLoader.h"
-#include "PlexFilterManager.h"
+#include "Owned/VideoThumbLoader.h"
+#include "Filters/PlexFilterManager.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
-#include "dialogs/GUIDialogVideoOSD.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "Utility/PlexProfiler.h"
 #include "Client/PlexTranscoderClient.h"
-#include "music/tags/MusicInfoTag.h"
 #include "FileSystem/PlexDirectoryCache.h"
 #include "GUI/GUIPlexDefaultActionHandler.h"
-
-#include "network/UdpClient.h"
-#include "DNSNameCache.h"
-
 #include "Client/PlexExtraInfoLoader.h"
 #include "Playlists/PlexPlayQueueManager.h"
 #include "GUI/GUIWindowStartup.h"
-
-#ifdef ENABLE_AUTOUPDATE
-#include "AutoUpdate/PlexAutoUpdate.h"
-#endif
-
-#include "AudioEngine/AEFactory.h"
-
-#include <sstream>
+#include "utils/log.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 void PlexApplication::Start()
 {
+  std::string uuid = CSettings::Get().GetString("system.uuid");
+  if (uuid.empty())
+  {
+    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    CSettings::Get().SetString("system.uuid", boost::lexical_cast<std::string>(uuid));
+  }
+
   timer = CPlexGlobalTimerPtr(new CPlexGlobalTimer);
 
   myPlexManager = new CMyPlexManager;
@@ -63,7 +56,6 @@ void PlexApplication::Start()
   serverManager = CPlexServerManagerPtr(new CPlexServerManager);
   remoteSubscriberManager = new CPlexRemoteSubscriberManager;
   mediaServerClient = CPlexMediaServerClientPtr(new CPlexMediaServerClient);
-  analytics = new CPlexAnalytics;
   timelineManager = CPlexTimelineManagerPtr(new CPlexTimelineManager);
   themeMusicPlayer = CPlexThemeMusicPlayerPtr(new CPlexThemeMusicPlayer);
   thumbCacher = new CPlexThumbCacher;
@@ -76,21 +68,15 @@ void PlexApplication::Start()
 
   serverManager->load();
 
-  ANNOUNCEMENT::CAnnouncementManager::AddAnnouncer(this);
-
-#ifdef ENABLE_AUTOUPDATE
-  autoUpdater = new CPlexAutoUpdate;
-#endif
-
-  new CrashSubmitter;
+  ANNOUNCEMENT::CAnnouncementManager::Get().AddAnnouncer(this);
 
   if (g_advancedSettings.m_bEnableGDM)
     m_serviceListener = CPlexServiceListenerPtr(new CPlexServiceListener);
 
   // Add the manual server if it exists and is enabled.
-  if (g_guiSettings.GetBool("plexmediaserver.manualaddress"))
+  if (CSettings::Get().GetBool("plexmediaserver.manualaddress"))
   {
-    string address = g_guiSettings.GetString("plexmediaserver.address");
+    std::string address = CSettings::Get().GetString("plexmediaserver.address");
     if (PlexUtils::IsValidIP(address))
     {
       PlexServerList list;
@@ -101,163 +87,14 @@ void PlexApplication::Start()
     }
   }
 
-  if (g_guiSettings.GetBool("advanced.collectanalytics"))
-    analytics->startLogging();
-
   myPlexManager->Create();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef TARGET_DARWIN_OSX
-// Hack
-class CRemoteRestartThread : public CThread
-{
-public:
-  CRemoteRestartThread() : CThread("RemoteRestart")
-  {
-  }
-  void Process()
-  {
-    // This blocks until the helper is restarted
-    PlexHTHelper::GetInstance().Restart();
-  }
-};
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::OnWakeUp()
-{
-  /* Scan servers */
-  m_serviceListener->ScanNow();
-  myPlexManager->Poke();
-
-#ifdef TARGET_DARWIN_OSX
-  CRemoteRestartThread* hack = new CRemoteRestartThread;
-  hack->Create(true);
-#endif
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::FailAddToPacketRender()
-{
-  if (g_application.m_pPlayer->IsPassthrough() && !m_triedToRestart)
-  {
-    CLog::Log(LOGDEBUG,
-              "CPlexApplication::FailAddToPacketRender Let's try to restart the media player");
-    CApplicationMessenger::Get().MediaRestart(false);
-    m_triedToRestart = true;
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::ForceVersionCheck()
-{
-#ifdef ENABLE_AUTOUPDATE
-  autoUpdater->ForceVersionCheckInBackground();
-#endif
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::setNetworkLogging(bool onOff)
-{
-  if (!myPlexManager->IsSignedIn())
-  {
-    g_guiSettings.SetBool("debug.networklogging", false);
-    return;
-  }
-
-  if (onOff && !m_networkLoggingOn)
-  {
-    if (!Create())
-    {
-      CLog::Log(LOGWARNING, "CPlexApplication::setNetworkLogging failed to enable UDPClient");
-      g_guiSettings.SetBool("debug.networklogging", false);
-      return;
-    }
-
-    if (!CDNSNameCache::Lookup("logs.papertrailapp.com", m_ipAddress))
-    {
-      CLog::Log(LOGWARNING, "CPlexApplication::setNetworkLogging failed to resolve papertrail");
-      g_guiSettings.SetBool("debug.networklogging", false);
-      return;
-    }
-    timer->SetTimeout(1200000, this);
-    m_networkLoggingOn = true;
-
-    CLog::Log(LOGINFO, "Plex Home Theater v%s (%s %s) @ %s", g_infoManager.GetVersion().c_str(),
-              PlexUtils::GetMachinePlatform().c_str(),
-              PlexUtils::GetMachinePlatformVersion().c_str(),
-              myPlexManager->GetCurrentUserInfo().email.c_str());
-  }
-  else if (!onOff && m_networkLoggingOn)
-  {
-    Destroy();
-
-    m_networkLoggingOn = false;
-    timer->RemoveTimeout(this);
-
-    CLog::Log(LOGWARNING, "CPlexApplication::setNetworkLogging stopped networkLogging");
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::OnTimeout()
-{
-  g_guiSettings.SetBool("debug.networklogging", false);
-  m_networkLoggingOn = false;
-  Destroy();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void PlexApplication::sendNetworkLog(int level, const std::string& logline)
-{
-  if (boost::contains(logline, "DEBUG: UDPCLIENT"))
-    return;
-
-  if (!m_networkLoggingOn)
-    return;
-
-  if (!myPlexManager->IsSignedIn())
-    return;
-
-  int priority = 16 * 8;
-
-  switch (level)
-  {
-    case LOGSEVERE:
-    case LOGFATAL:
-    case LOGERROR:
-      priority += 0;
-    case LOGWARNING:
-      priority += 4;
-    case LOGNOTICE:
-    case LOGINFO:
-      priority += 6;
-    case LOGDEBUG:
-      priority += 7;
-  }
-
-  tm t;
-  CDateTime::GetCurrentDateTime().GetAsTm(t);
-  char time[128];
-  strftime(time, 63, "%b %d %H:%M:%S", &t);
-
-  std::stringstream s;
-  s << "<" << priority << ">" + std::string(time) << " x "
-    << "Plex Home Theater: ";
-  s << "[" << myPlexManager->GetCurrentUserInfo().email << "] ";
-
-  int strleft = 1024 - s.str().size();
-  s << logline.substr(0, strleft);
-
-  CStdString packet(s.str());
-  Send(m_ipAddress, 60969, packet);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void PlexApplication::preShutdown()
 {
-  analytics->stopLogging();
+  ANNOUNCEMENT::CAnnouncementManager::Get().RemoveAnnouncer(this);
+
   remoteSubscriberManager->Stop();
   timer->StopAllTimers();
   themeMusicPlayer->stop();
@@ -277,10 +114,9 @@ void PlexApplication::Shutdown()
 {
   CLog::Log(LOGINFO, "CPlexApplication shutting down!");
 
-  delete extraInfo;
+  SAFE_DELETE(extraInfo);
 
-  delete myPlexManager;
-  delete analytics;
+  SAFE_DELETE(myPlexManager);
 
   timer.reset();
 
@@ -303,16 +139,12 @@ void PlexApplication::Shutdown()
   directoryCache.reset();
   defaultActionHandler.reset();
 
-  OnTimeout();
+  themeMusicPlayer.reset();
+  playQueueManager.reset();
 
-  delete remoteSubscriberManager;
-  remoteSubscriberManager = NULL;
+  SAFE_DELETE(remoteSubscriberManager);
 
-#ifdef ENABLE_AUTOUPDATE
-  delete autoUpdater;
-#endif
-
-  delete thumbCacher;
+  SAFE_DELETE(thumbCacher);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +183,7 @@ void PlexApplication::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char* 
 
   if ((stricmp(message, "OnScreensaverDeactivated") == 0) && (stricmp(sender, "xbmc") == 0))
   {
-    if (!g_application.IsPlaying() && g_plexApplication.myPlexManager->IsPinProtected() && !g_guiSettings.GetBool("myplex.automaticlogin"))
+    if (!g_application.m_pPlayer->IsPlaying() && g_plexApplication.myPlexManager->IsPinProtected() && !CSettings::Get().GetBool("myplex.automaticlogin"))
     {
       CLog::Log(LOGDEBUG, "PlexApplication::Announce resuming from screensaver");
       g_windowManager.ActivateWindow(WINDOW_STARTUP_ANIM);
@@ -360,5 +192,12 @@ void PlexApplication::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char* 
       if (window)
         window->allowEscOut(false);
     }
+  }
+  else if (flag == ANNOUNCEMENT::System && !strcmp(sender, "xbmc") && !strcmp(message, "OnWake"))
+  {
+    /* Scan servers */
+    if (m_serviceListener)
+      m_serviceListener->ScanNow();
+    myPlexManager->Poke();
   }
 }

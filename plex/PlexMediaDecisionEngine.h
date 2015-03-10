@@ -13,7 +13,7 @@
 #include "FileSystem/PlexDirectory.h"
 #include "threads/Thread.h"
 #include "filesystem/CurlFile.h"
-#include "Job.h"
+#include "utils/Job.h"
 
 class CPlexMediaDecisionJob : public CJob
 {
@@ -27,10 +27,10 @@ public:
 
 private:
   // allow override for tests.
-  virtual CFileItemPtr GetUrl(const CStdString &url);
+  virtual CFileItemPtr GetUrl(const std::string &url);
   virtual CFileItemPtr ResolveIndirect(CFileItemPtr item);
 
-  CStdString GetPartURL(CFileItemPtr mediaPart);
+  std::string GetPartURL(CFileItemPtr mediaPart);
   void AddHeaders();
 
   XFILE::CPlexDirectory m_dir;

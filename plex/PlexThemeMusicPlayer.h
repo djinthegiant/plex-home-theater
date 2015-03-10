@@ -4,7 +4,7 @@
 #include "FileItem.h"
 #include "cores/IPlayer.h"
 #include "threads/Timer.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 
 class CPlexThemeMusicPlayer : public IPlayerCallback, public IAudioCallback, public IJobCallback
 {

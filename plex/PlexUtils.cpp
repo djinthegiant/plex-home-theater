@@ -10,27 +10,29 @@
 #include "Third-Party/hash-library/sha1.h"
 
 #include "PlexUtils.h"
-#include "File.h"
-#include "URIUtils.h"
-#include "StackDirectory.h"
+#include "filesystem/File.h"
+#include "utils/URIUtils.h"
+#include "filesystem/StackDirectory.h"
 #include "URL.h"
 #include "TextureCache.h"
 
-#include "SystemInfo.h"
+#include "utils/SystemInfo.h"
 
 #include "utils/StringUtils.h"
 #include "addons/Skin.h"
 #include "Client/PlexMediaServerClient.h"
 #include "PlexApplication.h"
-#include "GUIWindowManager.h"
-#include "Key.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
 #include "GUI/GUIPlexMediaWindow.h"
 #include "Application.h"
 #include "threads/Atomics.h"
 #include "music/tags/MusicInfoTag.h"
 #include "video/VideoInfoTag.h"
+#include "playlists/PlayList.h"
+#include "PlayListPlayer.h"
 
-#include "File.h"
+#include "utils/log.h"
 
 #ifdef TARGET_DARWIN_OSX
 #include <CoreServices/CoreServices.h>
@@ -45,7 +47,7 @@ using namespace boost;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool PlexUtils::IsLocalNetworkIP(const CStdString &host)
+bool PlexUtils::IsLocalNetworkIP(const std::string &host)
 {
   bool isLocal = false;
   if (starts_with(host, "10.") || starts_with(host, "192.168.") || starts_with(host, "127.0.0.1"))
@@ -93,7 +95,7 @@ std::string PlexUtils::CacheImageUrlAsync(const std::string &url)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-int64_t PlexUtils::Size(const CStdString& strFileName)
+int64_t PlexUtils::Size(const std::string& strFileName)
 {
   struct __stat64 buffer;
   if (XFILE::CFile::Stat(strFileName, &buffer) == 0)
@@ -145,7 +147,7 @@ string PlexUtils::AppendPathToURL(const string& baseURL, const string& relativeP
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int PlexUtils::FileAge(const CStdString &strFileName)
+int PlexUtils::FileAge(const std::string &strFileName)
 {
   struct __stat64 stat;
   if(XFILE::CFile::Stat(strFileName, &stat) == 0)
@@ -186,7 +188,7 @@ string PlexUtils::GetHostName()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool PlexUtils::IsPlexMediaServer(const CStdString& strFile)
+bool PlexUtils::IsPlexMediaServer(const std::string& strFile)
 {
   CURL url(strFile);
   if (url.GetProtocol() == "plexserver" || url.GetProtocol() == "plex")
@@ -196,7 +198,7 @@ bool PlexUtils::IsPlexMediaServer(const CStdString& strFile)
   if (URIUtils::IsStack(strFile))
   {
     XFILE::CStackDirectory dir;
-    CStdString firstFile = dir.GetFirstStackedFile(strFile);
+    std::string firstFile = dir.GetFirstStackedFile(strFile);
     return IsPlexMediaServer(firstFile);
   }
 
@@ -204,9 +206,9 @@ bool PlexUtils::IsPlexMediaServer(const CStdString& strFile)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool PlexUtils::IsPlexWebKit(const CStdString& strFile)
+bool PlexUtils::IsPlexWebKit(const std::string& strFile)
 {
-  return strFile.Find("/:/webkit") != -1;
+  return strFile.find("/:/webkit") != std::string::npos;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -453,12 +455,14 @@ std::string PlexUtils::GetPlexCrashPath()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString PlexUtils::GetPrettyMediaItemName(const CFileItemPtr& mediaItem)
+std::string PlexUtils::GetPrettyMediaItemName(const CFileItemPtr& mediaItem)
 {
-  CStdString label;
-  CStdString videoCodec = CStdString(mediaItem->GetProperty("mediaTag-videoCodec").asString()).ToUpper();
-  CStdString videoRes = CStdString(mediaItem->GetProperty("mediaTag-videoResolution").asString()).ToUpper();
-  CStdString audioLabel = g_localizeStrings.Get(13205);
+  std::string label;
+  std::string videoCodec = std::string(mediaItem->GetProperty("mediaTag-videoCodec").asString());
+  StringUtils::ToUpper(videoCodec);
+  std::string videoRes = std::string(mediaItem->GetProperty("mediaTag-videoResolution").asString());
+  StringUtils::ToUpper(videoRes);
+  std::string audioLabel = g_localizeStrings.Get(13205);
   CFileItemPtr part = mediaItem->m_mediaParts[0];
   if (part)
   {
@@ -486,9 +490,9 @@ CStdString PlexUtils::GetPrettyMediaItemName(const CFileItemPtr& mediaItem)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString PlexUtils::GetPrettyStreamNameFromStreamItem(CFileItemPtr stream)
+std::string PlexUtils::GetPrettyStreamNameFromStreamItem(CFileItemPtr stream)
 {
-  CStdString name;
+  std::string name;
 
   if (stream->HasProperty("language") && !stream->GetProperty("language").asString().empty())
     name = stream->GetProperty("language").asString();
@@ -533,7 +537,7 @@ CStdString PlexUtils::GetPrettyStreamNameFromStreamItem(CFileItemPtr stream)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-CStdString PlexUtils::GetPrettyStreamName(const CFileItem &fileItem, bool audio)
+std::string PlexUtils::GetPrettyStreamName(const CFileItem &fileItem, bool audio)
 {
   CFileItemPtr selectedStream;
   int numStreams = 0;
@@ -556,7 +560,7 @@ CStdString PlexUtils::GetPrettyStreamName(const CFileItem &fileItem, bool audio)
     }
   }
   
-  CStdString name;
+  std::string name;
   
   if (selectedStream)
     name = GetPrettyStreamNameFromStreamItem(selectedStream);
@@ -567,7 +571,7 @@ CStdString PlexUtils::GetPrettyStreamName(const CFileItem &fileItem, bool audio)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString PlexUtils::GetSHA1SumFromURL(const CURL &url)
+std::string PlexUtils::GetSHA1SumFromURL(const CURL &url)
 {
   SHA1 sha;
   XFILE::CFile file;
@@ -590,7 +594,7 @@ CStdString PlexUtils::GetSHA1SumFromURL(const CURL &url)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString PlexUtils::GetXMLString(const CXBMCTinyXML &document)
+std::string PlexUtils::GetXMLString(const CXBMCTinyXML &document)
 {
   CXBMCTinyXML ldoc(document);
 
@@ -763,7 +767,7 @@ ePlexMediaType PlexUtils::GetMediaTypeFromString(const std::string &typestr)
 ////////////////////////////////////////////////////////////////////////////////////////
 std::string PlexUtils::GetMediaStateString(ePlexMediaState state)
 {
-  CStdString strstate;
+  std::string strstate;
   switch (state) {
     case PLEX_MEDIA_STATE_STOPPED:
       strstate = "stopped";
@@ -812,7 +816,7 @@ unsigned long PlexUtils::GetFastHash(std::string Data)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool PlexUtils::IsPlayingPlaylist()
 {
-  if (!g_application.IsPlaying())
+  if (!g_application.m_pPlayer->IsPlaying())
     return false;
 
   int playlist = g_playlistPlayer.GetCurrentPlaylist();
@@ -823,18 +827,18 @@ bool PlexUtils::IsPlayingPlaylist()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-string PlexUtils::GetCompositeImageUrl(const CFileItem &item, const CStdString &args)
+string PlexUtils::GetCompositeImageUrl(const CFileItem &item, const std::string &args)
 {
   if (!item.HasProperty("composite"))
     return "";
 
   CURL newURL(item.GetProperty("composite").asString());
-  CStdStringArray argList = StringUtils::SplitString(args, ";", 0);
+  std::vector<std::string> argList = StringUtils::Split(args, ";", 0);
   if (argList.size() > 0)
   {
-    BOOST_FOREACH(const CStdString& arg, argList)
+    BOOST_FOREACH(const std::string& arg, argList)
     {
-      CStdStringArray kv = StringUtils::SplitString(arg, "=", 2);
+      std::vector<std::string> kv = StringUtils::Split(arg, "=", 2);
       if (kv.size() == 2)
         newURL.SetOption(kv[0], kv[1]);
     }
@@ -845,7 +849,7 @@ string PlexUtils::GetCompositeImageUrl(const CFileItem &item, const CStdString &
 ////////////////////////////////////////////////////////////////////////////////
 string PlexUtils::GetPlexContent(const CFileItem &item)
 {
-  CStdString content;
+  std::string content;
 
   if (item.HasProperty("sectionType") &&
       item.GetProperty("sectionType").asInteger() == PLEX_DIR_TYPE_HOME_MOVIES)
@@ -1064,15 +1068,15 @@ int PlexUtils::GetItemListID(const CFileItemPtr& item)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-std::string PlexUtils::GetPlayListIDfromPath(CStdString plpath)
+std::string PlexUtils::GetPlayListIDfromPath(std::string plpath)
 {
-  int pos = plpath.Find("playlists/");
+  int pos = plpath.find("playlists/");
   if (pos > 0)
   {
     pos += 10;
-    int endpos = plpath.Find("/", pos);
+    int endpos = plpath.find("/", pos);
     if (endpos)
-      return plpath.Mid(pos, endpos-pos);
+      return plpath.substr(pos, endpos-pos);
   }
   
   return "";
@@ -1081,9 +1085,9 @@ std::string PlexUtils::GetPlayListIDfromPath(CStdString plpath)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void PlexUtils::PrintItemProperties(CGUIListItemPtr item)
 {
-  PropertyMap props = item->GetAllProperties();
+  CGUIListItem::PropertyMap props = item->GetAllProperties();
   printf("Item Properties :\n");
-  for (PropertyMap::iterator it = props.begin(); it != props.end(); ++it)
+  for (CGUIListItem::PropertyMap::iterator it = props.begin(); it != props.end(); ++it)
   {
     printf("%s : %s\n", it->first.c_str(), it->second.c_str());
   }
