@@ -23,8 +23,8 @@
 
 #include "guilib/GUIWindow.h"
 #include "ThumbLoader.h"
-#include "Stopwatch.h"
-#include "PlexGlobalTimer.h"
+#include "utils/Stopwatch.h"
+#include "Utility/PlexGlobalTimer.h"
 
 class CGUIWindowNowPlaying : public CGUIWindow, public IPlexGlobalTimeout
 {

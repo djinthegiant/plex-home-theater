@@ -21,14 +21,15 @@
 #include "GUIWindowMyPlex.h"
 #include "guilib/GUILabelControl.h"
 #include "guilib/GUIButtonControl.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 #include "Client/MyPlex/MyPlexManager.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "guilib/GUITextBox.h"
 #include "guilib/GUIEditControl.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "ApplicationMessenger.h"
 #include "addons/Skin.h"
+#include "guilib/Key.h"
 
 #include "PlexApplication.h"
 
@@ -195,15 +196,15 @@ void CGUIWindowMyPlex::Close(bool forceClose, int nextWindowID, bool enableSound
                                                g_localizeStrings.Get(52622),
                                                g_localizeStrings.Get(106), g_localizeStrings.Get(107));
     if (!ok)
-      CApplicationMessenger::Get().ActivateWindow(WINDOW_MYPLEX_LOGIN, std::vector<CStdString>(), true);
+      CApplicationMessenger::Get().ActivateWindow(WINDOW_MYPLEX_LOGIN, std::vector<std::string>(), true);
     else if (m_goHome)
-      CApplicationMessenger::Get().ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<CStdString>(), true);
+      CApplicationMessenger::Get().ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<std::string>(), true);
     else
       g_windowManager.PreviousWindow();
     return;
   }
   if (m_goHome)
-    CApplicationMessenger::Get().ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<CStdString>(), true);
+    CApplicationMessenger::Get().ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<std::string>(), true);
   else
     g_windowManager.PreviousWindow();
 }
@@ -241,8 +242,8 @@ CGUIWindowMyPlex::OnMessage(CGUIMessage &message)
         if (!password)
           Close();
 
-        CStdString ustr = username->GetLabel2();
-        CStdString pstr = password->GetLabel2();
+        std::string ustr = username->GetLabel2();
+        std::string pstr = password->GetLabel2();
 
         if (ustr.empty() || pstr.empty())
         {

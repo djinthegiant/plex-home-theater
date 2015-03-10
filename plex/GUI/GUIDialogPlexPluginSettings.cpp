@@ -7,24 +7,24 @@
 //
 
 #include "Application.h"
-#include "GUIControlGroupList.h"
+#include "guilib/GUIControlGroupList.h"
 #include "GUIDialogPlexPluginSettings.h"
-#include "GUIDialogOK.h"
-#include "GUIKeyboardFactory.h"
-#include "GUIDialogNumeric.h"
-#include "GUIImage.h"
-#include "GUILabelControl.h"
-#include "GUIRadioButtonControl.h"
-#include "GUISpinControlEx.h"
-#include "GUIEditControl.h"
+#include "dialogs/GUIDialogOK.h"
+#include "guilib/GUIKeyboardFactory.h"
+#include "dialogs/GUIDialogNumeric.h"
+#include "guilib/GUIImage.h"
+#include "guilib/GUILabelControl.h"
+#include "guilib/GUIRadioButtonControl.h"
+#include "guilib/GUISpinControlEx.h"
+#include "guilib/GUIEditControl.h"
 #include "Util.h"
 #include "FileItem.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/Directory.h"
 #include "FileSystem/PlexDirectory.h"
-#include "LocalizeStrings.h"
-#include "Settings.h"
+#include "guilib/LocalizeStrings.h"
+#include "settings/Settings.h"
 #include "ApplicationMessenger.h"
 #include "utils/XBMCTinyXML.h"
 
@@ -44,7 +44,7 @@ using namespace std;
 using namespace XFILE;
 
 ////////////////////////////////////////////////////////////////////////////////
-void CPlexPluginSettings::Set(const CStdString& key, const CStdString& value)
+void CPlexPluginSettings::Set(const std::string& key, const std::string& value)
 {
   if (key == "") return;
   
@@ -58,7 +58,7 @@ void CPlexPluginSettings::Set(const CStdString& key, const CStdString& value)
   while (setting)
   {
     const char *id = setting->Attribute("id");
-    if (id && strcmpi(id, key) == 0)
+    if (id && strcmpi(id, key.c_str()) == 0)
     {
       setting->SetAttribute("value", value.c_str());
       return;
@@ -75,7 +75,7 @@ void CPlexPluginSettings::Set(const CStdString& key, const CStdString& value)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexPluginSettings::Get(const CStdString& key)
+std::string CPlexPluginSettings::Get(const std::string& key)
 {
   if (m_userXmlDoc.RootElement())
   {
@@ -84,7 +84,7 @@ CStdString CPlexPluginSettings::Get(const CStdString& key)
     while (setting)
     {
       const char *id = setting->Attribute("id");
-      if (id && strcmpi(id, key) == 0)
+      if (id && strcmpi(id, key.c_str()) == 0)
         return setting->Attribute("value");
       
       setting = setting->NextSiblingElement("setting");
@@ -98,7 +98,7 @@ CStdString CPlexPluginSettings::Get(const CStdString& key)
     while (setting)
     {
       const char *id = setting->Attribute("id");
-      if (id && strcmpi(id, key) == 0 && setting->Attribute("default"))
+      if (id && strcmpi(id, key.c_str()) == 0 && setting->Attribute("default"))
         return setting->Attribute("default");
       
       setting = setting->NextSiblingElement("setting");
@@ -155,7 +155,7 @@ bool CPlexPluginSettings::Load(TiXmlElement* root)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool CPlexPluginSettings::Save(const CStdString& path)
+bool CPlexPluginSettings::Save(const std::string& path)
 {
   // Build up URL parameters with id and value.
   TiXmlElement* root = m_userXmlDoc.RootElement();
@@ -240,7 +240,7 @@ bool CGUIDialogPlexPluginSettings::OnMessage(CGUIMessage& message)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void CGUIDialogPlexPluginSettings::ShowAndGetInput(const CStdString& path, const CStdString& compositeXml)
+void CGUIDialogPlexPluginSettings::ShowAndGetInput(const std::string& path, const std::string& compositeXml)
 {
   // Parse the settings XML.
   TiXmlDocument doc;
@@ -286,7 +286,7 @@ bool CGUIDialogPlexPluginSettings::ShowVirtualKeyboard(int iControl)
       {
         const char *type = setting->Attribute("type");
         const char *option = setting->Attribute("option");
-        CStdString value = ((CGUIButtonControl*) control)->GetLabel2();
+        std::string value = ((CGUIButtonControl*) control)->GetLabel2();
         
         if (strcmp(type, "text") == 0)
         {
@@ -333,7 +333,7 @@ bool CGUIDialogPlexPluginSettings::SaveSettings(void)
   TiXmlElement *setting = m_settings->GetPluginRoot()->FirstChildElement("setting");
   while (setting)
   {
-    CStdString id;
+    std::string id;
     if (setting->Attribute("id"))
       id = setting->Attribute("id");
     const char *type = setting->Attribute("type");
@@ -343,7 +343,7 @@ bool CGUIDialogPlexPluginSettings::SaveSettings(void)
     {
       const CGUIControl* control = GetControl(controlId);
       
-      CStdString value;
+      std::string value;
       switch (control->GetControlType())
       {
         case CGUIControl::GUICONTROL_BUTTON:
@@ -356,7 +356,7 @@ bool CGUIDialogPlexPluginSettings::SaveSettings(void)
           if (strcmpi(type, "fileenum") == 0 || strcmpi(type, "labelenum") == 0)
             value = ((CGUISpinControlEx*) control)->GetLabel();
           else
-            value.Format("%i", ((CGUISpinControlEx*) control)->GetValue());
+            value = StringUtils::Format("%i", ((CGUISpinControlEx*) control)->GetValue());
           break;
         default:
           break;
@@ -415,18 +415,18 @@ void CGUIDialogPlexPluginSettings::CreateControls()
     const char *type = setting->Attribute("type");
     const char *option = setting->Attribute("option");
     const char *id = setting->Attribute("id");
-    CStdString values;
+    std::string values;
     if (setting->Attribute("values"))
       values = setting->Attribute("values");
-    CStdString lvalues;
+    std::string lvalues;
     if (setting->Attribute("lvalues"))
       lvalues = setting->Attribute("lvalues");
-    CStdString entries;
+    std::string entries;
     if (setting->Attribute("entries"))
       entries = setting->Attribute("entries");
-    CStdString label;
+    std::string label;
     if (setting->Attribute("label") && atoi(setting->Attribute("label")) > 0)
-      label.Format("$LOCALIZE[%s]", setting->Attribute("label"));
+      label = StringUtils::Format("$LOCALIZE[%s]", setting->Attribute("label"));
     else
       label = setting->Attribute("label");
     
@@ -452,29 +452,29 @@ void CGUIDialogPlexPluginSettings::CreateControls()
       }
       else if (strcmpi(type, "enum") == 0 || strcmpi(type, "labelenum") == 0)
       {
-        vector<CStdString> valuesVec;
-        vector<CStdString> entryVec;
+        vector<std::string> valuesVec;
+        vector<std::string> entryVec;
         
         pControl = new CGUISpinControlEx(*pOriginalSpin);
         if (!pControl) return;
         ((CGUISpinControlEx *)pControl)->SetText(label);
         
-        if (!lvalues.IsEmpty())
-          CUtil::Tokenize(lvalues, valuesVec, "|");
+        if (!lvalues.empty())
+          StringUtils::Tokenize(lvalues, valuesVec, "|");
         else
-          CUtil::Tokenize(values, valuesVec, "|");
-        if (!entries.IsEmpty())
-          CUtil::Tokenize(entries, entryVec, "|");
+          StringUtils::Tokenize(values, valuesVec, "|");
+        if (!entries.empty())
+          StringUtils::Tokenize(entries, entryVec, "|");
         for (unsigned int i = 0; i < valuesVec.size(); i++)
         {
           int iAdd = i;
           if (entryVec.size() > i)
-            iAdd = atoi(entryVec[i]);
-          if (!lvalues.IsEmpty())
+            iAdd = atoi(entryVec[i].c_str());
+          if (!lvalues.empty())
           {
-            CStdString replace = g_localizeStringsTemp.Get(atoi(valuesVec[i]));
-            if (replace.IsEmpty())
-              replace = g_localizeStrings.Get(atoi(valuesVec[i]));
+            std::string replace = g_localizeStringsTemp.Get(atoi(valuesVec[i].c_str()));
+            if (replace.empty())
+              replace = g_localizeStrings.Get(atoi(valuesVec[i].c_str()));
             ((CGUISpinControlEx *)pControl)->AddLabel(replace, iAdd);
           }
           else
@@ -485,7 +485,7 @@ void CGUIDialogPlexPluginSettings::CreateControls()
           ((CGUISpinControlEx*) pControl)->SetValueFromLabel(m_settings->Get(id));
         }
         else
-          ((CGUISpinControlEx*) pControl)->SetValue(atoi(m_settings->Get(id)));
+          ((CGUISpinControlEx*) pControl)->SetValue(atoi(m_settings->Get(id).c_str()));
         
       }
       else if (strcmpi(type, "lsep") == 0 && pOriginalLabel)
@@ -539,30 +539,30 @@ void CGUIDialogPlexPluginSettings::EnableControls()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool CGUIDialogPlexPluginSettings::GetCondition(const CStdString &condition, const int controlId)
+bool CGUIDialogPlexPluginSettings::GetCondition(const std::string &condition, const int controlId)
 {
-  if (condition.IsEmpty()) return true;
+  if (condition.empty()) return true;
   
   bool bCondition = true;
   bool bCompare = true;
-  vector<CStdString> conditionVec;
-  if (condition.Find("+") >= 0)
-    CUtil::Tokenize(condition, conditionVec, "+");
+  vector<std::string> conditionVec;
+  if (condition.find("+") != std::string::npos)
+    StringUtils::Tokenize(condition, conditionVec, "+");
   else
   {
     bCondition = false;
     bCompare = false;
-    CUtil::Tokenize(condition, conditionVec, "|");
+    StringUtils::Tokenize(condition, conditionVec, "|");
   }
   
   for (unsigned int i = 0; i < conditionVec.size(); i++)
   {
-    vector<CStdString> condVec;
+    vector<std::string> condVec;
     if (!TranslateSingleString(conditionVec[i], condVec)) continue;
     
-    const CGUIControl* control2 = GetControl(controlId + atoi(condVec[1]));
+    const CGUIControl* control2 = GetControl(controlId + atoi(condVec[1].c_str()));
     
-    CStdString value;
+    std::string value;
     switch (control2->GetControlType())
     {
       case CGUIControl::GUICONTROL_BUTTON:
@@ -572,60 +572,59 @@ bool CGUIDialogPlexPluginSettings::GetCondition(const CStdString &condition, con
         value = ((CGUIRadioButtonControl*) control2)->IsSelected() ? "true" : "false";
         break;
       case CGUIControl::GUICONTROL_SPINEX:
-        value.Format("%i", ((CGUISpinControlEx*) control2)->GetValue());
+        value = StringUtils::Format("%i", ((CGUISpinControlEx*) control2)->GetValue());
         break;
       default:
         break;
     }
     
-    if (condVec[0].Equals("eq"))
+    if (condVec[0] == "eq")
     {
       if (bCompare)
-        bCondition &= value.Equals(condVec[2]);
+        bCondition &= value == condVec[2];
       else
-        bCondition |= value.Equals(condVec[2]);
+        bCondition |= value == condVec[2];
     }
-    else if (condVec[0].Equals("!eq"))
+    else if (condVec[0] == "!eq")
     {
       if (bCompare)
-        bCondition &= !value.Equals(condVec[2]);
+        bCondition &= value != condVec[2];
       else
-        bCondition |= !value.Equals(condVec[2]);
+        bCondition |= value != condVec[2];
     }
-    else if (condVec[0].Equals("gt"))
+    else if (condVec[0] == "gt")
     {
       if (bCompare)
-        bCondition &= (atoi(value) > atoi(condVec[2]));
+        bCondition &= (atoi(value.c_str()) > atoi(condVec[2].c_str()));
       else
-        bCondition |= (atoi(value) > atoi(condVec[2]));
+        bCondition |= (atoi(value.c_str()) > atoi(condVec[2].c_str()));
     }
-    else if (condVec[0].Equals("lt"))
+    else if (condVec[0] == "lt")
     {
       if (bCompare)
-        bCondition &= (atoi(value) < atoi(condVec[2]));
+        bCondition &= (atoi(value.c_str()) < atoi(condVec[2].c_str()));
       else
-        bCondition |= (atoi(value) < atoi(condVec[2]));
+        bCondition |= (atoi(value.c_str()) < atoi(condVec[2].c_str()));
     }
   }
   return bCondition;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool CGUIDialogPlexPluginSettings::TranslateSingleString(const CStdString &strCondition, vector<CStdString> &condVec)
+bool CGUIDialogPlexPluginSettings::TranslateSingleString(const std::string &strCondition, vector<std::string> &condVec)
 {
-  CStdString strTest = strCondition;
-  strTest.ToLower();
-  strTest.TrimLeft(" ");
-  strTest.TrimRight(" ");
+  std::string strTest = strCondition;
+  StringUtils::ToLower(strTest);
+  StringUtils::Trim(strTest, " ");
   
-  int pos1 = strTest.Find("(");
-  int pos2 = strTest.Find(",");
-  int pos3 = strTest.Find(")");
-  if (pos1 >= 0 && pos2 > pos1 && pos3 > pos2)
+  int pos1 = strTest.find("(");
+  int pos2 = strTest.find(",");
+  int pos3 = strTest.find(")");
+  if (pos1 != std::string::npos && pos2 > pos1 && pos3 > pos2)
   {
-    condVec.push_back(strTest.Left(pos1));
-    condVec.push_back(strTest.Mid(pos1 + 1, pos2 - pos1 - 1));
-    condVec.push_back(strTest.Mid(pos2 + 1, pos3 - pos2 - 1));
+    condVec.push_back(strTest.substr(0, pos1));
+    condVec.push_back(strTest.substr(pos1 + 1, pos2 - pos1 - 1));
+    condVec.push_back(strTest.substr(pos2 + 1, pos3 - pos2 - 1));
     return true;
   }
   return false;
@@ -641,7 +640,7 @@ void CGUIDialogPlexPluginSettings::SetDefaults()
     const CGUIControl* control = GetControl(controlId);
     if (control)
     {
-      CStdString value;
+      std::string value;
       switch (control->GetControlType())
       {
         case CGUIControl::GUICONTROL_BUTTON:

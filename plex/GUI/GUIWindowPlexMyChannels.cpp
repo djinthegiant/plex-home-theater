@@ -1,6 +1,6 @@
 #include "GUIWindowPlexMyChannels.h"
 #include "interfaces/Builtins.h"
-#include "log.h"
+#include "utils/log.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CGUIWindowPlexMyChannels::CGUIWindowPlexMyChannels()
@@ -18,8 +18,8 @@ bool CGUIWindowPlexMyChannels::OnSelect(int iItem)
   if (!pItem->HasProperty("mediaWindow"))
     return CGUIPlexMediaWindow::OnClick(iItem);
 
-  CStdString window = pItem->GetProperty("mediaWindow").asString();
-  CStdString action = "XBMC.ActivateWindow(" + window + "," + pItem->GetPath() + ",return)";
+  std::string window = pItem->GetProperty("mediaWindow").asString();
+  std::string action = "XBMC.ActivateWindow(" + window + "," + pItem->GetPath() + ",return)";
 
   CLog::Log(LOGDEBUG, "CGUIWindowPlexMyChannels::OnClick executing action %s", action.c_str());
 

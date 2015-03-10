@@ -27,15 +27,15 @@
 #include "dialogs/GUIDialogOK.h"
 #include "Application.h"
 #include "GUI/GUIDialogPlexUserSelect.h"
-#include "GUISettings.h"
+#include "settings/Settings.h"
 #include "PlexTypes.h"
-#include "log.h"
-#include "PlexDirectory.h"
+#include "utils/log.h"
+#include "FileSystem/PlexDirectory.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "guilib/LocalizeStrings.h"
 #include "input/XBMC_vkeys.h"
-#include "GUILabelControl.h"
-#include "PlexJobs.h"
+#include "guilib/GUILabelControl.h"
+#include "Utility/PlexJobs.h"
 #include "Client/MyPlex/MyPlexManager.h"
 
 #define CONTROL_LIST 3
@@ -67,7 +67,7 @@ bool CGUIWindowStartup::OnMessage(CGUIMessage& message)
 
     m_users.Clear();
 
-    if ((!g_guiSettings.GetBool("myplex.automaticlogin") &&
+    if ((!CSettings::Get().GetBool("myplex.automaticlogin") &&
          (g_plexApplication.myPlexManager->IsPinProtected() || g_plexApplication.myPlexManager->GetCurrentUserInfo().home))
         || m_allowEscOut)
     {
@@ -268,7 +268,7 @@ void CGUIWindowStartup::OnJobComplete(unsigned int jobID, bool success, CJob *jo
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowStartup::SelectUserByName(CStdString user)
+void CGUIWindowStartup::SelectUserByName(std::string user)
 {
   for (int i = 0; i < m_users.Size(); i++)
   {
@@ -347,8 +347,8 @@ void CGUIWindowStartup::OnNumber(unsigned int num)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CGUIWindowStartup::OnBackSpace()
 {
-  if (!m_pin.IsEmpty())
-    m_pin.Delete(m_pin.GetLength() - 1);
+  if (!m_pin.empty())
+    m_pin.erase(m_pin.length() - 1);
 
   setPinControlText(m_pin);
 }
@@ -361,13 +361,13 @@ void CGUIWindowStartup::PreviousWindow()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowStartup::setPinControlText(CStdString pin)
+void CGUIWindowStartup::setPinControlText(std::string pin)
 {
   CGUILabelControl* pLabel = (CGUILabelControl*)GetControl(CONTROL_INPUT_LABEL);
   if (pLabel)
   {
-    CStdString mask = "....";
-    pLabel->SetLabel(mask.Left(pin.size()));
+    std::string mask = "....";
+    pLabel->SetLabel(mask.substr(0, pin.size()));
   }
 }
 

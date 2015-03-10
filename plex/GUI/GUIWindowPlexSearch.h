@@ -25,11 +25,11 @@
 
 #include "FileItem.h"
 #include "guilib/GUIWindow.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "guilib/GUIEditControl.h"
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexGlobalTimer.h"
 #include "threads/CriticalSection.h"
-#include "PlexNavigationHelper.h"
+#include "Utility/PlexNavigationHelper.h"
 
 class CGUIWindowPlexSearch : public CGUIWindow, public IJobCallback, public IPlexGlobalTimeout
 {
@@ -49,20 +49,20 @@ class CGUIWindowPlexSearch : public CGUIWindow, public IJobCallback, public IPle
       return (m_currentSearchId.size() > 0);
     }
 
-    CStdString TimerName() const { return "plexSearch"; }
+    std::string TimerName() const { return "plexSearch"; }
 
   private:
     void InitWindow();
     void UpdateSearch();
     void OnTimeout();
-    CStdString GetString();
+    std::string GetString();
     void HideAllLists();
     void ProcessResults(CFileItemList *results);
     void Reset();
     CGUIEditControl *GetEditControl() const;
 
     std::vector<unsigned int> m_currentSearchId;
-    CStdString m_currentSearchString;
+    std::string m_currentSearchString;
     CCriticalSection m_threadsSection;
 
     std::map<int, int> m_resultMap;

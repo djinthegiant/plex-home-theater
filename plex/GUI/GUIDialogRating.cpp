@@ -1,14 +1,15 @@
 #include "GUIDialogRating.h"
-#include "GUIWindowManager.h"
-#include "GUIImage.h"
-#include "Key.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/GUIImage.h"
+#include "guilib/Key.h"
 #include "PlexTypes.h"
 #include "threads/SingleLock.h"
 
 #include "video/VideoInfoTag.h"
-#include "PlexDirectory.h"
+#include "FileSystem/PlexDirectory.h"
 #include "PlexApplication.h"
 #include "Client/PlexMediaServerClient.h"
+#include "utils/StringUtils.h"
 
 CGUIDialogRating::CGUIDialogRating(void)
 : CGUIDialog(WINDOW_DIALOG_RATING, "DialogRating.xml")
@@ -65,7 +66,7 @@ void CGUIDialogRating::SetHeading(int iHeading)
     g_windowManager.SendThreadMessage(msg, GetID());
 }
 
-void CGUIDialogRating::SetTitle(const CStdString& strTitle)
+void CGUIDialogRating::SetTitle(const std::string& strTitle)
 {
   Initialize();
   CGUIMessage msg(GUI_MSG_LABEL_SET, GetID(), 2);
@@ -86,8 +87,8 @@ void CGUIDialogRating::SetRating(float iRating)
   if (!image)
     return;
 
-  CStdString fileName;
-  fileName.Format("rating%d.png", (int)(iRating + 0.5f));
+  std::string fileName;
+  fileName = StringUtils::Format("rating%d.png", (int)(iRating + 0.5f));
   image->SetFileName(fileName);
   m_iRating = (int)iRating;
   SetInvalid();

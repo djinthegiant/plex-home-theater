@@ -1,8 +1,8 @@
 #include "GUIPlexWindowFocusSaver.h"
-#include "GUIControlGroup.h"
-#include "GUIBaseContainer.h"
-#include "GUIWindowManager.h"
-#include "log.h"
+#include "guilib/GUIControlGroup.h"
+#include "guilib/GUIBaseContainer.h"
+#include "guilib/GUIWindowManager.h"
+#include "utils/log.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CGUIPlexWindowFocusSaver::CGUIPlexWindowFocusSaver()

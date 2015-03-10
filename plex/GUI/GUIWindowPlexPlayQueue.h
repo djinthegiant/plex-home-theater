@@ -14,7 +14,7 @@ public:
   bool OnMessage(CGUIMessage &message);
   void GetContextButtons(int itemNumber, CContextButtons &buttons);
   bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
-  bool Update(const CStdString &strDirectory, bool updateFilterPath);
+  bool Update(const std::string &strDirectory, bool updateFilterPath);
   bool OnAction(const CAction &action);
   bool isItemPlaying(CFileItemPtr item);
   bool isPQ() const;

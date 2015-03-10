@@ -7,9 +7,9 @@
 //
 
 #include "GUIDialogPlayListSelection.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "PlexApplication.h"
-#include "PlexPlayQueueManager.h"
+#include "Playlists/PlexPlayQueueManager.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIDialogPlaylistSelection::OnMessage(CGUIMessage& message)

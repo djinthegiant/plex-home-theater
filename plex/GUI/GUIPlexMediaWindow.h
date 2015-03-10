@@ -12,13 +12,13 @@
 #include "video/windows/GUIWindowVideoNav.h"
 #include "guilib/GUIButtonControl.h"
 #include "guilib/GUIRadioButtonControl.h"
-#include "StringUtils.h"
-#include "JobManager.h"
+#include "utils/StringUtils.h"
+#include "utils/JobManager.h"
 #include "threads/Event.h"
 #include "Filters/PlexSectionFilter.h"
 #include "guilib/GUIButtonControl.h"
-#include "PlexNavigationHelper.h"
-#include "gtest/gtest_prod.h"
+#include "Utility/PlexNavigationHelper.h"
+//#include "gtest/gtest_prod.h"
 #include <set>
 
 // for trunc.
@@ -54,22 +54,22 @@ typedef std::pair<int, int> FetchJobPair;
 
 class CGUIPlexMediaWindow : public CGUIMediaWindow, public IJobCallback
 {    
-  friend class PlexMediaWindowTests;
-  FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_basic);
-  FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_cased);
-  FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_nomatch);
-  FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_twoArgs);
+  //friend class PlexMediaWindowTests;
+  //FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_basic);
+  //FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_cased);
+  //FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_nomatch);
+  //FRIEND_TEST(PlexMediaWindowTests, matchPlexFilter_twoArgs);
 
   public:
-    CGUIPlexMediaWindow(int windowId = WINDOW_VIDEO_NAV, const CStdString &xml = "MyVideoNav.xml") :
-      CGUIMediaWindow(windowId, xml), m_returningFromSkinLoad(false), m_hasAdvancedFilters(false), m_clearFilterButton(NULL) { m_loadType = LOAD_ON_GUI_INIT; };
+    CGUIPlexMediaWindow(int windowId = WINDOW_VIDEO_NAV, const std::string &xml = "MyVideoNav.xml") :
+      CGUIMediaWindow(windowId, xml.c_str()), m_returningFromSkinLoad(false), m_hasAdvancedFilters(false), m_clearFilterButton(NULL) { m_loadType = LOAD_ON_GUI_INIT; };
     bool OnMessage(CGUIMessage &message);
     bool OnAction(const CAction& action);
-    virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
+    virtual bool GetDirectory(const std::string &strDirectory, CFileItemList &items);
     void GetContextButtons(int itemNumber, CContextButtons &buttons);
 
-    bool Update(const CStdString &strDirectory, bool updateFilterPath, bool updateFromFilter);
-    bool Update(const CStdString &strDirectory, bool updateFilterPath);
+    bool Update(const std::string &strDirectory, bool updateFilterPath, bool updateFromFilter);
+    bool Update(const std::string &strDirectory, bool updateFilterPath);
     bool OnSelect(int item);
     bool OnPlayMedia(int iItem);
     bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
@@ -77,7 +77,7 @@ class CGUIPlexMediaWindow : public CGUIMediaWindow, public IJobCallback
     bool OnBack(int actionID);
     void OnFilterButton(int filterButtonId);
     void OnFilterSelected(const std::string& filterKey, int filterButtonId);
-    static CURL GetRealDirectoryUrl(const CStdString &strDirectory);
+    static CURL GetRealDirectoryUrl(const std::string &strDirectory);
 
     void SaveSelection();
     bool RestoreSelection();
@@ -87,9 +87,9 @@ class CGUIPlexMediaWindow : public CGUIMediaWindow, public IJobCallback
     void PlayAll(bool shuffle, const CFileItemPtr &fromHere = CFileItemPtr());
     void PlayAllPlayQueue(const CPlexServerPtr &server, bool shuffle, const CFileItemPtr &fromHere);
     void PlayAllLocalPlaylist(bool shuffle, const CFileItemPtr &fromHere);
-    bool MatchPlexContent(const CStdString& matchStr);
-    bool MatchPlexFilter(const CStdString& matchStr);
-    bool MatchUniformProperty(const CStdString& property);
+    bool MatchPlexContent(const std::string& matchStr);
+    bool MatchPlexFilter(const std::string& matchStr);
+    bool MatchUniformProperty(const std::string& property);
     CFileItemListPtr GetVecItems() const { return m_vecItems; }
     bool IsFiltered();
     bool CanFilterAdvanced();
@@ -123,7 +123,7 @@ private:
     bool UnwatchedEnabled() const;
     std::string GetFilteredURI(const CFileItem &item) const;
 
-    CStdString GetLevelURL();
+    std::string GetLevelURL();
 
     bool m_hasAdvancedFilters;
     CCriticalSection m_filterValuesSection;

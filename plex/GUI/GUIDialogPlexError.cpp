@@ -11,7 +11,7 @@ void CGUIDialogPlexError::ShowError(const CVariant &heading, const CVariant &lin
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CGUIDialogPlexError::GetLocalizedString(const CVariant &var)
+std::string CGUIDialogPlexError::GetLocalizedString(const CVariant &var)
 {
   if (var.isString())
     return var.asString();

@@ -1,6 +1,6 @@
 
 #include "GUIPlexDefaultActionHandler.h"
-#include "PlexExtraDataLoader.h"
+#include "FileSystem/PlexExtraDataLoader.h"
 #include "Application.h"
 #include "PlexApplication.h"
 #include "Playlists/PlexPlayQueueManager.h"
@@ -8,16 +8,16 @@
 #include <boost/foreach.hpp>
 #include "dialogs/GUIDialogYesNo.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "GUIBaseContainer.h"
+#include "guilib/GUIBaseContainer.h"
 #include "Client/PlexServerManager.h"
 #include "ApplicationMessenger.h"
-#include "VideoInfoTag.h"
-#include "GUIMessage.h"
+#include "video/VideoInfoTag.h"
+#include "guilib/GUIMessage.h"
 #include "GUI/GUIDialogPlayListSelection.h"
 #include "GUI/GUIDialogPlexError.h"
 #include "Client/PlexServer.h"
 #include "guilib/GUIKeyboardFactory.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +290,7 @@ bool CGUIPlexDefaultActionHandler::OnAction(int windowID, CAction action, CFileI
             CFileItemPtr plItem =  plDialog->GetSelectedItem();
             if (plItem)
             {
-              CStdString playlistID = plItem->GetProperty("ratingkey").asString();
+              std::string playlistID = plItem->GetProperty("ratingkey").asString();
               
               if (server)
               {
@@ -318,7 +318,7 @@ bool CGUIPlexDefaultActionHandler::OnAction(int windowID, CAction action, CFileI
       {
         if (IsItemPlaylistCompatible(item))
         {
-          CStdString playlistName;
+          std::string playlistName;
           if (CGUIKeyboardFactory::ShowAndGetInput(playlistName, g_localizeStrings.Get(52614), false))
           {
             CPlexServerPtr server = g_plexApplication.serverManager->FindFromItem(item);
@@ -380,7 +380,7 @@ void CGUIPlexDefaultActionHandler::GetContextButtonsForAction(int actionID, CFil
       break;
       
     case ACTION_PLEX_NOW_PLAYING:
-      if (g_application.IsPlaying())
+      if (g_application.m_pPlayer->IsPlaying())
         buttons.Add(actionID, 13350);
       break;
       
@@ -393,7 +393,7 @@ void CGUIPlexDefaultActionHandler::GetContextButtonsForAction(int actionID, CFil
     {
       if (item->IsVideo() && item->IsPlexMediaServer())
       {
-        CStdString viewOffset = item->GetProperty("viewOffset").asString();
+        std::string viewOffset = item->GetProperty("viewOffset").asString();
         
         if (item->GetVideoInfoTag()->m_playCount == 0)
           buttons.Add(actionID, 16103);
@@ -405,7 +405,7 @@ void CGUIPlexDefaultActionHandler::GetContextButtonsForAction(int actionID, CFil
     {
       if (item->IsVideo() && item->IsPlexMediaServer())
       {
-        CStdString viewOffset = item->GetProperty("viewOffset").asString();
+        std::string viewOffset = item->GetProperty("viewOffset").asString();
         
         if (item->GetVideoInfoTag()->m_playCount > 0 && viewOffset.size() == 0)
           buttons.Add(actionID, 16104);
@@ -544,12 +544,12 @@ void CGUIPlexDefaultActionHandler::PlayAll(CFileItemListPtr container, bool shuf
   if (container->HasProperty("plexServer"))
     server = g_plexApplication.serverManager->FindByUUID(container->GetProperty("plexServer").asString());
 
-  CStdString fromHereKey;
+  std::string fromHereKey;
   if (fromHere)
     fromHereKey = fromHere->GetProperty("key").asString();
 
   // take out the plexserver://plex part from above when passing it down
-  CStdString uri = GetFilteredURI(*container);
+  std::string uri = GetFilteredURI(*container);
 
   CPlexPlayQueueOptions options;
   options.startItemKey = fromHereKey;
@@ -588,7 +588,7 @@ std::string CGUIPlexDefaultActionHandler::GetFilteredURI(const CFileItem& item) 
   // set sourceType
   if (item.m_bIsFolder)
   {
-    CStdString sourceType = boost::lexical_cast<CStdString>(PlexUtils::GetFilterType(item));
+    std::string sourceType = boost::lexical_cast<std::string>(PlexUtils::GetFilterType(item));
     itemUrl.SetOption("sourceType", sourceType);
   }
 

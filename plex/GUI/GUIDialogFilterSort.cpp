@@ -10,8 +10,9 @@
 #include "plex/PlexTypes.h"
 #include "guilib/GUIControlGroupList.h"
 #include "guilib/GUILabelControl.h"
-#include "GUIWindowManager.h"
-#include "LocalizeStrings.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/LocalizeStrings.h"
+#include "guilib/Key.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CGUIDialogFilterSort::CGUIDialogFilterSort()

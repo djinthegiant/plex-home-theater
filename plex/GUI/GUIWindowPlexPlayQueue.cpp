@@ -1,6 +1,6 @@
 #include "GUIWindowPlexPlayQueue.h"
 #include "PlexApplication.h"
-#include "PlexPlayQueueManager.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "music/tags/MusicInfoTag.h"
 #include "GUIUserMessages.h"
 #include "Application.h"
@@ -68,21 +68,21 @@ void CGUIWindowPlexPlayQueue::GetContextButtons(int itemNumber, CContextButtons&
 
   g_plexApplication.defaultActionHandler->GetContextButtons(WINDOW_PLEX_PLAY_QUEUE, item, m_vecItems, buttons);
 
-  if (!g_application.IsPlaying())
+  if (!g_application.m_pPlayer->IsPlaying())
     buttons.Add(CONTEXT_BUTTON_EDIT, 52608);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowPlexPlayQueue::Update(const CStdString& strDirectory, bool updateFilterPath)
+bool CGUIWindowPlexPlayQueue::Update(const std::string& strDirectory, bool updateFilterPath)
 {
-  CStdString dirPath = strDirectory;
+  std::string dirPath = strDirectory;
   if (strDirectory.empty())
     dirPath = "plexserver://playqueue/audio";
 
-  CStdString plexEditMode = m_vecItems->GetProperty("PlexEditMode").asString();
+  std::string plexEditMode = m_vecItems->GetProperty("PlexEditMode").asString();
 
   // retrieve PQ itemID from selection
-  CStdString key;
+  std::string key;
   int selectedItemID = m_viewControl.GetSelectedItem();
   if (selectedItemID >= 0)
     key = m_vecItems->Get(selectedItemID)->GetProperty("key").asInteger();
@@ -99,7 +99,7 @@ bool CGUIWindowPlexPlayQueue::Update(const CStdString& strDirectory, bool update
     m_vecItems->SetProperty("PlexEditMode", plexEditMode);
 
     // restore selection if any
-    if (!key.IsEmpty())
+    if (!key.empty())
     {
       // try to restore selection based on PQ itemID
       for (int i = 0; i < m_vecItems->Size(); i++)
@@ -160,7 +160,7 @@ bool CGUIWindowPlexPlayQueue::OnContextButton(int itemNumber, CONTEXT_BUTTON but
     case CONTEXT_BUTTON_EDIT:
     {
       // toggle edit mode
-       if (!g_application.IsPlaying())
+       if (!g_application.m_pPlayer->IsPlaying())
         m_vecItems->SetProperty("PlexEditMode",
                                 m_vecItems->GetProperty("PlexEditMode").asString() == "1" ? "" : "1");
       break;

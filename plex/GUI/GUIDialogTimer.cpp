@@ -8,10 +8,10 @@
  */
 
 #include "GUIDialogTimer.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "GUIInfoManager.h"
-#include "GUIImage.h"
-#include "Key.h"
+#include "guilib/GUIImage.h"
+#include "guilib/Key.h"
 #include <boost/lexical_cast.hpp>
 #include "Util.h"
 #include "PlexTypes.h"
@@ -45,7 +45,7 @@ void CGUIDialogTimer::SendGUIMessage(CGUIMessage msg)
     g_windowManager.SendThreadMessage(msg, GetID());  
 }
 
-void CGUIDialogTimer::SetControlLabel(int controlId, CStdString str)
+void CGUIDialogTimer::SetControlLabel(int controlId, std::string str)
 {
   CGUIMessage msg(GUI_MSG_LABEL_SET, GetID(), controlId);
   msg.SetLabel(str);
@@ -93,8 +93,8 @@ bool CGUIDialogTimer::OnAction(const CAction &action)
     {
       ShowControl(100);
       
-      m_typedString.Format("%s%d", m_typedString.c_str(), action.GetID() - REMOTE_0);
-      CStdString m_labelString = m_typedString;
+      m_typedString = StringUtils::Format("%s%d", m_typedString.c_str(), action.GetID() - REMOTE_0);
+      std::string m_labelString = m_typedString;
       while (m_labelString.length() < 4) m_labelString = "-" + m_labelString;
       SetControlLabel(21, m_labelString.substr(0, 2));
       SetControlLabel(22, m_labelString.substr(2, 2));
@@ -175,7 +175,7 @@ void CGUIDialogTimer::Render()
 #else
 #pragma warning do we need to support the short time format here? TIME_FORMAT_SHORT
 #endif
-    CStdString strTime = g_infoManager.LocalizeTime(dateTime, TIME_FORMAT_HH_MM_SS);
+    std::string strTime = g_infoManager.LocalizeTime(dateTime, TIME_FORMAT_HH_MM_SS);
     SetControlLabel(31, strTime);
     m_lastDateTime = dateTime;
   }
@@ -220,10 +220,10 @@ void CGUIDialogTimer::UpdateLabels()
   
   int time = m_iTime;
   if (time == 0) time = 5; // Fake this value in the UI for animating between time cell & off states.
-  CStdString strHours;
-  CStdString strMinutes;
-  strHours.Format("%02d", time / 60);
-  strMinutes.Format("%02d", time % 60);
+  std::string strHours;
+  std::string strMinutes;
+  strHours = StringUtils::Format("%02d", time / 60);
+  strMinutes = StringUtils::Format("%02d", time % 60);
   SetControlLabel(21, strHours);
   SetControlLabel(22, strMinutes);
   m_typedString = "";

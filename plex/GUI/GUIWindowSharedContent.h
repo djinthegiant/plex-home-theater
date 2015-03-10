@@ -21,7 +21,9 @@
  *
  */
 
+#include "PlexApplication.h"
 #include "GUIPlexMediaWindow.h"
+#include "Client/PlexServerManager.h"
 #include "PlexTypes.h"
 
 class CGUIWindowSharedContent : public CGUIPlexMediaWindow
@@ -39,7 +41,7 @@ class CGUIWindowSharedContent : public CGUIPlexMediaWindow
     
     if (message.GetMessage() == GUI_MSG_PLEX_SERVER_DATA_LOADED)
     {
-      CStdString uuid = message.GetStringParam();
+      std::string uuid = message.GetStringParam();
       CPlexServerPtr server = g_plexApplication.serverManager->FindByUUID(uuid);
       if (server && !server->IsShared())
       {

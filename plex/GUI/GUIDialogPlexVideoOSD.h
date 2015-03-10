@@ -2,7 +2,7 @@
 #define GUIDIALOGPLEXVIDEOOSD_H
 
 #include "video/dialogs/GUIDialogVideoOSD.h"
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexGlobalTimer.h"
 
 class CGUIDialogPlexVideoOSD : public CGUIDialogVideoOSD, public IPlexGlobalTimeout
 {
@@ -12,7 +12,7 @@ public:
   bool OnMessage(CGUIMessage &message);
 
   void OnTimeout();
-  CStdString TimerName() const { return "videoosd"; }
+  std::string TimerName() const { return "videoosd"; }
 
   bool IsOpenedFromPause() const { return m_openedFromPause; }
   void SetOpenedFromPause(bool onOff) { m_openedFromPause = onOff; }

@@ -9,14 +9,14 @@
 
 #pragma once
 #include "guilib/GUIDialog.h"
-#include "Stopwatch.h"
+#include "utils/Stopwatch.h"
 #include "XBDateTime.h"
 
 class CGUIDialogTimer: public CGUIDialog
 {
 private:
   int m_iTime;
-  CStdString m_typedString;
+  std::string m_typedString;
   CDateTime m_lastDateTime;
   bool m_bConfirmed, m_bShowFooter, m_bShowFooterLabel;
   CStopWatch m_typingStopWatch;
@@ -34,7 +34,7 @@ public:
   
 private:
   virtual void SendGUIMessage(CGUIMessage msg);
-  virtual void SetControlLabel(int controlId, CStdString str);
+  virtual void SetControlLabel(int controlId, std::string str);
   virtual void SetControlLabel(int controlId, int str);
   virtual void ShowControl(int controlId);
   virtual void HideControl(int controlId);

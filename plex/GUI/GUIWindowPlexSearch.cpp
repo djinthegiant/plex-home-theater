@@ -23,29 +23,28 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "CharsetConverter.h"
-#include "Key.h"
-#include "TimeUtils.h"
+#include "utils/CharsetConverter.h"
+#include "guilib/Key.h"
+#include "utils/TimeUtils.h"
 #include "FileItem.h"
-#include "GUIBaseContainer.h"
+#include "guilib/GUIBaseContainer.h"
 #include "GUIInfoManager.h"
-#include "GUILabelControl.h"
+#include "guilib/GUILabelControl.h"
 #include "GUIWindowPlexSearch.h"
 #include "GUIUserMessages.h"
-#include "PlexDirectory.h"
+#include "FileSystem/PlexDirectory.h"
 #include "Client/PlexServerManager.h"
-#include "Settings.h"
 #include "Util.h"
 #include "PlexUtils.h"
 #include "input/XBMC_vkeys.h"
 #include "PlexApplication.h"
 #include "Client/PlexTimelineManager.h"
-#include "GUIEditControl.h"
-#include "GUIMessage.h"
+#include "guilib/GUIEditControl.h"
+#include "guilib/GUIMessage.h"
 #include "ApplicationMessenger.h"
 #include "PlexThemeMusicPlayer.h"
-#include "PlexJobs.h"
-#include "settings/GUISettings.h"
+#include "Utility/PlexJobs.h"
+#include "settings/Settings.h"
 #include "Playlists/PlexPlayQueueManager.h"
 
 #define CTL_LABEL_EDIT       310
@@ -81,7 +80,7 @@ CGUIWindowPlexSearch::~CGUIWindowPlexSearch()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CGUIWindowPlexSearch::GetString()
+std::string CGUIWindowPlexSearch::GetString()
 {
   CGUIEditControl* edit = GetEditControl();
   if (edit)
@@ -95,12 +94,12 @@ void CGUIWindowPlexSearch::OnTimeout()
   CGUIMessage msg(GUI_MSG_LABEL_RESET, GetID(), GetID());
   CApplicationMessenger::Get().SendGUIMessage(msg, GetID(), false);
 
-  CStdString str = GetString();
+  std::string str = GetString();
 
   if (str.empty())
     return;
 
-  CPlexServerManager::CPlexServerOwnedModifier modifier = g_guiSettings.GetBool("myplex.searchsharedlibraries") ? CPlexServerManager::SERVER_ALL : CPlexServerManager::SERVER_OWNED;
+  CPlexServerManager::CPlexServerOwnedModifier modifier = CSettings::Get().GetBool("myplex.searchsharedlibraries") ? CPlexServerManager::SERVER_ALL : CPlexServerManager::SERVER_OWNED;
   PlexServerList list = g_plexApplication.serverManager->GetAllServers(modifier, true);
 
   CSingleLock lk(m_threadsSection);
@@ -122,7 +121,7 @@ void CGUIWindowPlexSearch::OnTimeout()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CGUIWindowPlexSearch::UpdateSearch()
 {
-  CStdString str = GetString();
+  std::string str = GetString();
 
   if (InProgress() && m_currentSearchString != str)
   {
@@ -226,7 +225,7 @@ bool CGUIWindowPlexSearch::OnClick(int senderId, int action)
   }
   else if (senderId == CTL_BUTTON_SPACE)
   {
-    CStdString str = GetString();
+    std::string str = GetString();
     str += " ";
     if (GetEditControl())
       GetEditControl()->SetLabel2(str);
@@ -241,7 +240,7 @@ bool CGUIWindowPlexSearch::OnClick(int senderId, int action)
     else
       c = '0' + (senderId - 91);
 
-    CStdString str = GetString();
+    std::string str = GetString();
     str += c;
     if (GetEditControl())
       GetEditControl()->SetLabel2(str);
@@ -350,8 +349,9 @@ void CGUIWindowPlexSearch::InitWindow()
     CONTROL_SELECT_ITEM(m_lastFocusedContainer, m_lastFocusedItem);
   }
 
-  if (GetEditControl())
-    GetEditControl()->SetOnlyCaps(true);
+  //MREGE:
+  //if (GetEditControl())
+  //  GetEditControl()->SetOnlyCaps(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

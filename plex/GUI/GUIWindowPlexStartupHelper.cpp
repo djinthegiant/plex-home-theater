@@ -9,17 +9,17 @@
 #include "GUIWindowPlexStartupHelper.h"
 #include "FileItem.h"
 #include "PlexTypes.h"
-#include "StdString.h"
-#include "Variant.h"
+#include "utils/Variant.h"
 #include "ApplicationMessenger.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "PlexApplication.h"
 #include "Client/MyPlex/MyPlexManager.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "utils/log.h"
 #include "guilib/GUIRadioButtonControl.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "cores/AudioEngine/Utils/AEChannelInfo.h"
+#include "cores/AudioEngine/Utils/AEDeviceInfo.h"
 #include "GUI/GUIWindowStartup.h"
 #include "addons/Skin.h"
 
@@ -56,7 +56,7 @@ bool CGUIWindowPlexStartupHelper::OnMessage(CGUIMessage &message)
         {
           if (!g_plexApplication.myPlexManager->IsSignedIn())
           {
-            std::vector<CStdString> param;
+            std::vector<std::string> param;
             param.push_back("gohome");
             g_windowManager.ActivateWindow(WINDOW_MYPLEX_LOGIN, param, true);
           }
@@ -65,7 +65,7 @@ bool CGUIWindowPlexStartupHelper::OnMessage(CGUIMessage &message)
             CGUIWindowStartup* startup = (CGUIWindowStartup*)g_windowManager.GetWindow(WINDOW_STARTUP_ANIM);
             if (startup)
               startup->allowEscOut(false);
-            g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<CStdString>(), true);
+            g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow(), std::vector<std::string>(), true);
           }
           break;
         }
@@ -98,15 +98,15 @@ void CGUIWindowPlexStartupHelper::AudioControlSelected(int id)
   optical->SetSelected(false);
   hdmi->SetSelected(false);
 
-  CStdString outputDevice = "default";
+  std::string outputDevice = "default";
 
   if (id == RADIO_BUTTON_ANALOG)
   {
     analog->SetSelected(true);
-    g_guiSettings.SetInt("audiooutput.mode", AUDIO_ANALOG);
-    g_guiSettings.SetInt("audiooutput.channels", AE_CH_LAYOUT_2_0);
-    g_guiSettings.SetBool("audiooutput.ac3passthrough", false);
-    g_guiSettings.SetBool("audiooutput.dtspassthrough", false);
+    //MERGE: CSettings::Get().SetInt("audiooutput.audiodevice", AE_DEVTYPE_PCM);
+    CSettings::Get().SetInt("audiooutput.channels", AE_CH_LAYOUT_2_0);
+    CSettings::Get().SetBool("audiooutput.ac3passthrough", false);
+    CSettings::Get().SetBool("audiooutput.dtspassthrough", false);
 
 #ifdef TARGET_DARWIN_OSX
     outputDevice = "CoreAudio:Built-In Output";
@@ -115,10 +115,10 @@ void CGUIWindowPlexStartupHelper::AudioControlSelected(int id)
   else if (id == RADIO_BUTTON_OPTICAL)
   {
     optical->SetSelected(true);
-    g_guiSettings.SetInt("audiooutput.mode", AUDIO_IEC958);
-    g_guiSettings.SetInt("audiooutput.channels", AE_CH_LAYOUT_5_1);
-    g_guiSettings.SetBool("audiooutput.ac3passthrough", true);
-    g_guiSettings.SetBool("audiooutput.dtspassthrough", true);
+    //MERGE: CSettings::Get().SetInt("audiooutput.audiodevice", AE_DEVTYPE_IEC958);
+    CSettings::Get().SetInt("audiooutput.channels", AE_CH_LAYOUT_5_1);
+    CSettings::Get().SetBool("audiooutput.ac3passthrough", true);
+    CSettings::Get().SetBool("audiooutput.dtspassthrough", true);
 
 #ifdef TARGET_DARWIN_OSX
     outputDevice = "CoreAudio:Built-In Output";
@@ -127,10 +127,10 @@ void CGUIWindowPlexStartupHelper::AudioControlSelected(int id)
   else if (id == RADIO_BUTTON_HDMI)
   {
     hdmi->SetSelected(true);
-    g_guiSettings.SetInt("audiooutput.mode", AUDIO_HDMI);
-    g_guiSettings.SetInt("audiooutput.channels", GetNumberOfHDMIChannels());
-    g_guiSettings.SetBool("audiooutput.ac3passthrough", true);
-    g_guiSettings.SetBool("audiooutput.dtspassthrough", true);
+    //MERGE: CSettings::Get().SetInt("audiooutput.audiodevice", AE_DEVTYPE_HDMI);
+    CSettings::Get().SetInt("audiooutput.channels", GetNumberOfHDMIChannels());
+    CSettings::Get().SetBool("audiooutput.ac3passthrough", true);
+    CSettings::Get().SetBool("audiooutput.dtspassthrough", true);
 
 #ifdef TARGET_DARWIN_OSX
     outputDevice = "CoreAudio:HDMI";
@@ -138,7 +138,7 @@ void CGUIWindowPlexStartupHelper::AudioControlSelected(int id)
   }
 
   CAEFactory::VerifyOutputDevice(outputDevice, false);
-  g_guiSettings.SetString("audiooutput.audiodevice", outputDevice);
+  CSettings::Get().SetString("audiooutput.audiodevice", outputDevice);
   CAEFactory::OnSettingsChange("audiooutput.mode");
 }
 
@@ -148,7 +148,7 @@ void CGUIWindowPlexStartupHelper::SetupAudioStuff()
   AEDeviceList devices;
 
   CAEFactory::EnumerateOutputDevices(devices, true);
-  std::pair<CStdString, CStdString> dev;
+  std::pair<std::string, std::string> dev;
 
   bool hasPassthrough = false;
 #ifdef TARGET_DARWIN_OSX

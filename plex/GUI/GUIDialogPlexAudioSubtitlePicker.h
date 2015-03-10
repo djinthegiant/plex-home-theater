@@ -7,7 +7,7 @@
 class CGUIDialogPlexPicker : public CGUIDialogSelect
 {
 public:
-  CGUIDialogPlexPicker(int id, const CStdString &xml, bool audio=true);
+  CGUIDialogPlexPicker(int id, const std::string &xml, bool audio=true);
   void SetFileItem(CFileItemPtr &fileItem);
   void UpdateStreamSelection();
   

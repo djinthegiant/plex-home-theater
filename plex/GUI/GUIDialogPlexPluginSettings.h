@@ -16,11 +16,11 @@
 class CPlexPluginSettings
 {
 public:
-  void Set(const CStdString& key, const CStdString& value);
-  CStdString Get(const CStdString& key);
+  void Set(const std::string& key, const std::string& value);
+  std::string Get(const std::string& key);
   
   bool Load(TiXmlElement* root);
-  bool Save(const CStdString& strPath);
+  bool Save(const std::string& strPath);
   
   TiXmlElement* GetPluginRoot();
   
@@ -34,7 +34,7 @@ class CGUIDialogPlexPluginSettings : public CGUIDialogBoxBase
 public:
   CGUIDialogPlexPluginSettings();
   virtual bool OnMessage(CGUIMessage& message);
-  static void ShowAndGetInput(const CStdString& path, const CStdString& compositeXml);
+  static void ShowAndGetInput(const std::string& path, const std::string& compositeXml);
   int GetDefaultLabelID(int controlId) const;
   
 private:
@@ -42,12 +42,12 @@ private:
   void FreeControls();
   void EnableControls();
   void SetDefaults();
-  bool GetCondition(const CStdString &condition, const int controlId);
+  bool GetCondition(const std::string &condition, const int controlId);
 
   bool SaveSettings(void);
   bool ShowVirtualKeyboard(int iControl);
-  bool TranslateSingleString(const CStdString &strCondition, std::vector<CStdString> &enableVec);
+  bool TranslateSingleString(const std::string &strCondition, std::vector<std::string> &enableVec);
   CPlexPluginSettings* m_settings;
-  CStdString m_strHeading;
+  std::string m_strHeading;
   bool m_okSelected; 
 };

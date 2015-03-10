@@ -1,10 +1,10 @@
 #ifndef _GUIPLEXDEFAULTACTIONHANDLER_
 #define _GUIPLEXDEFAULTACTIONHANDLER_
 
-#include "Key.h"
+#include "guilib/Key.h"
 #include "FileItem.h"
 #include "xbmc/dialogs/GUIDialogContextMenu.h"
-#include "PlexNavigationHelper.h"
+#include "Utility/PlexNavigationHelper.h"
 #include <boost/unordered_map.hpp>
 
 typedef struct

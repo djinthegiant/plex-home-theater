@@ -6,10 +6,10 @@
 #include "guilib/GUIMultiImage.h"
 #include "guilib/GUILabelControl.h"
 
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "FileItem.h"
 #include "addons/Addon.h"
-#include "PlexTimer.h"
+#include "Utility/PlexTimer.h"
 
 class CGUIPlexScreenSaverPhoto : public CGUIDialog, public IJobCallback
 {

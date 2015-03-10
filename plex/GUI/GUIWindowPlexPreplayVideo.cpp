@@ -5,6 +5,7 @@
 #include "plex/PlexTypes.h"
 #include "guilib/GUIWindow.h"
 #include "filesystem/Directory.h"
+#include "guilib/GUIBaseContainer.h"
 
 #include "FileItem.h"
 #include "guilib/GUILabelControl.h"
@@ -16,14 +17,14 @@
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogKeyboardGeneric.h"
 #include "dialogs/GUIDialogYesNo.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "Client/PlexServerManager.h"
 #include "guilib/GUIWindowManager.h"
-#include "LocalizeStrings.h"
-#include "PlexPlayQueueManager.h"
-#include "GUISettings.h"
+#include "guilib/LocalizeStrings.h"
+#include "Playlists/PlexPlayQueueManager.h"
+#include "settings/Settings.h"
 
-#include "DirectoryCache.h"
+#include "filesystem/DirectoryCache.h"
 #include "Application.h"
 #include "GUIUserMessages.h"
 
@@ -272,15 +273,15 @@ void CGUIWindowPlexPreplayVideo::Share()
 
   if (net)
   {
-    CStdString message;
+    std::string message;
     CGUIDialogKeyboardGeneric *keyb = (CGUIDialogKeyboardGeneric *)g_windowManager.GetWindow(WINDOW_DIALOG_KEYBOARD);
     if (keyb)
     {
       if (keyb->ShowAndGetInput(NULL, "", message, g_localizeStrings.Get(52402), false))
       {
         bool canceled;
-        CStdString shareStr;
-        shareStr.Format(g_localizeStrings.Get(52403), m_vecItems->Get(0)->GetLabel(), net->GetLabel());
+        std::string shareStr;
+        shareStr = StringUtils::Format(g_localizeStrings.Get(52403).c_str(), m_vecItems->Get(0)->GetLabel().c_str(), net->GetLabel().c_str());
         CGUIDialogYesNo::ShowAndGetInput(g_localizeStrings.Get(750), shareStr, message, "", canceled);
         if (!canceled)
         {
@@ -300,12 +301,12 @@ bool CGUIWindowPlexPreplayVideo::OnBack(int actionID)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowPlexPreplayVideo::Update(const CStdString &strDirectory, bool updateFilterPath)
+bool CGUIWindowPlexPreplayVideo::Update(const std::string &strDirectory, bool updateFilterPath)
 {
   bool ret = CGUIMediaWindow::Update(strDirectory, updateFilterPath);
 
   CURL currentURL(strDirectory);
-  if (!currentURL.HasOption("checkfiles"))
+  if (!currentURL.HasOption("checkFiles"))
   {
     currentURL.SetOption("checkFiles", "1");
     CPlexDirectoryFetchJob *job = new CPlexDirectoryFetchJob(currentURL, CPlexDirectoryCache::CACHE_STRATEGY_ALWAYS);

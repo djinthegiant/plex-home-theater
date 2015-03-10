@@ -21,8 +21,8 @@
  */
 
 #include "FileItem.h"
-#include "GUIViewControl.h"
-#include "JobManager.h"
+#include "view/GUIViewControl.h"
+#include "utils/JobManager.h"
 #include "video/windows/GUIWindowVideoNav.h"
 
 class CGUIWindowStartup :
@@ -41,20 +41,20 @@ public:
   inline void allowEscOut(bool allow) { m_allowEscOut = allow; }
 
 private:
-  void SelectUserByName(CStdString user);
+  void SelectUserByName(std::string user);
   void OnUserSelected(CFileItemPtr item);
-  void setPinControlText(CStdString pin);
+  void setPinControlText(std::string pin);
   void OnJobComplete(unsigned int jobID, bool success, CJob *job);
   void setUsersList(CFileItemList &userlist);
   void OnTimeout();
   void notifyLoginFailed();
 
   CFileItemList m_users;
-  CStdString m_pin;
-  CStdString m_selectedUser;
-  CStdString m_selectedUserThumb;
+  std::string m_pin;
+  std::string m_selectedUser;
+  std::string m_selectedUserThumb;
   bool m_allowEscOut;
-  CStdString m_currentToken;
+  std::string m_currentToken;
   int m_fetchUsersJobID;
 
   CGUIViewControl m_viewControl;

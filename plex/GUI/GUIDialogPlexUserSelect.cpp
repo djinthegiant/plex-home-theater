@@ -2,10 +2,11 @@
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
 
 #include "FileItem.h"
-#include "PlexBusyIndicator.h"
-#include "PlexJobs.h"
+#include "Utility/PlexBusyIndicator.h"
+#include "Utility/PlexJobs.h"
 #include "Client/MyPlex/MyPlexManager.h"
 #include "PlexApplication.h"
 #include "Third-Party/hash-library/sha256.h"
@@ -138,11 +139,11 @@ void CGUIDialogPlexUserSelect::OnSelected()
     m_selectedUserThumb = item->GetArt("thumb");
     while (true)
     {
-      CStdString pin;
+      std::string pin;
       CGUIDialogNumeric* diag = (CGUIDialogNumeric*)g_windowManager.GetWindow(WINDOW_DIALOG_NUMERIC);
       if (diag)
       {
-        CStdString initial = "";
+        std::string initial = "";
         diag->SetMode(CGUIDialogNumeric::INPUT_PASSWORD, (void*)&initial);
         diag->SetHeading(firstTry ? "Enter PIN" : "Try again...");
         diag->DoModal();

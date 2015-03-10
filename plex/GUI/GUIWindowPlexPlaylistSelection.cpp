@@ -11,7 +11,7 @@
 #include "PlexApplication.h"
 #include "GUIPlexDefaultActionHandler.h"
 #include "GUIDialogPlexError.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 
 CGUIWindowPlexPlaylistSelection::CGUIWindowPlexPlaylistSelection()
   : CGUIMediaWindow(WINDOW_PLEX_PLAYLIST_SELECTION, "PlexPlaylistSelection.xml")
@@ -27,7 +27,7 @@ bool CGUIWindowPlexPlaylistSelection::OnSelect(int iItem)
   
   if (pItem->GetProperty("leafCount").asInteger())
   {
-    CStdString action = "XBMC.ActivateWindow(PlexPlayQueue," + pItem->GetPath() + ",return)";
+    std::string action = "XBMC.ActivateWindow(PlexPlayQueue," + pItem->GetPath() + ",return)";
     
     CBuiltins::Execute(action);
   }

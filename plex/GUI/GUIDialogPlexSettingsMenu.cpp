@@ -1,6 +1,6 @@
 
 #include "GUI/GUIDialogPlexSettingsMenu.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIDialogPlexSettingsMenu::OnBack(int actionID)

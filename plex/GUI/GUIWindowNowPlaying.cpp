@@ -20,15 +20,16 @@
  */
 
 #include <boost/foreach.hpp>
-#include "Key.h"
+#include "guilib/Key.h"
 #include "FileItem.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "GUIInfoManager.h"
 #include "PlayListPlayer.h"
-#include "PlayList.h"
-#include "Settings.h"
-#include "AdvancedSettings.h"
+#include "playlists/PlayList.h"
+#include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 #include "PlexApplication.h"
+#include "utils/StringUtils.h"
 
 #include "GUIWindowNowPlaying.h"
 #include "PlexTypes.h"
@@ -51,8 +52,8 @@ CGUIWindowNowPlaying::~CGUIWindowNowPlaying()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIWindowNowPlaying::OnAction(const CAction &action)
 {
-  CStdString strAction = action.GetName();
-  strAction = strAction.ToLower();
+  std::string strAction = action.GetName();
+  StringUtils::ToLower(strAction);
   
   if (action.GetID() == ACTION_PREVIOUS_MENU || action.GetID() == ACTION_PARENT_DIR)
   {
@@ -95,7 +96,7 @@ bool CGUIWindowNowPlaying::OnMessage(CGUIMessage& message)
         g_windowManager.GetWindow(g_windowManager.GetTopMostModalDialogID(true))->Close();
 
       m_isFlipped = false;
-      g_plexApplication.timer->SetTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
+      //MERGE: g_plexApplication.timer->SetTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
       break;
     }
   }
@@ -109,5 +110,5 @@ void CGUIWindowNowPlaying::OnTimeout()
   m_isFlipped = !m_isFlipped;
   SetInvalid();
 
-  g_plexApplication.timer->RestartTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
+  //MERGE: g_plexApplication.timer->RestartTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
 }

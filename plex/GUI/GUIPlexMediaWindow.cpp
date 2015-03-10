@@ -14,37 +14,37 @@
 #include "plex/PlexUtils.h"
 #include "plex/FileSystem/PlexDirectory.h"
 #include "GUIUserMessages.h"
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "guilib/GUILabelControl.h"
 #include "GUI/GUIDialogFilterSort.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIWindowManager.h"
 #include "ApplicationMessenger.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "PlexUtils.h"
 #include "interfaces/Builtins.h"
-#include "PlayList.h"
+#include "playlists/PlayList.h"
 #include "PlexApplication.h"
 #include "Client/PlexServerManager.h"
-#include "GUIKeyboardFactory.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "utils/URIUtils.h"
 #include "plex/GUI/GUIDialogPlexPluginSettings.h"
 #include "PlexThemeMusicPlayer.h"
-#include "PlexFilterManager.h"
+#include "Filters/PlexFilterManager.h"
 #include "Filters/GUIPlexFilterFactory.h"
 #include "dialogs/GUIDialogBusy.h"
 #include "Client/PlexTimelineManager.h"
 #include "Client/PlexServerDataLoader.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "Client/PlexExtraInfoLoader.h"
-#include "ViewDatabase.h"
-#include "ViewState.h"
-#include "PlexPlayQueueManager.h"
+#include "view/ViewDatabase.h"
+#include "view/ViewState.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "Client/PlexServerVersion.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "Application.h"
 
-#include "LocalizeStrings.h"
-#include "DirectoryCache.h"
+#include "guilib/LocalizeStrings.h"
+#include "filesystem/DirectoryCache.h"
 #include "music/tags/MusicInfoTag.h"
 #include "plex/FileSystem/PlexExtraDataLoader.h"
 #include "GUIPlexDefaultActionHandler.h"
@@ -181,7 +181,7 @@ bool CGUIPlexMediaWindow::OnMessage(CGUIMessage &message)
         CViewState state;
         state.m_viewMode = viewMode;
 
-        db.SetViewState(GetLevelURL(), GetID(), state, g_guiSettings.GetString("lookandfeel.skin"));
+        db.SetViewState(GetLevelURL(), GetID(), state, CSettings::Get().GetString("lookandfeel.skin"));
         db.Close();
       }
 
@@ -242,7 +242,7 @@ void CGUIPlexMediaWindow::InsertPage(CFileItemList* items, int Where)
 {
 #ifdef USE_PAGING
   int nItem = m_viewControl.GetSelectedItem();
-  CStdString strSelected;
+  std::string strSelected;
   if (nItem >= 0)
     strSelected = m_vecItems->Get(nItem)->GetPath();
 
@@ -494,7 +494,7 @@ bool CGUIPlexMediaWindow::OnAction(const CAction &action)
       else if (action.GetID() == ACTION_PLEX_CYCLE_PRIMARY_FILTER)
       {
         PlexStringPairVector vec = m_sectionFilter->getPrimaryFilters();
-        CStdString curr = m_sectionFilter->currentPrimaryFilter();
+        std::string curr = m_sectionFilter->currentPrimaryFilter();
         int idx = 0;
 
         BOOST_FOREACH(PlexStringPair p, vec)
@@ -565,7 +565,7 @@ bool CGUIPlexMediaWindow::OnAction(const CAction &action)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::GetDirectory(const CStdString &strDirectory, CFileItemList &items)
+bool CGUIPlexMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemList &items)
 {
   CURL u(strDirectory);
 #ifdef USE_PAGING
@@ -658,7 +658,7 @@ bool CGUIPlexMediaWindow::GetDirectory(const CStdString &strDirectory, CFileItem
         CFileItemPtr item = CFileItemPtr(new CFileItem);
         item->SetPath(boost::lexical_cast<std::string>(i));
         if (charMap.find(i) != charMap.end())
-          item->SetSortLabel(CStdString(charMap[i]));
+          item->SetSortLabel(std::string(charMap[i]));
         items.AddFront(item, 0);
       }
 
@@ -667,7 +667,7 @@ bool CGUIPlexMediaWindow::GetDirectory(const CStdString &strDirectory, CFileItem
         CFileItemPtr item = CFileItemPtr(new CFileItem);
         item->SetPath(boost::lexical_cast<std::string>(i));
         if (charMap.find(i) != charMap.end())
-          item->SetSortLabel(CStdString(charMap[i]));
+          item->SetSortLabel(std::string(charMap[i]));
         items.Add(item);
       }
     }
@@ -777,7 +777,7 @@ bool CGUIPlexMediaWindow::OnSelect(int iItem)
     }
   }
 
-  CStdString newUrl = m_navHelper.navigateToItem(item, m_vecItems->GetPath(), GetID());
+  std::string newUrl = m_navHelper.navigateToItem(item, m_vecItems->GetURL(), GetID());
 
   if (item->m_bIsFolder && !newUrl.empty())
   {
@@ -844,13 +844,13 @@ bool CGUIPlexMediaWindow::UnwatchedEnabled() const
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::Update(const CStdString &strDirectory, bool updateFilterPath)
+bool CGUIPlexMediaWindow::Update(const std::string &strDirectory, bool updateFilterPath)
 {
   return Update(strDirectory, updateFilterPath, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::Update(const CStdString &strDirectory, bool updateFilterPath, bool updateFromFilter)
+bool CGUIPlexMediaWindow::Update(const std::string &strDirectory, bool updateFilterPath, bool updateFromFilter)
 {
   CSingleLock lock(m_fetchMapsSection);
   m_fetchedPages.clear();
@@ -865,13 +865,13 @@ bool CGUIPlexMediaWindow::Update(const CStdString &strDirectory, bool updateFilt
   
   if (strDirectory == m_startDirectory)
   {
-    m_sectionRoot = strDirectory;
+    m_sectionRoot = CURL(strDirectory);
     g_plexApplication.filterManager->loadFilterForSection(m_sectionRoot.Get());
   }
 
   // since the filters might not have been loaded yet we should really make sure that we
   // use *a* primaryFilter here. We just default to all since that seems sane.
-  CStdString primaryFilter = "all";
+  std::string primaryFilter = "all";
   if (m_sectionFilter)
   {
     primaryFilter = m_sectionFilter->currentPrimaryFilter();
@@ -970,7 +970,7 @@ void CGUIPlexMediaWindow::UpdateButtons()
   if (db.Open())
   {
     CViewState state;
-    if (db.GetViewState(GetLevelURL(), GetID(), state, g_guiSettings.GetString("lookandfeel.skin")))
+    if (db.GetViewState(GetLevelURL(), GetID(), state, CSettings::Get().GetString("lookandfeel.skin")))
     {
       CLog::Log(LOGDEBUG, "GUIPlexMediaWindow::UpdateButtons got viewMode from db: %d", state.m_viewMode);
       viewMode = state.m_viewMode;
@@ -984,7 +984,7 @@ void CGUIPlexMediaWindow::UpdateButtons()
     {
       CViewState state;
       state.m_viewMode = viewMode;
-      db.SetViewState(GetLevelURL(), GetID(), state, g_guiSettings.GetString("lookandfeel.skin"));
+      db.SetViewState(GetLevelURL(), GetID(), state, CSettings::Get().GetString("lookandfeel.skin"));
       CLog::Log(LOGDEBUG, "GUIPlexMediaWindow::UpdateButtons storing viewMode to db: %d", state.m_viewMode);
     }
   }
@@ -1038,8 +1038,8 @@ CURL CGUIPlexMediaWindow::GetUrlWithParentArgument(const CURL &originalUrl)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIPlexMediaWindow::OnBack(int actionID)
 {
-  CURL currPath = GetUrlWithParentArgument(m_vecItems->GetPath());
-  CURL parent = GetUrlWithParentArgument(m_history.GetParentPath());
+  CURL currPath = GetUrlWithParentArgument(m_vecItems->GetURL());
+  CURL parent = GetUrlWithParentArgument(CURL(m_history.GetParentPath()));
 
   if (!parent.Get().empty())
   {
@@ -1064,17 +1064,17 @@ bool CGUIPlexMediaWindow::OnBack(int actionID)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CURL CGUIPlexMediaWindow::GetRealDirectoryUrl(const CStdString& url_)
+CURL CGUIPlexMediaWindow::GetRealDirectoryUrl(const std::string& url_)
 {
   CURL dirUrl(url_);
 
   if (!PlexUtils::CurrentSkinHasFilters())
-    return url_;
+    return CURL(url_);
 
   if (dirUrl.GetProtocol() == "plexserver" &&
       (dirUrl.GetHostName() == "channels" || dirUrl.GetHostName() == "shared" || dirUrl.GetHostName() == "channeldirectory"))
 
-    return url_;
+    return CURL(url_);
 
   bool isSecondary = false;
 
@@ -1084,7 +1084,7 @@ CURL CGUIPlexMediaWindow::GetRealDirectoryUrl(const CStdString& url_)
        (boost::starts_with(dirUrl.GetFileName(), "sync/"))))
   {
     /* remove library/sections/ at the beginning of the string */
-    CStdString sectionName = URIUtils::GetFileName(dirUrl.GetFileName());
+    std::string sectionName = URIUtils::GetFileName(dirUrl.GetFileName());
 
     /* now let's check if this is a number i.e. 5 or something */
     try { sectionNumber = boost::lexical_cast<int>(sectionName); }
@@ -1259,7 +1259,7 @@ void CGUIPlexMediaWindow::AddFilters()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::MatchPlexContent(const CStdString &matchStr)
+bool CGUIPlexMediaWindow::MatchPlexContent(const std::string &matchStr)
 {
   if (m_contentMatch.find(matchStr) != m_contentMatch.end())
     return m_contentMatch[matchStr];
@@ -1289,18 +1289,18 @@ bool CGUIPlexMediaWindow::MatchPlexContent(const CStdString &matchStr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::MatchPlexFilter(const CStdString &matchStr)
+bool CGUIPlexMediaWindow::MatchPlexFilter(const std::string &matchStr)
 {
   if (!m_sectionFilter)
     return "all";
 
-  CStdStringArray matchVec = StringUtils::SplitString(matchStr, ";");
-  CStdString filterName = m_sectionFilter->currentPrimaryFilter();
+  std::vector<std::string> matchVec = StringUtils::Split(matchStr, ";");
+  std::string filterName = m_sectionFilter->currentPrimaryFilter();
 
-  BOOST_FOREACH(CStdString& match, matchVec)
+  BOOST_FOREACH(std::string& match, matchVec)
   {
     match = StringUtils::Trim(match);
-    if(match.Equals(filterName))
+    if(match == filterName)
       return true;
   }
 
@@ -1327,7 +1327,7 @@ bool CGUIPlexMediaWindow::CanFilterAdvanced()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIPlexMediaWindow::MatchUniformProperty(const CStdString& property)
+bool CGUIPlexMediaWindow::MatchUniformProperty(const std::string& property)
 {
   if (!IsMusicContainer() || !m_vecItems)
     return false;
@@ -1336,11 +1336,11 @@ bool CGUIPlexMediaWindow::MatchUniformProperty(const CStdString& property)
     return false;
 
   bool same = true;
-  CStdString lastVal;
+  std::string lastVal;
   for (int i = 0; i < m_vecItems->Size(); i ++)
   {
     CFileItemPtr item = m_vecItems->Get(i);
-    CStdString value;
+    std::string value;
 
     if (!item)
       continue;
@@ -1406,10 +1406,10 @@ void CGUIPlexMediaWindow::FetchItemPage(int Index)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CGUIPlexMediaWindow::GetLevelURL()
+std::string CGUIPlexMediaWindow::GetLevelURL()
 {
   int level = 1;
-  CStdString viewGroup = m_vecItems->GetProperty("viewGroup").asString();
+  std::string viewGroup = m_vecItems->GetProperty("viewGroup").asString();
   
   if ((viewGroup == "episode") || (viewGroup == "track"))
     level = 3;
@@ -1420,11 +1420,11 @@ CStdString CGUIPlexMediaWindow::GetLevelURL()
   else
     level = 0;
 
-  CStdString userName = g_plexApplication.myPlexManager->GetCurrentUserInfo().username;
+  std::string userName = g_plexApplication.myPlexManager->GetCurrentUserInfo().username;
   
-  CStdString levelUrl = m_sectionRoot.Get() + "/level/";
+  std::string levelUrl = m_sectionRoot.Get() + "/level/";
   levelUrl += boost::lexical_cast<std::string>(level);
-  if (!userName.IsEmpty())
+  if (!userName.empty())
     levelUrl += "/user/" + userName;
 
   return  levelUrl;

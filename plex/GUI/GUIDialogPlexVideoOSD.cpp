@@ -1,5 +1,6 @@
 #include "GUIDialogPlexVideoOSD.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/Key.h"
 #include "PlexApplication.h"
 #include "Application.h"
 
@@ -26,7 +27,7 @@ bool CGUIDialogPlexVideoOSD::OnAction(const CAction &action)
 
     case ACTION_NAV_BACK:
     {
-      if (m_openedFromPause || g_application.IsPaused())
+      if (m_openedFromPause || g_application.m_pPlayer->IsPaused())
       {
         g_application.StopPlaying();
         return true;

@@ -1,7 +1,7 @@
 #include "GUIDialogPlexAudioSubtitlePicker.h"
 #include "plex/PlexTypes.h"
-#include "LocalizeStrings.h"
-#include "GUIWindowManager.h"
+#include "guilib/LocalizeStrings.h"
+#include "guilib/GUIWindowManager.h"
 #include "FileItem.h"
 #include "Client/PlexServerManager.h"
 #include "Client/PlexMediaServerClient.h"
@@ -14,9 +14,10 @@
 #include "PlexUtils.h"
 #include "PlexApplication.h"
 #include "Application.h"
-#include "Settings.h"
+#include "settings/MediaSettings.h"
+#include "guilib/Key.h"
 
-CGUIDialogPlexPicker::CGUIDialogPlexPicker(int id, const CStdString& xml, bool audio)
+CGUIDialogPlexPicker::CGUIDialogPlexPicker(int id, const std::string& xml, bool audio)
   : CGUIDialogSelect(id, xml)
 {
   m_audio = audio;
@@ -28,7 +29,7 @@ CGUIDialogPlexPicker::OnMessage(CGUIMessage &msg)
   if (msg.GetMessage() == GUI_MSG_WINDOW_INIT)
   {
     SetHeading(g_localizeStrings.Get(m_audio ? 52100 : 52101));
-    if (g_application.IsPlaying() && g_application.CurrentFileItemPtr())
+    if (g_application.m_pPlayer->IsPlaying() && g_application.CurrentFileItemPtr())
       SetFileItem(g_application.CurrentFileItemPtr());
     else if (g_plexApplication.m_preplayItem)
       SetFileItem(g_plexApplication.m_preplayItem);
@@ -105,9 +106,9 @@ void CGUIDialogPlexPicker::UpdateStreamSelection()
   PlexUtils::SetSelectedStream(m_fileItem, selectedStream);
 
   if (g_application.CurrentFileItemPtr()->GetPath() == m_fileItem->GetPath() &&
-      g_application.IsPlayingVideo() && g_application.m_pPlayer)
+      g_application.m_pPlayer->IsPlayingVideo() && g_application.m_pPlayer)
   {
-    IPlayer *player = g_application.m_pPlayer;
+    CApplicationPlayer *player = g_application.m_pPlayer;
     int64_t streamId = selectedStream->GetProperty("id").asInteger();
 
     if (m_audio)
@@ -115,7 +116,7 @@ void CGUIDialogPlexPicker::UpdateStreamSelection()
       if (player->GetAudioStreamPlexID() != streamId)
       {
         player->SetAudioStreamPlexID(streamId);
-        g_settings.m_currentVideoSettings.m_AudioStream = player->GetAudioStream();
+        CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream = player->GetAudioStream();
       }
     }
     else
@@ -126,7 +127,7 @@ void CGUIDialogPlexPicker::UpdateStreamSelection()
       if (visible)
       {
         player->SetSubtitleStreamPlexID(streamId);
-        g_settings.m_currentVideoSettings.m_SubtitleStream = player->GetSubtitle();
+        CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream = player->GetSubtitle();
       }
     }
 

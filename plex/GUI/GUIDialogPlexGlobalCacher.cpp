@@ -1,7 +1,7 @@
 #include "boost/foreach.hpp"
-#include "PlexGlobalCacher.h"
+#include "Utility/PlexGlobalCacher.h"
 #include "Client/PlexServerDataLoader.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 #include "GUIDialogPlexGlobalCacher.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,14 +22,14 @@ void CGUIDialogPlexGlobalCacher::LoadSections()
   CLog::Log(LOGNOTICE, "Global Cache : found %d Regular Sections", m_Sections->Size());
 
   CFileItemList items;
-  std::set<CStdString> servers;
+  std::set<std::string> servers;
 
   // build the servers list
   for (int iSection = 0; iSection < m_Sections->Size(); iSection++)
   {
     CFileItemPtr section = m_Sections->Get(iSection);
 
-    CStdString servername = section->GetProperty("serverName").asString();
+    std::string servername = section->GetProperty("serverName").asString();
 
     if (servers.find(servername) == servers.end())
     {

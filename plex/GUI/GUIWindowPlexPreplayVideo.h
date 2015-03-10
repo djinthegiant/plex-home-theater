@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GUI/GUIPlexMediaWindow.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "threads/Event.h"
-#include "PlexNavigationHelper.h"
+#include "Utility/PlexNavigationHelper.h"
 #include "FileSystem/PlexExtraDataLoader.h"
 #include "GUIPlexWindowFocusSaver.h"
 
@@ -22,7 +22,7 @@ public:
   CFileItemPtr getSelectedExtraItem();
 
   void OnJobComplete(unsigned int jobID, bool success, CJob *job);
-  bool Update(const CStdString &strDirectory, bool updateFilterPath);
+  bool Update(const std::string &strDirectory, bool updateFilterPath);
   void UpdateItem();
   bool OnBack(int actionID);
 

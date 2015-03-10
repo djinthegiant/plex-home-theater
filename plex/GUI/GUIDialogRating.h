@@ -11,7 +11,7 @@ public:
   virtual ~CGUIDialogRating(void);
   
   virtual void SetHeading(int iHeading);
-  virtual void SetTitle(const CStdString& strHeading);
+  virtual void SetTitle(const std::string& strHeading);
   virtual int GetRating() { return m_iRating; }
   virtual void SetRating(float iRating);
   virtual bool OnMessage(CGUIMessage &msg);
