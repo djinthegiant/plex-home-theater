@@ -32,26 +32,26 @@
 
 #include "filesystem/File.h"
 #include "FileItem.h"
-#include "GUIBaseContainer.h"
-#include "GUIStaticItem.h"
-#include "GUIWindowHome.h"
+#include "guilib/GUIBaseContainer.h"
+#include "guilib/GUIStaticItem.h"
+#include "windows/GUIWindowHome.h"
 #include "GUI/GUIDialogTimer.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIUserMessages.h"
 #include "MediaSource.h"
-#include "AlarmClock.h"
-#include "Key.h"
+#include "utils/AlarmClock.h"
+#include "guilib/Key.h"
 
 #include "Client/MyPlex/MyPlexManager.h"
-#include "PlexDirectory.h"
+#include "FileSystem/PlexDirectory.h"
 #include "threads/SingleLock.h"
 #include "PlexUtils.h"
 #include "video/VideoInfoTag.h"
 
 #include "dialogs/GUIDialogProgress.h"
 #include "dialogs/GUIDialogSelect.h"
-#include "dialogs/GUIDialogVideoInfo.h"
+#include "video/dialogs/GUIDialogVideoInfo.h"
 #include "dialogs/GUIDialogOK.h"
 
 #include "Client/PlexMediaServerClient.h"
@@ -60,33 +60,35 @@
 
 #include "ApplicationMessenger.h"
 
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 
-#include "Job.h"
-#include "JobManager.h"
+#include "utils/Job.h"
+#include "utils/JobManager.h"
 
 #include "interfaces/Builtins.h"
 
 #include "Client/PlexServerManager.h"
 #include "Client/PlexServerDataLoader.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "PlexApplication.h"
 
 #include "ApplicationMessenger.h"
 
-#include "AutoUpdate/PlexAutoUpdate.h"
+//MERGE: #include "AutoUpdate/PlexAutoUpdate.h"
 
 #include "PlexThemeMusicPlayer.h"
 #include "dialogs/GUIDialogBusy.h"
-#include "DirectoryCache.h"
+#include "filesystem/DirectoryCache.h"
 #include "GUI/GUIPlexMediaWindow.h"
 #include "PlayListPlayer.h"
 #include "playlists/PlayList.h"
-#include "PlexPlayQueueManager.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "music/tags/MusicInfoTag.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "GUI/GUIPlexDefaultActionHandler.h"
 #include "GUI/GUIDialogPlexError.h"
+
+#include "PlexSectionFanout.h"
 
 
 using namespace std;
@@ -108,7 +110,7 @@ using namespace boost;
 
 #define SLIDESHOW_MULTIIMAGE 10101
 
-typedef std::pair<CStdString, CPlexSectionFanout*> nameSectionPair;
+typedef std::pair<std::string, CPlexSectionFanout*> nameSectionPair;
 
 //////////////////////////////////////////////////////////////////////////////
 CGUIWindowHome::CGUIWindowHome(void) : CGUIWindow(WINDOW_HOME, "Home.xml"), m_globalArt(false), m_lastSelectedItem("Search")
@@ -159,7 +161,7 @@ bool CGUIWindowHome::OnAction(const CAction &action)
       {
         HideAllLists();
         m_lastSelectedItem = GetCurrentItemName();
-        m_lastSelectedSubItem.Empty();
+        m_lastSelectedSubItem.clear();
         if (g_plexApplication.timer)
           g_plexApplication.timer->SetTimeout(200, this);
       }
@@ -341,7 +343,7 @@ bool CGUIWindowHome::OnPopupMenu()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowHome::CheckTimer(const CStdString& strExisting, const CStdString& strNew, int title, int line1, int line2)
+bool CGUIWindowHome::CheckTimer(const std::string& strExisting, const std::string& strNew, int title, int line1, int line2)
 {
   bool bReturn;
   if (g_alarmClock.HasAlarm(strExisting) && strExisting != strNew)
@@ -486,10 +488,10 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
 void CGUIWindowHome::OnSectionLoaded(const CGUIMessage& message)
 {
   int type = message.GetParam1();
-  CStdString url = message.GetStringParam();
+  std::string url = message.GetStringParam();
   CFileItem* currentFileItem = GetCurrentFileItem();
 
-  CStdString sectionToLoad;
+  std::string sectionToLoad;
   if (currentFileItem && currentFileItem->HasProperty("sectionPath"))
     sectionToLoad = currentFileItem->GetProperty("sectionPath").asString();
   if (m_lastSelectedItem != sectionToLoad)
@@ -663,7 +665,7 @@ void CGUIWindowHome::OpenItem(CFileItemPtr item)
   // save current focused controls
   m_focusSaver.SaveFocus(this);
 
-  CStdString url = m_navHelper.navigateToItem(item, CURL(), GetID());
+  std::string url = m_navHelper.navigateToItem(item, CURL(), GetID());
   if (!url.empty())
     CLog::Log(LOGDEBUG, "CGUIWindowHome::OpenItem got %s back from navigateToItem, not sure what to do with it?", url.c_str());
 }
@@ -741,11 +743,13 @@ void CGUIWindowHome::UpdateSections()
     return;
   }
 
-  vector<CGUIListItemPtr>& oldList = control->GetStaticItems();
+  vector<CGUIStaticItemPtr>& oldList = vector<CGUIStaticItemPtr>();
+  BOOST_FOREACH(CGUIListItemPtr fileItem, control->GetItems())
+    oldList.push_back(boost::static_pointer_cast<CGUIStaticItem>(fileItem));
 
   CFileItemListPtr sections = g_plexApplication.dataLoader->GetAllSections();
-  vector<CGUIListItemPtr> newList;
-  vector<CGUIListItemPtr> newSections;
+  vector<CGUIStaticItemPtr> newList;
+  vector<CGUIStaticItemPtr> newSections;
 
   bool listUpdated = false;
   bool haveShared = false;
@@ -756,7 +760,7 @@ void CGUIWindowHome::UpdateSections()
 
   for (int i = 0; i < oldList.size(); i ++)
   {
-    CGUIListItemPtr item = oldList[i];
+    CGUIStaticItemPtr item = oldList[i];
     if (!item->HasProperty("plex"))
     {
       if (item->HasProperty("plexshared"))
@@ -853,7 +857,7 @@ void CGUIWindowHome::UpdateSections()
 
   for(int i = 0; i < newSections.size(); i ++)
   {
-    CGUIListItemPtr item = newSections[i];
+    CGUIStaticItemPtr item = newSections[i];
     newList.push_back(item);
   }
 
@@ -888,18 +892,19 @@ void CGUIWindowHome::UpdateSections()
     listUpdated = true;
   }
 
-  if (!havePlaylists &&
-      g_plexApplication.serverManager->GetBestServer() &&
-      g_plexApplication.dataLoader->AnyOwnedServerHasPlaylists())
-    AddPlaylists(newList, listUpdated);
-  
-  if ((!havePlayqueues) && g_plexApplication.playQueueManager->getPlayQueuesCount())
-    AddPlayQueues(newList, listUpdated);
+  //MERGE:
+  //if (!havePlaylists &&
+  //    g_plexApplication.serverManager->GetBestServer() &&
+  //    g_plexApplication.dataLoader->AnyOwnedServerHasPlaylists())
+  //  AddPlaylists(newList, listUpdated);
+  //
+  //if ((!havePlayqueues) && g_plexApplication.playQueueManager->getPlayQueuesCount())
+  //  AddPlayQueues(newList, listUpdated);
 
   if (listUpdated)
   {
     std::sort(newList.begin(), newList.end(), _sortLabels);
-    control->SetStaticContent(newList);
+    control->SetListProvider(new CStaticListProvider(newList));
     RestoreSection();
   }
 
@@ -911,7 +916,7 @@ void CGUIWindowHome::AddPlaylists(std::vector<CGUIListItemPtr>& list, bool& upda
   updated = true;
 
   CGUIStaticItemPtr item = CGUIStaticItemPtr(new CGUIStaticItem);
-  CStdString path("plexserver://playlists/");
+  std::string path("plexserver://playlists/");
 
   item->SetLabel("Playlists");
   item->SetProperty("playlists", true);
@@ -931,7 +936,7 @@ void CGUIWindowHome::AddPlayQueues(std::vector<CGUIListItemPtr>& list, bool& upd
   updated = true;
   
   CGUIStaticItemPtr item = CGUIStaticItemPtr(new CGUIStaticItem);
-  CStdString path("plexserver://playQueues/");
+  std::string path("plexserver://playQueues/");
   
   item->SetLabel("Now Playing");
   item->SetProperty("playqueues", true);
@@ -965,7 +970,7 @@ void CGUIWindowHome::HideAllLists()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::AddSection(const CStdString &url, CPlexSectionFanout::SectionTypes type,
+void CGUIWindowHome::AddSection(const std::string &url, CPlexSectionFanout::SectionTypes type,
                                 bool useGlobalSlideshow)
 {
   if (m_sections.find(url) == m_sections.end())
@@ -977,7 +982,7 @@ void CGUIWindowHome::AddSection(const CStdString &url, CPlexSectionFanout::Secti
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::RemoveSection(const CStdString &url)
+void CGUIWindowHome::RemoveSection(const std::string &url)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -988,7 +993,7 @@ void CGUIWindowHome::RemoveSection(const CStdString &url)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowHome::GetContentTypesFromSection(const CStdString &url, std::vector<int> &list)
+bool CGUIWindowHome::GetContentTypesFromSection(const std::string &url, std::vector<int> &list)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -1000,7 +1005,7 @@ bool CGUIWindowHome::GetContentTypesFromSection(const CStdString &url, std::vect
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowHome::GetContentListFromSection(const CStdString &url, int contentType, CFileItemList &l)
+bool CGUIWindowHome::GetContentListFromSection(const std::string &url, int contentType, CFileItemList &l)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -1011,7 +1016,7 @@ bool CGUIWindowHome::GetContentListFromSection(const CStdString &url, int conten
   }
 
   if (contentType == CONTENT_LIST_FANART &&
-      !g_guiSettings.GetBool("lookandfeel.enableglobalslideshow"))
+      !CSettings::Get().GetBool("lookandfeel.enableglobalslideshow"))
   {
     /* Special case */
     CGUIBaseContainer *container = (CGUIBaseContainer*)GetControl(MAIN_MENU);
@@ -1043,7 +1048,7 @@ bool CGUIWindowHome::GetContentListFromSection(const CStdString &url, int conten
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::SectionNeedsRefresh(const CStdString &url)
+void CGUIWindowHome::SectionNeedsRefresh(const std::string &url)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -1067,7 +1072,7 @@ void CGUIWindowHome::OnTimeout()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::RefreshSection(const CStdString &url, CPlexSectionFanout::SectionTypes type)
+void CGUIWindowHome::RefreshSection(const std::string &url, CPlexSectionFanout::SectionTypes type)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -1089,7 +1094,7 @@ void CGUIWindowHome::RefreshAllSections(bool force)
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::RefreshSectionsForServer(const CStdString &uuid)
+void CGUIWindowHome::RefreshSectionsForServer(const std::string &uuid)
 {
   BOOST_FOREACH(nameSectionPair p, m_sections)
   {
@@ -1103,9 +1108,9 @@ void CGUIWindowHome::RefreshSectionsForServer(const CStdString &uuid)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::RemoveSectionsForServer(const CStdString &uuid)
+void CGUIWindowHome::RemoveSectionsForServer(const std::string &uuid)
 {
-  std::list<CStdString> sectionsToRemove;
+  std::list<std::string> sectionsToRemove;
   
   BOOST_FOREACH(nameSectionPair p, m_sections)
   {
@@ -1114,12 +1119,12 @@ void CGUIWindowHome::RemoveSectionsForServer(const CStdString &uuid)
       sectionsToRemove.push_back(p.first);
   }
   
-  for (std::list<CStdString>::iterator it = sectionsToRemove.begin(); it != sectionsToRemove.end(); ++it )
+  for (std::list<std::string>::iterator it = sectionsToRemove.begin(); it != sectionsToRemove.end(); ++it )
     m_sections.erase(*it);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CGUIWindowHome::ShowSection(const CStdString &url)
+bool CGUIWindowHome::ShowSection(const std::string &url)
 {
   if (m_sections.find(url) != m_sections.end())
   {
@@ -1139,15 +1144,15 @@ bool CGUIWindowHome::ShowSection(const CStdString &url)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIWindowHome::ShowCurrentSection()
 {
-  if (GetCurrentItemName(true))
+  if (!GetCurrentItemName(true).empty())
     return ShowSection(GetCurrentItemName(true));
   return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CGUIWindowHome::GetCurrentItemName(bool onlySections)
+std::string CGUIWindowHome::GetCurrentItemName(bool onlySections)
 {
-  CStdString name;
+  std::string name;
 
   CFileItemPtr item = GetCurrentListItem();
   if (!item)

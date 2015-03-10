@@ -26,19 +26,21 @@
 
 #include "guilib/GUIWindow.h"
 #include "guilib/GUIStaticItem.h"
-#include "Job.h"
+#include "utils/Job.h"
 #include <boost/timer.hpp>
 
-#include "VideoThumbLoader.h"
-#include "MusicThumbLoader.h"
-#include "PictureThumbLoader.h"
+#include "Owned/VideoThumbLoader.h"
+#include "Owned/MusicThumbLoader.h"
+#include "Owned/PictureThumbLoader.h"
 
 #include "Utility/PlexTimer.h"
-#include "PlexNavigationHelper.h"
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexNavigationHelper.h"
+#include "Utility/PlexGlobalTimer.h"
 #include "PlexSectionFanout.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "GUI/GUIPlexWindowFocusSaver.h"
+
+#include "listproviders/StaticProvider.h"
 
 // List IDs.
 #define CONTEXT_BUTTON_SLEEP (CONTEXT_BUTTON_RATING + 1)
@@ -58,22 +60,22 @@ public:
 
 private:
   virtual bool OnAction(const CAction &action);
-  virtual bool CheckTimer(const CStdString& strExisting, const CStdString& strNew, int title, int line1, int line2);
+  virtual bool CheckTimer(const std::string& strExisting, const std::string& strNew, int title, int line1, int line2);
   virtual CFileItemPtr GetCurrentListItem(int offset = 0);
 
   void HideAllLists();
   void RestoreSection();
-  void RefreshSection(const CStdString& url, CPlexSectionFanout::SectionTypes type);
+  void RefreshSection(const std::string& url, CPlexSectionFanout::SectionTypes type);
   void RefreshAllSections(bool force = true);
-  void RefreshSectionsForServer(const CStdString &uuid);
-  void RemoveSectionsForServer(const CStdString &uuid);
-  void AddSection(const CStdString& url, CPlexSectionFanout::SectionTypes sectionType, bool useGlobalSlideshow);
-  void RemoveSection(const CStdString& url);
-  bool ShowSection(const CStdString& url);
+  void RefreshSectionsForServer(const std::string &uuid);
+  void RemoveSectionsForServer(const std::string &uuid);
+  void AddSection(const std::string& url, CPlexSectionFanout::SectionTypes sectionType, bool useGlobalSlideshow);
+  void RemoveSection(const std::string& url);
+  bool ShowSection(const std::string& url);
   bool ShowCurrentSection();
-  bool GetContentTypesFromSection(const CStdString& url, std::vector<int> &types);
-  bool GetContentListFromSection(const CStdString& url, int contentType, CFileItemList &list);
-  void SectionNeedsRefresh(const CStdString& url);
+  bool GetContentTypesFromSection(const std::string& url, std::vector<int> &types);
+  bool GetContentListFromSection(const std::string& url, int contentType, CFileItemList &list);
+  void SectionNeedsRefresh(const std::string& url);
   void OpenItem(CFileItemPtr item);
   bool OnClick(const CGUIMessage& message);
   void OnSectionLoaded(const CGUIMessage& message);
@@ -86,9 +88,9 @@ private:
   void OnJobComplete(unsigned int jobID, bool success, CJob *job);
 
   void OnTimeout();
-  CStdString TimerName() const { return "windowHome"; }
+  std::string TimerName() const { return "windowHome"; }
 
-  CStdString GetCurrentItemName(bool onlySections=false);
+  std::string GetCurrentItemName(bool onlySections=false);
   CFileItem* GetCurrentFileItem();
   CFileItemPtr GetCurrentFanoutItem();
 
@@ -112,11 +114,11 @@ private:
   CGUIListItemPtr            m_photoChannelItem;
   CGUIListItemPtr            m_applicationChannelItem;
 
-  std::map<CStdString, CPlexSectionFanout*> m_sections;
+  std::map<std::string, CPlexSectionFanout*> m_sections;
   
-  CStdString                 m_lastSelectedItem;
-  CStdString                 m_currentFanArt;
-  CStdString                 m_lastSelectedSubItem;
+  std::string                 m_lastSelectedItem;
+  std::string                 m_currentFanArt;
+  std::string                 m_lastSelectedSubItem;
   CEvent                     m_loadNavigationEvent;
   bool                       m_cacheLoadFail;
   CPlexNavigationHelper      m_navHelper;

@@ -1,11 +1,11 @@
 #include "PlexSectionFanout.h"
 #include <boost/foreach.hpp>
-#include "GUIMessage.h"
+#include "guilib/GUIMessage.h"
 #include "Client/PlexServerManager.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
-#include "VideoThumbLoader.h"
-#include "Key.h"
+#include "Owned/VideoThumbLoader.h"
+#include "guilib/Key.h"
 #include "guilib/GUIWindowManager.h"
 #include "Playlists/PlexPlayQueueManager.h"
 #include "PlayListPlayer.h"
@@ -14,7 +14,7 @@ using namespace XFILE;
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////
-CPlexSectionFanout::CPlexSectionFanout(const CStdString& url, SectionTypes sectionType,
+CPlexSectionFanout::CPlexSectionFanout(const std::string& url, SectionTypes sectionType,
                                        bool useGlobalSlideshow)
   : m_sectionType(sectionType),
     m_needsRefresh(false),
@@ -48,7 +48,7 @@ int CPlexSectionFanout::LoadSection(const CURL& url, int contentType)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-CStdString CPlexSectionFanout::GetBestServerUrl(const CStdString& extraUrl)
+std::string CPlexSectionFanout::GetBestServerUrl(const std::string& extraUrl)
 {
   CPlexServerPtr server = g_plexApplication.serverManager->GetBestServer();
   if (server)
@@ -96,7 +96,7 @@ void CPlexSectionFanout::Refresh(bool force)
   else if (m_sectionType == SECTION_TYPE_CHANNELS)
   {
     if (!g_advancedSettings.m_bHideFanouts)
-      m_outstandingJobs.push_back(LoadSection(GetBestServerUrl("channels/recentlyViewed"),
+      m_outstandingJobs.push_back(LoadSection(CURL(GetBestServerUrl("channels/recentlyViewed")),
                                               CONTENT_LIST_RECENTLY_ACCESSED));
   }
 
@@ -128,14 +128,14 @@ void CPlexSectionFanout::Refresh(bool force)
 
       PlexUtils::AppendPathToURL(trueUrl, "recentlyAdded");
 
-      m_outstandingJobs.push_back(LoadSection(trueUrl.Get(), CONTENT_LIST_RECENTLY_ADDED));
+      m_outstandingJobs.push_back(LoadSection(trueUrl, CONTENT_LIST_RECENTLY_ADDED));
 
       if (m_sectionType == SECTION_TYPE_MOVIE || m_sectionType == SECTION_TYPE_SHOW ||
           m_sectionType == SECTION_TYPE_HOME_MOVIE)
       {
         trueUrl = CURL(m_url);
         PlexUtils::AppendPathToURL(trueUrl, "onDeck");
-        m_outstandingJobs.push_back(LoadSection(trueUrl.Get(), CONTENT_LIST_ON_DECK));
+        m_outstandingJobs.push_back(LoadSection(trueUrl, CONTENT_LIST_ON_DECK));
       }
     }
   }
@@ -159,7 +159,7 @@ void CPlexSectionFanout::LoadArts(bool force)
   // compute the Arts Url
   if (m_useGlobalSlideshow)
   {
-    artsUrl = GetBestServerUrl("library/arts");
+    artsUrl = CURL(GetBestServerUrl("library/arts"));
   }
   else
   {
@@ -178,7 +178,7 @@ void CPlexSectionFanout::LoadArts(bool force)
         // Sync content has no endpoint, use global art
         if (boost::starts_with(sectionURL.GetFileName(),"sync/"))
         {
-          artsUrl = GetBestServerUrl("library/arts");
+          artsUrl = CURL(GetBestServerUrl("library/arts"));
         }
         else
         {
@@ -189,7 +189,7 @@ void CPlexSectionFanout::LoadArts(bool force)
         break;
 
       default:
-        artsUrl = GetBestServerUrl("library/arts");
+        artsUrl = CURL(GetBestServerUrl("library/arts"));
         break;
     }
   }
