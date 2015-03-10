@@ -2,7 +2,7 @@
 #define CPLEXSERVERVERSION_H
 
 #include <string>
-#include "StdString.h"
+#include "utils/StringUtils.h"
 
 class CPlexServerVersion
 {
@@ -30,15 +30,15 @@ public:
     return std::lexicographical_compare(ver1.begin(), ver1.end(), ver2.begin(), ver2.end());
   }
 
-  CStdString shortString() const
+  std::string shortString() const
   {
-    CStdString shortStr;
-    CStdString dev;
+    std::string shortStr;
+    std::string dev;
 
     if (!isDev)
-      dev.Format(".%05d", build);
+      dev = StringUtils::Format(".%05d", build);
 
-    shortStr.Format("%02d.%02d.%02d.%02d%s", major, minor, micro, patch, dev);
+    shortStr = StringUtils::Format("%02d.%02d.%02d.%02d%s", major, minor, micro, patch, dev.c_str());
 
     return shortStr;
   }

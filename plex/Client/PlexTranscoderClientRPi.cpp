@@ -12,8 +12,8 @@
 
 #include "Client/PlexTranscoderClientRPi.h"
 #include "plex/PlexUtils.h"
-#include "log.h"
-#include "settings/GUISettings.h"
+#include "utils/log.h"
+#include "settings/Settings.h"
 #include "Client/PlexConnection.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "PlexMediaDecisionEngine.h"
@@ -25,8 +25,8 @@ CPlexTranscoderClientRPi::CPlexTranscoderClientRPi()
   m_maxAudioBitrate = 0;
 
   // Here is as list of audio / video codecs that we support natively on RPi
-  m_knownVideoCodecs = boost::assign::list_of<std::string>  ("h264") ("mpeg4");
-  m_knownAudioCodecs = boost::assign::list_of<std::string>  ("") ("aac") ("ac3") ("mp3") ("mp2") ("dca") ("flac");
+  m_knownVideoCodecs = (boost::assign::list_of<std::string>  ("h264") ("mpeg4") ).convert_to_container<std::set<std::string> >();
+  m_knownAudioCodecs = (boost::assign::list_of<std::string>  ("") ("aac") ("ac3") ("mp3") ("mp2") ("dca") ("flac") ).convert_to_container<std::set<std::string> >();
 
   // check if optionnal codecs are here
   if ( CheckCodec("MPG2") )
@@ -155,35 +155,35 @@ bool CPlexTranscoderClientRPi::ShouldTranscode(CPlexServerPtr server, const CFil
   CLog::Log(LOGDEBUG,"-%16s : %d", "audioBitRate",audioBitRate);
 
   // check if seetings are to transcoding for local media
-  if ( (g_guiSettings.GetInt("plexmediaserver.localquality") != 0) && (server->GetActiveConnection()->IsLocal()) )
+  if ( (CSettings::Get().GetInt("plexmediaserver.localquality") != 0) && (server->GetActiveConnection()->IsLocal()) )
   {
     bShouldTranscode = true;
-    m_maxVideoBitrate = g_guiSettings.GetInt("plexmediaserver.localquality");
-    ReasonWhy.Format("Settings require local transcoding to %d kbps",g_guiSettings.GetInt("plexmediaserver.localquality"));
+    m_maxVideoBitrate = CSettings::Get().GetInt("plexmediaserver.localquality");
+    ReasonWhy = StringUtils::Format("Settings require local transcoding to %d kbps", CSettings::Get().GetInt("plexmediaserver.localquality"));
   }
   // check if seetings are to transcoding for remote media
-  else if ( (g_guiSettings.GetInt("plexmediaserver.remotequality") != 0) && (!server->GetActiveConnection()->IsLocal()) )
+  else if ((CSettings::Get().GetInt("plexmediaserver.remotequality") != 0) && (!server->GetActiveConnection()->IsLocal()))
   {
     bShouldTranscode = true;
-    m_maxVideoBitrate = g_guiSettings.GetInt("plexmediaserver.remotequality");
-    ReasonWhy.Format("Settings require remote transcoding to %d kbps",g_guiSettings.GetInt("plexmediaserver.remotequality"));
+    m_maxVideoBitrate = CSettings::Get().GetInt("plexmediaserver.remotequality");
+    ReasonWhy = StringUtils::Format("Settings require remote transcoding to %d kbps", CSettings::Get().GetInt("plexmediaserver.remotequality"));
   }
   // check if Video Codec is natively supported
   else if (m_knownVideoCodecs.find(videoCodec) == m_knownVideoCodecs.end())
   {
     bShouldTranscode = true;
-    ReasonWhy.Format("Unknown video codec : %s",videoCodec);
+    ReasonWhy = StringUtils::Format("Unknown video codec : %s", videoCodec.c_str());
   }
   // check if Audio Codec is natively supported
   else if (m_knownAudioCodecs.find(audioCodec) == m_knownAudioCodecs.end())
   {
     bShouldTranscode = true;
-    ReasonWhy.Format("Unknown audio codec : %s",audioCodec);
+    ReasonWhy = StringUtils::Format("Unknown audio codec : %s", audioCodec.c_str());
   }
   else if (bitDepth > maxBitDepth)
   {
     bShouldTranscode = true;
-    ReasonWhy.Format("Video bitDepth is too high : %d (max : %d)",bitDepth,maxBitDepth);
+    ReasonWhy = StringUtils::Format("Video bitDepth is too high : %d (max : %d)", bitDepth, maxBitDepth);
   }
 
   if (bShouldTranscode)

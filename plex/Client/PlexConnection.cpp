@@ -1,12 +1,13 @@
 #include "PlexConnection.h"
 
 #include "filesystem/CurlFile.h"
+#include "utils/log.h"
 
 #include <boost/algorithm/string.hpp>
 
 using namespace XFILE;
 
-CPlexConnection::CPlexConnection(int type, const CStdString& host, int port, const CStdString& schema, const CStdString& token) :
+CPlexConnection::CPlexConnection(int type, const std::string& host, int port, const std::string& schema, const std::string& token) :
   m_type(type), m_state(CONNECTION_STATE_UNKNOWN), m_token(token)
 {
   m_url.SetHostName(host);
@@ -19,10 +20,10 @@ CPlexConnection::CPlexConnection(int type, const CStdString& host, int port, con
 }
 
 CURL
-CPlexConnection::BuildURL(const CStdString &path) const
+CPlexConnection::BuildURL(const std::string &path) const
 {
   CURL ret(m_url);
-  CStdString p(path);
+  std::string p(path);
 
   if (boost::starts_with(path, "/"))
     p = path.substr(1, std::string::npos);
@@ -39,7 +40,7 @@ CPlexConnection::ConnectionState
 CPlexConnection::TestReachability(CPlexServerPtr server)
 {
   CURL url = BuildURL("/");
-  CStdString rootXml;
+  std::string rootXml;
 
   m_http.Reset();
 
@@ -78,7 +79,7 @@ CPlexConnection::Merge(CPlexConnectionPtr otherConnection)
 
   // If we don't have a token or if the otherConnection have a new token, then we
   // need to use that token instead of our own
-  if (m_token.IsEmpty() || (!otherConnection->m_token.IsEmpty() && m_token != otherConnection->m_token))
+  if (m_token.empty() || (!otherConnection->m_token.empty() && m_token != otherConnection->m_token))
     m_token = otherConnection->m_token;
 
   m_refreshed = true;
@@ -88,17 +89,17 @@ bool CPlexConnection::Equals(const CPlexConnectionPtr &other)
 {
   if (!other) return false;
 
-  CStdString url1 = m_url.Get();
-  CStdString url2 = other->m_url.Get();
+  std::string url1 = m_url.Get();
+  std::string url2 = other->m_url.Get();
 
-  bool uriMatches = url1.Equals(url2);
+  bool uriMatches = url1 == url2;
   bool tokenMatches;
-  if (m_token.IsEmpty() && !other->m_token.IsEmpty())
+  if (m_token.empty() && !other->m_token.empty())
     tokenMatches = true;
-  else if (!m_token.IsEmpty() && other->m_token.IsEmpty())
+  else if (!m_token.empty() && other->m_token.empty())
     tokenMatches = true;
   else
-    tokenMatches = m_token.Equals(other->m_token);
+    tokenMatches = m_token == other->m_token;
 
 
   if (!uriMatches)
@@ -110,7 +111,7 @@ bool CPlexConnection::Equals(const CPlexConnectionPtr &other)
   return (uriMatches && tokenMatches);
 }
 
-CStdString
+std::string
 CPlexConnection::ConnectionStateName(CPlexConnection::ConnectionState state)
 {
   switch (state) {
@@ -129,10 +130,10 @@ CPlexConnection::ConnectionStateName(CPlexConnection::ConnectionState state)
   }
 }
 
-CStdString
+std::string
 CPlexConnection::ConnectionTypeName(CPlexConnection::ConnectionType type)
 {
-  CStdString typeName;
+  std::string typeName;
   if (type & CONNECTION_DISCOVERED)
     typeName = "(discovered)";
   if (type & CONNECTION_MANUAL)

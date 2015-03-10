@@ -9,10 +9,10 @@
 #include "PlexServerManager.h"
 #include "Application.h"
 #include "PlayListPlayer.h"
-#include "PlayList.h"
-#include "StringUtils.h"
+#include "playlists/PlayList.h"
+#include "utils/StringUtils.h"
 #include "guilib/GUIWindowManager.h"
-#include "PlexPlayQueueManager.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "music/tags/MusicInfoTag.h"
 #include "video/VideoInfoTag.h"
 
@@ -42,7 +42,7 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
 
   if (m_item)
   {
-    CStdString time = m_item->GetProperty("viewOffset").asString();
+    std::string time = m_item->GetProperty("viewOffset").asString();
     time = time.empty() ? "0" : time;
 
     options.AddOption("time", time);
@@ -54,12 +54,12 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
     
     options.AddOption("key", m_item->GetProperty("unprocessed_key").asString());
 
-    CStdString container = m_item->GetProperty("containerKey").asString();
+    std::string container = m_item->GetProperty("containerKey").asString();
 
     // We need to set our own container since the one from the item can be
     // just /playQueues
     if (m_item->HasProperty("playQueueID"))
-      container.Format("/playQueues/%s", m_item->GetProperty("playQueueID").asString());
+      container = StringUtils::Format("/playQueues/%s", m_item->GetProperty("playQueueID").asString().c_str());
 
     options.AddOption("containerKey", container);
 
@@ -116,7 +116,7 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
       options.AddOption("machineIdentifier", m_item->GetProperty("plexserver").asString());
     }
 
-    int player = g_application.IsPlayingAudio() ? PLAYLIST_MUSIC : PLAYLIST_VIDEO;
+    int player = g_application.m_pPlayer->IsPlayingAudio() ? PLAYLIST_MUSIC : PLAYLIST_VIDEO;
     int playlistLen = g_playlistPlayer.GetPlaylist(player).size();
     int playlistPos = g_playlistPlayer.GetCurrentSong();
 
@@ -160,7 +160,7 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
     if (controllable.size() > 0 && m_state != PLEX_MEDIA_STATE_STOPPED)
       options.AddOption("controllable", StringUtils::Join(controllable, ","));
 
-    if (g_application.IsPlaying() && m_state != PLEX_MEDIA_STATE_STOPPED)
+    if (g_application.m_pPlayer->IsPlaying() && m_state != PLEX_MEDIA_STATE_STOPPED)
     {
       options.AddOption("volume", g_application.GetVolume());
 
@@ -178,7 +178,7 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
 
       options.AddOption("mute", g_application.IsMuted() ? "1" : "0");
 
-      if (m_type == PLEX_MEDIA_TYPE_VIDEO && g_application.IsPlayingVideo())
+      if (m_type == PLEX_MEDIA_TYPE_VIDEO && g_application.m_pPlayer->IsPlayingVideo())
       {
         int subid = g_application.m_pPlayer->GetSubtitleVisible() ? g_application.m_pPlayer->GetSubtitlePlexID() : -1;
         options.AddOption("subtitleStreamID", subid);
@@ -213,7 +213,7 @@ CUrlOptions CPlexTimeline::getTimeline(bool forServer)
     else if (m_continuing)
       options.AddOption("continuing", "1");
 
-    if (g_application.IsPlaying() && g_application.m_pPlayer)
+    if (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer)
     {
       if (g_application.m_pPlayer->CanSeek() && !durationStr.empty())
         options.AddOption("seekRange", "0-" + durationStr);
@@ -239,7 +239,7 @@ CXBMCTinyXML CPlexTimelineCollection::getTimelinesXML(int commandID)
   TiXmlElement *mediaContainer = new TiXmlElement("MediaContainer");
   mediaContainer->SetAttribute("location", "navigation"); // default
 
-  CStdString name, contents;
+  std::string name, contents;
   bool secure;
   if (g_plexApplication.timelineManager->GetTextFieldInfo(name, contents, secure))
   {

@@ -14,7 +14,7 @@
 #include <map>
 #include "threads/CriticalSection.h"
 #include "PlexTypes.h"
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexGlobalTimer.h"
 
 class CPlexManualServerManager : public IJobCallback, public IPlexGlobalTimeout
 {
@@ -24,7 +24,7 @@ class CPlexManualServerManager : public IJobCallback, public IPlexGlobalTimeout
     void OnJobComplete(unsigned int jobID, bool success, CJob *job);
 
     void OnTimeout();
-    CStdString TimerName() const { return "manualServerManager"; }
+    std::string TimerName() const { return "manualServerManager"; }
 
     CCriticalSection m_manualServerLock;
     PlexServerList m_manualServers;

@@ -9,17 +9,18 @@
 class CPlexServerCacheDatabase : public CDatabase
 {
 public:
-  bool CreateTables();
+  void CreateTables();
+  void CreateAnalytics() {};
   bool cacheServers();
   bool getCachedServers(std::vector<CPlexServerPtr>& servers);
   bool Open() { return CDatabase::Open(); }
   
 private:
   bool storeServer(const CPlexServerPtr& server);
-  bool storeConnection(const CStdString& uuid, const CPlexConnectionPtr& connection);
+  bool storeConnection(const std::string& uuid, const CPlexConnectionPtr& connection);
   bool clearTables();
   
-  virtual int GetMinVersion() const { return 4; }
+  virtual int GetSchemaVersion() const { return 4; }
   virtual const char* GetBaseDBName() const { return "PlexServerCache"; }
   virtual bool UpdateOldVersion(int version);
   

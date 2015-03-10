@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "PlexConnection.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 
 #include "PlexManualServerManager.h"
 
@@ -38,7 +38,7 @@ public:
   void SetBestServer(CPlexServerPtr server, bool force);
   void ClearBestServer();
 
-  CPlexServerPtr FindByUUID(const CStdString &uuid);
+  CPlexServerPtr FindByUUID(const std::string &uuid);
   CPlexServerPtr FindFromItem(const CFileItemPtr& item);
   CPlexServerPtr FindFromItem(const CFileItem& item);
 
@@ -81,7 +81,7 @@ private:
   CEvent m_reachabilityTestEvent;
   bool m_updateRechabilityForced;
   
-  std::map<CStdString, CPlexServerReachabilityThread*> m_reachabilityThreads;
+  std::map<std::string, CPlexServerReachabilityThread*> m_reachabilityThreads;
 };
 
 typedef boost::shared_ptr<CPlexServerManager> CPlexServerManagerPtr;
@@ -90,7 +90,7 @@ class CPlexServerReachabilityThread : public CThread
 {
   public:
     CPlexServerReachabilityThread(CPlexServerManagerPtr serverManager, CPlexServerPtr server)
-      : CThread("ServerReachability: " + server->GetName()), m_server(server), m_serverManager(serverManager)
+      : CThread(("ServerReachability: " + server->GetName()).c_str()), m_server(server), m_serverManager(serverManager)
     {
       Create(true);
     }

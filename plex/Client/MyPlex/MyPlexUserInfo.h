@@ -12,6 +12,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "XBDateTime.h"
 #include <string>
+#include <vector>
 
 class CMyPlexUserInfo
 {

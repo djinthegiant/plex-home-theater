@@ -6,15 +6,15 @@
 
 #include <vector>
 #include "utils/log.h"
-#include "GUIMessage.h"
-#include "GUIWindowManager.h"
+#include "guilib/GUIMessage.h"
+#include "guilib/GUIWindowManager.h"
 #include "plex/PlexTypes.h"
 #include "Client/PlexConnection.h"
 #include "PlexServerDataLoader.h"
-#include "File.h"
+#include "filesystem/File.h"
 
-#include "Stopwatch.h"
-#include "settings/GUISettings.h"
+#include "utils/Stopwatch.h"
+#include "settings/Settings.h"
 
 #include "PlexApplication.h"
 #include "PlexServerCacheDatabase.h"
@@ -66,7 +66,7 @@ CPlexServerManager::CPlexServerManager(const CPlexServerPtr &server) : m_stopped
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexServerPtr CPlexServerManager::FindFromItem(const CFileItem& item)
 {
-  CStdString uuid = item.GetProperty("plexserver").asString();
+  std::string uuid = item.GetProperty("plexserver").asString();
   if (uuid.empty())
     return CPlexServerPtr();
 
@@ -83,23 +83,23 @@ CPlexServerPtr CPlexServerManager::FindFromItem(const CFileItemPtr& item)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CPlexServerPtr CPlexServerManager::FindByUUID(const CStdString &uuid)
+CPlexServerPtr CPlexServerManager::FindByUUID(const std::string &uuid)
 {
   if (m_stopped)
     return CPlexServerPtr();
 
   CSingleLock lk(m_serverManagerLock);
 
-  if (uuid.Equals("myplex"))
+  if (uuid == "myplex")
     return _myPlexServer;
 
-  if (uuid.Equals("local"))
+  if (uuid == "local")
     return _localServer;
   
-  if (uuid.Equals("node") || uuid.Equals("com.plexapp.node"))
+  if (uuid == "node" || uuid == "com.plexapp.node")
     return _nodeServer;
 
-  if (uuid.Equals("best"))
+  if (uuid == "best")
     return m_bestServer;
 
   if (m_serverMap.find(uuid) != m_serverMap.end())
@@ -230,7 +230,7 @@ CPlexServerPtr CPlexServerManager::MergeServer(const CPlexServerPtr& server)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexServerManager::ServerRefreshComplete(int connectionType)
 {
-  vector<CStdString> serversToRemove;
+  vector<std::string> serversToRemove;
 
   BOOST_FOREACH(PlexServerPair p, m_serverMap)
   {
@@ -238,7 +238,7 @@ void CPlexServerManager::ServerRefreshComplete(int connectionType)
       serversToRemove.push_back(p.first);
   }
 
-  BOOST_FOREACH(CStdString uuid, serversToRemove)
+  BOOST_FOREACH(std::string uuid, serversToRemove)
   {
     CLog::Log(LOGDEBUG, "CPlexServerManager::ServerRefreshComplete removing server %s", uuid.c_str());
     NotifyAboutServer(m_serverMap.find(uuid)->second, false);
@@ -319,7 +319,7 @@ void CPlexServerManager::ServerReachabilityDone(const CPlexServerPtr& server, bo
   if (success)
   {
     if (!server->IsShared() &&
-        (server->GetServerClass().empty() || !server->GetServerClass().Equals(PLEX_SERVER_CLASS_SECONDARY)))
+        (server->GetServerClass().empty() || server->GetServerClass() != PLEX_SERVER_CLASS_SECONDARY))
       SetBestServer(server, false);
     NotifyAboutServer(server);
   }

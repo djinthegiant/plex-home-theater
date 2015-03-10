@@ -9,8 +9,8 @@
 #include "PlexTypes.h"
 #include "FileItem.h"
 
-#include "PlexJobs.h"
-#include "JobManager.h"
+#include "Utility/PlexJobs.h"
+#include "utils/JobManager.h"
 
 #include <map>
 

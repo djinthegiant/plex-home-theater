@@ -1,8 +1,8 @@
 #include "PlexServerDataLoader.h"
 #include "FileSystem/PlexDirectory.h"
-#include "GUIWindowManager.h"
-#include "GUIMessage.h"
-#include "settings/GUISettings.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/GUIMessage.h"
+#include "settings/Settings.h"
 #include "Playlists/PlexPlayQueueManager.h"
 #include "Application.h"
 
@@ -136,7 +136,7 @@ void CPlexServerDataLoader::OnJobComplete(unsigned int jobID, bool success, CJob
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CFileItemListPtr CPlexServerDataLoader::GetSectionsForUUID(const CStdString& uuid)
+CFileItemListPtr CPlexServerDataLoader::GetSectionsForUUID(const std::string& uuid)
 {
   CSingleLock lk(m_dataLock);
 
@@ -151,7 +151,7 @@ CFileItemListPtr CPlexServerDataLoader::GetSectionsForUUID(const CStdString& uui
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CFileItemListPtr CPlexServerDataLoader::GetChannelsForUUID(const CStdString& uuid)
+CFileItemListPtr CPlexServerDataLoader::GetChannelsForUUID(const std::string& uuid)
 {
   CSingleLock lk(m_dataLock);
   if (m_channelMap.find(uuid) != m_channelMap.end())
@@ -160,12 +160,12 @@ CFileItemListPtr CPlexServerDataLoader::GetChannelsForUUID(const CStdString& uui
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CFileItemListPtr CPlexServerDataLoaderJob::FetchList(const CStdString& path)
+CFileItemListPtr CPlexServerDataLoaderJob::FetchList(const std::string& path)
 {
   CURL url = m_server->BuildPlexURL(path);
   CFileItemListPtr list = CFileItemListPtr(new CFileItemList);
 
-  if (m_dir.GetDirectory(url.Get(), *list))
+  if (m_dir.GetDirectory(url, *list))
     return list;
 
   return CFileItemListPtr();
@@ -183,7 +183,7 @@ void CPlexServerDataLoaderJob::loadPreferences()
       PlexUtils::AppendPathToURL(u, "prefs");
       CFileItemList prefsList;
 
-      if (m_dir.GetDirectory(u.Get(), prefsList))
+      if (m_dir.GetDirectory(u, prefsList))
       {
         if (prefsList.Size() > 0)
         {
@@ -193,10 +193,10 @@ void CPlexServerDataLoaderJob::loadPreferences()
             if (!prefsItem)
               continue;
 
-            CStdString key("pref_");
+            std::string key("pref_");
             key += prefsItem->GetProperty("id").asString();
-            CStdString value = prefsItem->GetProperty("value").asString();
-            CStdString type = prefsItem->GetProperty("type").asString();
+            std::string value = prefsItem->GetProperty("value").asString();
+            std::string type = prefsItem->GetProperty("type").asString();
 
             CVariant realValue(value);
 
@@ -334,7 +334,7 @@ void CPlexServerDataLoader::OnTimeout()
   CSingleLock lk(m_serverLock);
 
   // don't run any checks during video playback
-  if (g_application.IsPlayingVideo())
+  if (g_application.m_pPlayer->IsPlayingVideo())
   {
     g_plexApplication.timer->SetTimeout(SECTION_REFRESH_INTERVAL, this);
     return;
@@ -349,7 +349,7 @@ void CPlexServerDataLoader::OnTimeout()
     m_channelMap.clear();
   }
 
-  std::pair<CStdString, CPlexServerPtr> p;
+  std::pair<std::string, CPlexServerPtr> p;
   BOOST_FOREACH(p, m_servers)
   {
     if (!p.second)

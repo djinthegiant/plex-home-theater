@@ -3,8 +3,8 @@
 #include "Client/PlexServer.h"
 #include "Client/PlexServerManager.h"
 
-#include "GlobalsHandling.h"
-#include "JobManager.h"
+#include "utils/GlobalsHandling.h"
+#include "utils/JobManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -15,9 +15,9 @@
 #include "FileSystem/PlexDirectory.h"
 
 /* Maps UUID->list of sections for the section */
-typedef std::map<CStdString, CFileItemListPtr> ServerDataMap;
-typedef std::pair<CStdString, CFileItemListPtr> ServerDataPair;
-typedef std::map<CStdString, CPlexServerPtr> ServerMap;
+typedef std::map<std::string, CFileItemListPtr> ServerDataMap;
+typedef std::pair<std::string, CFileItemListPtr> ServerDataPair;
+typedef std::map<std::string, CPlexServerPtr> ServerMap;
 
 class CPlexServerDataLoader : public CJobQueue,
                               public IPlexGlobalTimeout,
@@ -29,12 +29,12 @@ public:
   void LoadDataFromServer(const CPlexServerPtr& server);
   void RemoveServer(const CPlexServerPtr& server);
 
-  CFileItemListPtr GetSectionsForUUID(const CStdString& uuid);
+  CFileItemListPtr GetSectionsForUUID(const std::string& uuid);
   CFileItemListPtr GetSectionsForServer(const CPlexServerPtr& server)
   {
     return GetSectionsForUUID(server->GetUUID());
   }
-  CFileItemListPtr GetChannelsForUUID(const CStdString& uuid);
+  CFileItemListPtr GetChannelsForUUID(const std::string& uuid);
   CFileItemListPtr GetChannelsForServer(const CPlexServerPtr& server)
   {
     return GetChannelsForUUID(server->GetUUID());
@@ -56,7 +56,7 @@ public:
     }
     return false;
   }
-  bool ServerUUIDHasPlaylist(const CStdString& uuid)
+  bool ServerUUIDHasPlaylist(const std::string& uuid)
   {
     if (m_serverHasPlaylist.find(uuid) == m_serverHasPlaylist.end())
       return false;
@@ -90,7 +90,7 @@ public:
   CFileItemPtr GetSection(const CURL& sectionUrl);
   EPlexDirectoryType GetSectionType(const CURL& sectionUrl);
 
-  CStdString TimerName() const
+  std::string TimerName() const
   {
     return "serverDataLoader";
   }
@@ -114,7 +114,7 @@ private:
   ServerDataMap m_sectionMap;
   ServerDataMap m_channelMap;
   ServerDataMap m_sharedSectionsMap;
-  std::map<CStdString, bool> m_serverHasPlaylist;
+  std::map<std::string, bool> m_serverHasPlaylist;
 
   bool m_forceRefresh;
 };
@@ -130,7 +130,7 @@ public:
   }
 
   bool DoWork();
-  CFileItemListPtr FetchList(const CStdString& path);
+  CFileItemListPtr FetchList(const std::string& path);
 
   CPlexServerPtr m_server;
   CFileItemListPtr m_sectionList;

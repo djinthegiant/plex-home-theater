@@ -8,8 +8,8 @@
 
 #include "PlexManualServerManager.h"
 #include "PlexServerManager.h"
-#include "settings/GUISettings.h"
-#include "PlexJobs.h"
+#include "settings/Settings.h"
+#include "Utility/PlexJobs.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/log.h"
 #include "PlexApplication.h"
@@ -35,10 +35,10 @@ void CPlexManualServerManager::checkManualServersAsync()
   }
 #endif
 
-  if (g_guiSettings.GetBool("plexmediaserver.manualaddress"))
+  if (CSettings::Get().GetBool("plexmediaserver.manualaddress"))
   {
-    CStdString address = g_guiSettings.GetString("plexmediaserver.address");
-    int port = boost::lexical_cast<int>(g_guiSettings.GetString("plexmediaserver.port"));
+    std::string address = CSettings::Get().GetString("plexmediaserver.address");
+    int port = CSettings::Get().GetInt("plexmediaserver.port");
 
     m_waitingForThreads ++;
 

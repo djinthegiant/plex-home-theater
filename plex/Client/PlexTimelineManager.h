@@ -1,12 +1,11 @@
 #ifndef PLEXTIMELINEMANAGER_H
 #define PLEXTIMELINEMANAGER_H
 
-#include "StdString.h"
 #include "FileItem.h"
 #include "Utility/PlexTimer.h"
 #include "threads/Event.h"
 #include "threads/Timer.h"
-#include "UrlOptions.h"
+#include "utils/UrlOptions.h"
 #include "FileItem.h"
 #include "Remote/PlexRemoteSubscriberManager.h"
 #include "utils/XBMCTinyXML.h"
@@ -31,7 +30,7 @@ class CPlexTimelineManager
     void SendTimelineToSubscriber(CPlexRemoteSubscriberPtr subscriber, const CPlexTimelineCollectionPtr &timelines);
     void SendTimelineToSubscribers(const CPlexTimelineCollectionPtr &timelines, bool delay = false);
 
-    void SetTextFieldFocused(bool focused, const CStdString &name="field", const CStdString &contents=CStdString(), bool isSecure=false);
+    void SetTextFieldFocused(bool focused, const std::string &name="field", const std::string &contents=std::string(), bool isSecure=false);
     void RefreshSubscribers();
 
     void Stop();
@@ -39,10 +38,10 @@ class CPlexTimelineManager
     std::string GetCurrentFocusedTextField() const { return m_textFieldName; }
     bool IsTextFieldFocused() const { return m_textFieldFocused; }
 
-    CStdString TimerName() const { return "timelineManager"; }
+    std::string TimerName() const { return "timelineManager"; }
 
     void SendCurrentTimelineToSubscriber(CPlexRemoteSubscriberPtr subscriber);
-    bool GetTextFieldInfo(CStdString& name, CStdString& contents, bool& secure);
+    bool GetTextFieldInfo(std::string& name, std::string& contents, bool& secure);
 
   private:
     void OnTimeout();
@@ -56,8 +55,8 @@ class CPlexTimelineManager
 
     bool m_stopped;
     bool m_textFieldFocused;
-    CStdString m_textFieldName;
-    CStdString m_textFieldContents;
+    std::string m_textFieldName;
+    std::string m_textFieldContents;
     bool m_textFieldSecure;
 
     void NotifyPollers();

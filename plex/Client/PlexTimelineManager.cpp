@@ -1,18 +1,18 @@
 #include "PlexTimelineManager.h"
-#include "UrlOptions.h"
-#include "log.h"
+#include "utils/UrlOptions.h"
+#include "utils/log.h"
 #include "Application.h"
 #include "PlexApplication.h"
 #include "Client/PlexMediaServerClient.h"
-#include "GUIWindowManager.h"
-#include "PlayList.h"
+#include "guilib/GUIWindowManager.h"
+#include "playlists/PlayList.h"
 #include "plex/Remote/PlexRemoteSubscriberManager.h"
 #include "utils/StringUtils.h"
 #include <boost/lexical_cast.hpp>
 #include "video/VideoInfoTag.h"
 #include "music/tags/MusicInfoTag.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include <boost/foreach.hpp>
 #include "pictures/GUIWindowSlideShow.h"
 
@@ -21,7 +21,7 @@
 #include "Playlists/PlexPlayQueueManager.h"
 
 #include "FileItem.h"
-#include "DirectoryCache.h"
+#include "filesystem/DirectoryCache.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexTimelineManager::CPlexTimelineManager() : m_stopped(false), m_textFieldFocused(false), m_textFieldSecure(false)
@@ -70,7 +70,7 @@ void CPlexTimelineManager::SendTimelineToSubscribers(const CPlexTimelineCollecti
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexTimelineManager::SetTextFieldFocused(bool focused, const CStdString &name, const CStdString &contents, bool isSecure)
+void CPlexTimelineManager::SetTextFieldFocused(bool focused, const std::string &name, const std::string &contents, bool isSecure)
 {
   CSingleLock lk(m_timelineManagerLock);
 
@@ -261,7 +261,7 @@ void CPlexTimelineManager::ReportProgress(const CPlexTimelinePtr &timeline, bool
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexTimelineManager::GetTextFieldInfo(CStdString& name, CStdString& contents, bool& secure)
+bool CPlexTimelineManager::GetTextFieldInfo(std::string& name, std::string& contents, bool& secure)
 {
   CSingleLock lk(m_timelineManagerLock);
 

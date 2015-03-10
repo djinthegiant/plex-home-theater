@@ -14,11 +14,11 @@
 #include <boost/foreach.hpp>
 #include <string>
 
-#include "PlexFile.h"
+#include "FileSystem/PlexFile.h"
 #include "video/VideoInfoTag.h"
 #include "music/tags/MusicInfoTag.h"
 #include "Client/PlexTranscoderClient.h"
-#include "PlexJobs.h"
+#include "Utility/PlexJobs.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIUserMessages.h"
 #include "guilib/Key.h"
@@ -30,13 +30,13 @@
 #include "utils/log.h"
 #include "PlexApplication.h"
 #include "PlexServerManager.h"
-#include "GUISettings.h"
-#include "StringUtils.h"
-#include "URIUtils.h"
+#include "settings/Settings.h"
+#include "utils/StringUtils.h"
+#include "utils/URIUtils.h"
 #include "PlexServer.h"
-#include "PlexFile.h"
-#include "NetworkInterface.h"
-#include "PlexPlayQueueManager.h"
+#include "FileSystem/PlexFile.h"
+#include "Network/NetworkInterface.h"
+#include "Playlists/PlexPlayQueueManager.h"
 #include "PlexServerDataLoader.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,10 +94,9 @@ void CPlexMediaServerClient::OnJobComplete(unsigned int jobID, bool success, CJo
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexMediaServerClient::share(const CFileItemPtr &item, const CStdString &network, const CStdString &message)
+void CPlexMediaServerClient::share(const CFileItemPtr &item, const std::string &network, const std::string &message)
 {
-  CStdString fnameStr;
-  fnameStr.Format("pms/social/networks/%s/share", network);
+  std::string fnameStr = StringUtils::Format("pms/social/networks/%s/share", network.c_str());
 
   CURL u;
   u.SetProtocol("plexserver");
@@ -112,8 +111,7 @@ void CPlexMediaServerClient::share(const CFileItemPtr &item, const CStdString &n
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexMediaServerClient::publishDevice()
 {
-  CStdString path;
-  path.Format("devices/%s", g_guiSettings.GetString("system.uuid"));
+  std::string path = StringUtils::Format("devices/%s", CSettings::Get().GetString("system.uuid").c_str());
 
   CPlexServerPtr myPlexServer = g_plexApplication.serverManager->FindByUUID("myplex");
   if (!myPlexServer)
@@ -123,7 +121,7 @@ void CPlexMediaServerClient::publishDevice()
 
   std::vector<NetworkInterface> allInterfaces;
   NetworkInterface::GetCachedList(allInterfaces);
-  CStdStringArray interfaceOptions;
+  std::vector<std::string> interfaceOptions;
 
   BOOST_FOREACH(NetworkInterface& xface, allInterfaces)
   {
@@ -135,25 +133,23 @@ void CPlexMediaServerClient::publishDevice()
         CURL deviceAddr;
         deviceAddr.SetProtocol("http");
         deviceAddr.SetHostName(xface.address());
-        deviceAddr.SetPort(boost::lexical_cast<int>(g_guiSettings.GetString("services.webserverport")));
+        deviceAddr.SetPort(CSettings::Get().GetInt("services.webserverport"));
         CLog::Log(LOGDEBUG, "CPlexMediaServerClient::publishDevice Adding interface: %s for publishing", deviceAddr.Get().c_str());
 
-        CStdString opt;
-        opt.Format("%s=%s", CURL::Encode("Connection[][uri]"), CURL::Encode(deviceAddr.Get()));
+        std::string opt = StringUtils::Format("%s=%s", CURL::Encode("Connection[][uri]").c_str(), CURL::Encode(deviceAddr.Get()).c_str());
 
         interfaceOptions.push_back(opt);
       }
     }
   }
 
-  CStdString optList;
-  StringUtils::JoinString(interfaceOptions, "&", optList);
+  std::string optList = StringUtils::Join(interfaceOptions, "&");
 
-  CStdString url = u.Get() + "&" + optList;
+  std::string url = u.Get() + "&" + optList;
 
   CLog::Log(LOGDEBUG, "CPlexMediaServerClient::publishDevice Going to call url: %s", url.c_str());
 
-  AddJob(new CPlexMediaServerClientJob(url, "PUT"));
+  AddJob(new CPlexMediaServerClientJob(CURL(url), "PUT"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +228,7 @@ void CPlexMediaServerClient::SendServerTimeline(const CFileItemPtr &item, const 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void CPlexMediaServerClient::SendSubscriberTimeline(const CURL &url, const CStdString &postData)
+void CPlexMediaServerClient::SendSubscriberTimeline(const CURL &url, const std::string &postData)
 {
   CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url, "POST");
   job->m_postData = postData;
@@ -248,9 +244,9 @@ void CPlexMediaServerClient::SetViewMode(CFileItemPtr item, int viewMode, int so
   u.SetOption("identifier", item->GetProperty("identifier").asString());
   u.SetOption("viewGroup", item->GetProperty("viewGroup").asString());
 
-  u.SetOption("viewMode", boost::lexical_cast<CStdString>(viewMode));
-  u.SetOption("sortMode", boost::lexical_cast<CStdString>(sortMode));
-  u.SetOption("sortAsc", boost::lexical_cast<CStdString>(sortAsc));
+  u.SetOption("viewMode", boost::lexical_cast<std::string>(viewMode));
+  u.SetOption("sortMode", boost::lexical_cast<std::string>(sortMode));
+  u.SetOption("sortAsc", boost::lexical_cast<std::string>(sortAsc));
 
   AddJob(new CPlexMediaServerClientJob(u));
 }
@@ -278,10 +274,10 @@ void CPlexMediaServerClient::deleteItem(const CFileItemPtr &item)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void CPlexMediaServerClient::deleteItemFromPath(const CStdString path)
+void CPlexMediaServerClient::deleteItemFromPath(const std::string path)
 {
   CGUIMessage msg(GUI_MSG_UPDATE, 0, 0, 0, 0);
-  AddJob(new CPlexMediaServerClientJob(path, "DELETE", msg, 16205));
+  AddJob(new CPlexMediaServerClientJob(CURL(path), "DELETE", msg, 16205));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -297,20 +293,20 @@ void CPlexMediaServerClient::movePlayListItem(CFileItemPtr item, CFileItemPtr af
     url.SetOption("after", "0");
 
   CGUIMessage msg(GUI_MSG_UPDATE, 0, 0, 0, 0);
-  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url.Get(), "PUT", msg, 16205);
+  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url, "PUT", msg, 16205);
   g_plexApplication.busy.blockWaitingForJob(job, NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexMediaServerClient::addItemToPlayList(CPlexServerPtr server, CFileItemPtr item, CStdString playlistID, bool block)
+bool CPlexMediaServerClient::addItemToPlayList(CPlexServerPtr server, CFileItemPtr item, std::string playlistID, bool block)
 {
   CURL url = server->BuildPlexURL("/playlists/" + playlistID + "/items");
   
-  CStdString uri = CPlexPlayQueueManager::getURIFromItem(*item);
+  std::string uri = CPlexPlayQueueManager::getURIFromItem(*item);
   url.SetOption("uri", uri);
   
   CGUIMessage msg(GUI_MSG_UPDATE, 0, 0, 0, 0);
-  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url.Get(), "PUT", msg);
+  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url, "PUT", msg);
   
   if (block)
   {
@@ -324,7 +320,7 @@ bool CPlexMediaServerClient::addItemToPlayList(CPlexServerPtr server, CFileItemP
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexMediaServerClient::createPlayList(CPlexServerPtr server, CStdString name, CFileItemPtr item, bool smart, bool block)
+bool CPlexMediaServerClient::createPlayList(CPlexServerPtr server, std::string name, CFileItemPtr item, bool smart, bool block)
 {
   CURL url = server->BuildPlexURL("/playlists");
 
@@ -341,13 +337,13 @@ bool CPlexMediaServerClient::createPlayList(CPlexServerPtr server, CStdString na
     return false;
   }
 
-  CStdString uri = CPlexPlayQueueManager::getURIFromItem(*item);
+  std::string uri = CPlexPlayQueueManager::getURIFromItem(*item);
   url.SetOption("uri", uri);
 
   url.SetOption("smart", smart ? "1" : "0");
 
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE, g_windowManager.GetActiveWindow());
-  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url.Get(), "POST", msg, 52615);
+  CPlexMediaServerClientJob *job = new CPlexMediaServerClientJob(url, "POST", msg, 52615);
   if (block)
   {
     return g_plexApplication.busy.blockWaitingForJob(job, this);

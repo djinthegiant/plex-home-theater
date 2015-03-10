@@ -1,7 +1,7 @@
 #include "PlexServerVersion.h"
 
 #include "utils/StringUtils.h"
-#include "log.h"
+#include "utils/log.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -29,7 +29,7 @@ CPlexServerVersion::CPlexServerVersion(const std::string& versionString)
 bool CPlexServerVersion::parse(const std::string& versionString)
 {
   std::vector<std::string> firstSplit = StringUtils::Split(versionString, "-");
-  CStdString versionStr;
+  std::string versionStr;
 
   if (firstSplit.size() != 2)
   {

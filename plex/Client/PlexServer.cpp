@@ -15,7 +15,7 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexServerConnTestThread::CPlexServerConnTestThread(CPlexConnectionPtr conn, CPlexServerPtr server)
-  : CThread("ConnectionTest: " + conn->GetAddress().GetHostName()), m_conn(conn), m_server(server)
+  : CThread(("ConnectionTest: " + conn->GetAddress().GetHostName()).c_str()), m_conn(conn), m_server(server)
 {
   Create(true);
 }
@@ -67,7 +67,7 @@ CPlexServer::~CPlexServer()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexServer::CollectDataFromRoot(const CStdString xmlData)
+bool CPlexServer::CollectDataFromRoot(const std::string xmlData)
 {
   CSingleLock lk(m_serverLock);
 
@@ -82,7 +82,7 @@ bool CPlexServer::CollectDataFromRoot(const CStdString xmlData)
     /* first we need to check that this is the server we should talk to */
     if (root->QueryStringAttribute("machineIdentifier", &uuid) == TIXML_SUCCESS)
     {
-      if (!m_uuid.Equals(uuid.c_str()))
+      if (m_uuid != uuid)
       {
         CLog::Log(LOGWARNING, "CPlexServer::CollectDataFromRoot we wanted to talk to %s but got %s, dropping this connection.", m_uuid.c_str(), uuid.c_str());
         return false;
@@ -107,7 +107,7 @@ bool CPlexServer::CollectDataFromRoot(const CStdString xmlData)
     root->QueryStringAttribute("serverClass", &m_serverClass);
     root->QueryStringAttribute("version", &m_version);
 
-    CStdString stringValue;
+    std::string stringValue;
     if (root->QueryStringAttribute("transcoderVideoResolutions", &stringValue) == TIXML_SUCCESS)
       m_transcoderResolutions = StringUtils::Split(stringValue, ",");
 
@@ -241,7 +241,7 @@ bool CPlexServer::UpdateReachability()
     CLog::Log(LOGDEBUG, "CPlexServer::UpdateReachability testing connection %s", conn->toString().c_str());
     if (g_plexApplication.myPlexManager &&
         g_plexApplication.myPlexManager->GetCurrentUserInfo().restricted &&
-        conn->GetAccessToken().IsEmpty())
+        conn->GetAccessToken().empty())
     {
       CLog::Log(LOGINFO, "CPlexServer::UpdateReachability skipping connection %s since we are restricted", conn->toString().c_str());
       m_connectionsLeft --;
@@ -296,7 +296,7 @@ void CPlexServer::CancelReachabilityTests()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexServer::GetAccessToken() const
+std::string CPlexServer::GetAccessToken() const
 {
   CSingleLock lk(m_serverLock);
   BOOST_FOREACH(CPlexConnectionPtr conn, m_connections)
@@ -304,7 +304,7 @@ CStdString CPlexServer::GetAccessToken() const
     if (!conn->GetAccessToken().empty())
       return conn->GetAccessToken();
   }
-  return CStdString();
+  return std::string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -414,17 +414,17 @@ CURL CPlexServer::GetActiveConnectionURL() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CURL CPlexServer::BuildPlexURL(const CStdString& path) const
+CURL CPlexServer::BuildPlexURL(const std::string& path) const
 {
   CURL url;
   url.SetProtocol("plexserver");
   url.SetHostName(m_uuid);
   url.SetFileName(path);
-  return url.Get();
+  return url;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CURL CPlexServer::BuildURL(const CStdString &path, const CStdString &options) const
+CURL CPlexServer::BuildURL(const std::string &path, const std::string &options) const
 {
   CPlexConnectionPtr connection = m_activeConnection;
 
@@ -442,10 +442,10 @@ CURL CPlexServer::BuildURL(const CStdString &path, const CStdString &options) co
   if (!url.HasOption(connection->GetAccessTokenParameter()))
   {
     /* See if we can find a token in our other connections */
-    CStdString token;
+    std::string token;
     BOOST_FOREACH(CPlexConnectionPtr conn, m_connections)
     {
-      if (!conn->GetAccessToken().IsEmpty())
+      if (!conn->GetAccessToken().empty())
       {
         token = conn->GetAccessToken();
         url.SetOption(connection->GetAccessTokenParameter(), token);
@@ -461,7 +461,7 @@ bool CPlexServer::HasAuthToken() const
 {
   BOOST_FOREACH(CPlexConnectionPtr conn, m_connections)
   {
-    if (!conn->GetAccessToken().IsEmpty())
+    if (!conn->GetAccessToken().empty())
       return true;
   }
   return false;
@@ -472,7 +472,7 @@ string CPlexServer::GetAnyToken() const
 {
   BOOST_FOREACH(CPlexConnectionPtr conn, m_connections)
   {
-    if (!conn->GetAccessToken().IsEmpty())
+    if (!conn->GetAccessToken().empty())
       return conn->GetAccessToken();
   }
   return string();
@@ -485,16 +485,16 @@ void CPlexServer::AddConnection(CPlexConnectionPtr connection)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexServer::toString() const
+std::string CPlexServer::toString() const
 {
-  CStdString ret;
-  ret.Format("%s version: %s activeConnection: %s owner: %s deletion: %s class: %s",
-             m_name,
-             m_version,
-             m_activeConnection ? m_activeConnection->GetAddress().GetHostName() : "NO",
-             m_owner.empty() ? "you" : m_owner,
+  std::string ret;
+  ret = StringUtils::Format("%s version: %s activeConnection: %s owner: %s deletion: %s class: %s",
+             m_name.c_str(),
+             m_version.c_str(),
+             m_activeConnection ? m_activeConnection->GetAddress().GetHostName().c_str() : "NO",
+             m_owner.empty() ? "you" : m_owner.c_str(),
              m_supportsDeletion ? "YES" : "NO",
-             m_serverClass);
+             m_serverClass.c_str());
 
   return ret;
 }

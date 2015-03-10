@@ -1,7 +1,6 @@
 #pragma once
 
 #include "URL.h"
-#include "StdString.h"
 #include "PlexUtils.h"
 
 #include "Client/PlexServer.h"
@@ -11,6 +10,7 @@
 
 #include "PlexApplication.h"
 #include "filesystem/CurlFile.h"
+#include "utils/StringUtils.h"
 
 class CPlexConnection;
 typedef boost::shared_ptr<CPlexConnection> CPlexConnectionPtr;
@@ -34,14 +34,14 @@ public:
   };
 
   CPlexConnection() {}
-  CPlexConnection(int type, const CStdString& host, int port, const CStdString& schema="http", const CStdString& token="");
+  CPlexConnection(int type, const std::string& host, int port, const std::string& schema = "http", const std::string& token = "");
   virtual ~CPlexConnection() {}
 
-  static CStdString ConnectionTypeName(ConnectionType type);
-  static CStdString ConnectionStateName(ConnectionState state);
+  static std::string ConnectionTypeName(ConnectionType type);
+  static std::string ConnectionStateName(ConnectionState state);
 
   virtual ConnectionState TestReachability(CPlexServerPtr server);
-  CURL BuildURL(const CStdString& path) const;
+  CURL BuildURL(const std::string& path) const;
 
   bool IsLocal() const
   {
@@ -53,12 +53,12 @@ public:
     return m_url;
   }
 
-  virtual CStdString GetAccessToken() const
+  virtual std::string GetAccessToken() const
   {
     return m_token;
   }
 
-  virtual CStdString GetAccessTokenParameter() const
+  virtual std::string GetAccessTokenParameter() const
   {
     return "X-Plex-Token";
   }
@@ -68,10 +68,10 @@ public:
     m_token = token;
   }
 
-  CStdString toString() const
+  std::string toString() const
   {
-    CStdString fmt;
-    fmt.Format("Connection: %s token used: %s type: %02x state: %s",
+    std::string fmt;
+    fmt = StringUtils::Format("Connection: %s token used: %s type: %02x state: %s",
                m_url.Get().empty() ? "NONE" : m_url.Get().c_str(),
                m_token.empty() ? "NO" : "YES",
                m_type,
@@ -95,7 +95,7 @@ private:
   ConnectionState m_state;
 
   CURL m_url;
-  CStdString m_token;
+  std::string m_token;
 
   bool m_refreshed;
 
@@ -107,7 +107,7 @@ class CMyPlexConnection : public CPlexConnection
     CMyPlexConnection()
     : CPlexConnection(CPlexConnection::CONNECTION_MYPLEX, "plex.tv", 443, "https") {}
 
-    virtual CStdString GetAccessToken() const
+    virtual std::string GetAccessToken() const
     {
       return g_plexApplication.myPlexManager->GetAuthToken();
     }

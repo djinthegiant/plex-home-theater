@@ -12,7 +12,7 @@
 #include "Client/PlexServer.h"
 #include "FileItem.h"
 #include "URL.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 #define PLEX_ONLINE_QUALITY_ALWAYS_ASK 0
 #define PLEX_ONLINE_QUALITY_1080p 1
@@ -36,10 +36,10 @@ public:
     PLEX_TRANSCODE_MODE_MKV = 2
   };
 
-  virtual bool transcodeForced() const { return g_guiSettings.GetBool("plexmediaserver.forcetranscode"); }
-  virtual int localBitrate() const { return g_guiSettings.GetInt("plexmediaserver.localquality"); }
-  virtual int remoteBitrate() const { return g_guiSettings.GetInt("plexmediaserver.remotequality"); }
-  static bool transcodeSubtitles() { return g_guiSettings.GetBool("plexmediaserver.transcodesubtitles"); }
+  virtual bool transcodeForced() const { return CSettings::Get().GetBool("plexmediaserver.forcetranscode"); }
+  virtual int localBitrate() const { return CSettings::Get().GetInt("plexmediaserver.localquality"); }
+  virtual int remoteBitrate() const { return CSettings::Get().GetInt("plexmediaserver.remotequality"); }
+  static bool transcodeSubtitles() { return CSettings::Get().GetBool("plexmediaserver.transcodesubtitles"); }
 
   CPlexTranscoderClient() {}
   virtual ~CPlexTranscoderClient() {}

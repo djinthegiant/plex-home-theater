@@ -12,7 +12,7 @@
 #include <boost/assign.hpp>
 
 #include "PlexTranscoderClient.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "dialogs/GUIDialogSelect.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
@@ -24,9 +24,9 @@
 #include "PlexMediaDecisionEngine.h"
 #include "Client/PlexServerVersion.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
 #include "Client/PlexTranscoderClientRPi.h"
-#include "log.h"
+#include "utils/log.h"
 
 #include <map>
 
@@ -107,8 +107,8 @@ int CPlexTranscoderClient::autoSelectQuality(const CFileItem& file, int target)
   for (size_t i = 0; i < file.m_mediaItems.size(); i++)
   {
     CFileItemPtr item = file.m_mediaItems[i];
-    CStdString videoRes =
-        CStdString(item->GetProperty("mediaTag-videoResolution").asString()).ToUpper();
+    std::string videoRes = std::string(item->GetProperty("mediaTag-videoResolution").asString());
+    StringUtils::ToUpper(videoRes);
 
     // Compute the quality, subsequent SDs get lesser values, assuming they're ordered
     // descending.
@@ -338,7 +338,7 @@ CURL CPlexTranscoderClient::GetTranscodeURL(CPlexServerPtr server, const CFileIt
   }
 
   tURL.SetOption("path", item.GetProperty("unprocessed_key").asString());
-  tURL.SetOption("session", g_guiSettings.GetString("system.uuid"));
+  tURL.SetOption("session", CSettings::Get().GetString("system.uuid"));
   tURL.SetOption("directPlay", "0");
   tURL.SetOption("directStream", "1");
 
@@ -380,7 +380,7 @@ CURL CPlexTranscoderClient::GetTranscodeURL(CPlexServerPtr server, const CFileIt
 ///////////////////////////////////////////////////////////////////////////////
 std::string CPlexTranscoderClient::GetCurrentSession()
 {
-  return g_guiSettings.GetString("system.uuid");
+  return CSettings::Get().GetString("system.uuid");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

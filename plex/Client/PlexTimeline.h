@@ -3,9 +3,9 @@
 
 #include "PlexTypes.h"
 #include "URL.h"
-#include "UrlOptions.h"
+#include "utils/UrlOptions.h"
 
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 #include "FileItem.h"
 
 class CPlexTimeline

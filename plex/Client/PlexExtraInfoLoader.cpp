@@ -1,8 +1,8 @@
 #include "PlexExtraInfoLoader.h"
 #include "video/VideoInfoTag.h"
 #include "music/tags/MusicInfoTag.h"
-#include "DirectoryCache.h"
-#include "PlexBusyIndicator.h"
+#include "filesystem/DirectoryCache.h"
+#include "Utility/PlexBusyIndicator.h"
 #include "PlexApplication.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,8 +89,8 @@ void CPlexExtraInfoLoader::CopyProperties(const CFileItemListPtr& list, CFileIte
     CFileItemPtr item = list->Get(i);
 
     /* copy Properties */
-    std::pair<CStdString, CVariant> p;
-    const PropertyMap pMap = extraItem->GetAllProperties();
+    std::pair<std::string, CVariant> p;
+    const CGUIListItem::PropertyMap pMap = extraItem->GetAllProperties();
     BOOST_FOREACH(p, pMap)
     {
       /* we only insert the properties if they are not available */
@@ -99,7 +99,7 @@ void CPlexExtraInfoLoader::CopyProperties(const CFileItemListPtr& list, CFileIte
     }
 
     /* copy Art */
-    std::pair<CStdString, CStdString> sP;
+    std::pair<std::string, std::string> sP;
     BOOST_FOREACH(sP, extraItem->GetArt())
     {
       if (!item->HasArt(sP.first))

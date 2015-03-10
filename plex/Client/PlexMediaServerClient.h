@@ -9,7 +9,7 @@
 #ifndef __Plex_Home_Theater__PlexMediaServerClient__
 #define __Plex_Home_Theater__PlexMediaServerClient__
 
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "Client/PlexServer.h"
 #include "FileItem.h"
 #include "guilib/GUIMessage.h"
@@ -31,7 +31,7 @@ public:
   
   /* timeline api */
   void SendServerTimeline(const CFileItemPtr& item, const CUrlOptions &options);
-  void SendSubscriberTimeline(const CURL& url, const CStdString &postData);
+  void SendSubscriberTimeline(const CURL& url, const std::string &postData);
 
   /* Set viewMode */
   void SetViewMode(CFileItemPtr item, int viewMode, int sortMode = -1, int sortAsc = 1);
@@ -40,14 +40,14 @@ public:
   void StopTranscodeSession(CPlexServerPtr server);
   
   void deleteItem(const CFileItemPtr& item);
-  void deleteItemFromPath(const CStdString path);
+  void deleteItemFromPath(const std::string path);
   void OnJobComplete(unsigned int jobID, bool success, CJob *job);
 
-  void share(const CFileItemPtr &item, const CStdString &network, const CStdString &message);
+  void share(const CFileItemPtr &item, const std::string &network, const std::string &message);
   
   void movePlayListItem(CFileItemPtr item, CFileItemPtr after);
-  bool addItemToPlayList(CPlexServerPtr server, CFileItemPtr item, CStdString playlistID, bool block = false);
-  bool createPlayList(CPlexServerPtr server, CStdString name, CFileItemPtr item, bool smart, bool block);
+  bool addItemToPlayList(CPlexServerPtr server, CFileItemPtr item, std::string playlistID, bool block = false);
+  bool createPlayList(CPlexServerPtr server, std::string name, CFileItemPtr item, bool smart, bool block);
   CFileItemListPtr getPlayLists();
 
   CURL GetItemURL(CFileItemPtr item);
@@ -55,9 +55,9 @@ public:
   void publishDevice();
 
   private:
-  CStdString GetPrefix(const CFileItemPtr& item) const
+  std::string GetPrefix(const CFileItemPtr& item) const
   {
-    CStdString prefix = "/:/";
+    std::string prefix = "/:/";
     if (item->GetProperty("plexserver") == "myplex")
       prefix = "/pms/:/";
     return prefix;

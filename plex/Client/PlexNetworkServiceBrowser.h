@@ -5,18 +5,18 @@
 #include <boost/lexical_cast.hpp>
 #include <vector>
 
-#include "plex/PlexUtils.h"
+#include "PlexUtils.h"
 #include "Network/NetworkServiceBrowser.h"
 #include "Network/PlexNetworkServiceAdvertiser.h"
 #include "Client/PlexServerManager.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "threads/Thread.h"
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/system/error_code.hpp>
 
 #include "PlexServerManager.h"
-#include "PlexGlobalTimer.h"
+#include "Utility/PlexGlobalTimer.h"
 
 ///
 /// Plex specific service browser.
@@ -37,14 +37,14 @@ public:
 
   virtual void handleNetworkChange(const vector<NetworkInterface> &interfaces);
 
-  virtual CStdString TimerName() const { return "networkServiceBrowser"; }
+  virtual std::string TimerName() const { return "networkServiceBrowser"; }
   virtual void OnTimeout();
 
 private:
   void SetAddTimer();
   void HandleAddTimeout(const boost::system::error_code& e);
   CCriticalSection m_serversSection;
-  std::map<CStdString, CPlexServerPtr> m_discoveredServers;
+  std::map<std::string, CPlexServerPtr> m_discoveredServers;
   boost::asio::deadline_timer m_addTimer;
 };
 
@@ -84,7 +84,7 @@ public:
   void StartAdvertisement()
   {
     // Player advertiser.
-    if(g_guiSettings.GetBool("services.plexplayer"))
+    if(CSettings::Get().GetBool("services.plexplayer"))
     {
       dprintf("NetworkService: starting player advertisement");
       m_plexAdvertiser = NetworkServiceAdvertiserPtr(new PlexNetworkServiceAdvertiser(m_ioService));
