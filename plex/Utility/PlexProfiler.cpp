@@ -26,6 +26,7 @@
 #include "threads/Thread.h"
 #include "system.h"
 #include <boost/foreach.hpp>
+#include "utils/StringUtils.h"
 
 typedef std::pair<ThreadIdentifier, CProfiledFunction*> FunctionMapPair;
 typedef std::map<ThreadIdentifier, CProfiledFunction*>::iterator FunctionMapIterator;
@@ -33,7 +34,7 @@ typedef std::map<ThreadIdentifier, CProfiledFunction*>::iterator FunctionMapIter
 /////////////////////////////////////////////////////////////////////////////////////////
 // CProfiledFunction Class methods
 /////////////////////////////////////////////////////////////////////////////////////////
-CProfiledFunction *CProfiledFunction::FindChild(CStdString aName)
+CProfiledFunction *CProfiledFunction::FindChild(std::string aName)
 {
   //for (std::list<CProfiledFunction*>::iterator it = m_childFunctions.begin();it !=m_childFunctions.end();++it)
   BOOST_FOREACH(CProfiledFunction* f,m_childFunctions)
@@ -92,7 +93,7 @@ void CProfiledFunction::Clear()
 void CProfiledFunction::PrintStats(FILE* file,int level)
 {
   // Print the current function Stats
-  CStdString sPad;
+  std::string sPad;
   for (int i=0;i<level;i++)
     sPad += "  | ";
 
@@ -106,8 +107,7 @@ void CProfiledFunction::PrintStats(FILE* file,int level)
   if (parentTime) percentage = (m_totalTime * 100.0f) / parentTime;
 
   // log information onto file
-  CStdString sLine;
-  sLine.Format("%s% 3d%%,%5d hit(s), % 2.3fs avg:%2.3fs- %s\n", sPad.c_str(),((int)percentage),m_numHits, m_totalTime,m_totalTime / m_numHits, m_name.c_str());
+  std::string sLine = StringUtils::Format("%s% 3d%%,%5d hit(s), % 2.3fs avg:%2.3fs- %s\n", sPad.c_str(),((int)percentage),m_numHits, m_totalTime,m_totalTime / m_numHits, m_name.c_str());
   fputs(sLine.c_str(),file);
 
   // iterate on childs
@@ -131,7 +131,7 @@ CPlexProfiler::~CPlexProfiler()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void CPlexProfiler::StartFunction(CStdString functionName)
+void CPlexProfiler::StartFunction(std::string functionName)
 {
   CSingleLock lk(m_lock);
   CProfiledFunction *currentFunction;
@@ -154,8 +154,7 @@ void CPlexProfiler::StartFunction(CStdString functionName)
   if (it==m_root.end())
   {
     PROFILE_DEBUG("Creating Root for thread %X",threadID);
-    CStdString RootName;
-    RootName.Format("Root %X",threadID);
+    std::string RootName = StringUtils::Format("Root %X", threadID);
     m_root[threadID] = new CProfiledFunction(RootName);
     m_currentFunction[threadID] = m_root[threadID];
     currentFunction = m_currentFunction[threadID];
@@ -193,7 +192,7 @@ void CPlexProfiler::StartFunction(CStdString functionName)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void CPlexProfiler::EndFunction(CStdString functionName)
+void CPlexProfiler::EndFunction(std::string functionName)
 {
   CSingleLock lk(m_lock);
   CProfiledFunction *currentFunction;
@@ -242,12 +241,12 @@ void CPlexProfiler::EndFunction(CStdString functionName)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void CPlexProfiler::SaveProfile(CStdString fileName)
+void CPlexProfiler::SaveProfile(std::string fileName)
 {
   CSingleLock lk(m_lock);
   FILE* file;
-  CStdString sLine;
-  CStdString OutfileName;
+  std::string sLine;
+  std::string OutfileName;
 
   if (!m_enabled)
     return;
@@ -262,7 +261,7 @@ void CPlexProfiler::SaveProfile(CStdString fileName)
   {
     PROFILE_DEBUG("Outputing stats in %s",OutfileName.c_str());
 
-    sLine.Format("Profiler results dump for %d threads :\n",m_root.size());
+    sLine = StringUtils::Format("Profiler results dump for %d threads :\n", m_root.size());
     fputs(sLine.c_str(),file);
 
     // now print individual theards results
@@ -270,7 +269,7 @@ void CPlexProfiler::SaveProfile(CStdString fileName)
     //for (std::map<int,CProfiledFunction*>::iterator it=m_root.begin(); it!=m_root.end(); ++it)
     BOOST_FOREACH(FunctionMapPair p,m_root)
     {
-      sLine.Format("-----------Thread %2d (%10X)-----------\n",iCount,p.first);
+      sLine = StringUtils::Format("-----------Thread %2d (%10X)-----------\n", iCount, p.first);
       fputs(sLine.c_str(),file);
 
       p.second->PrintStats(file,0);

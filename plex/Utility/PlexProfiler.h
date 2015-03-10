@@ -27,9 +27,8 @@
 
 #include <list>
 #include <map>
-#include "StdString.h"
-#include "Stopwatch.h"
-#include "log.h"
+#include "utils/Stopwatch.h"
+#include "utils/log.h"
 #include "stdio_utf8.h"
 #include <boost/enable_shared_from_this.hpp>
 #include "PlexApplication.h"
@@ -54,9 +53,9 @@ class CPlexProfiler : public boost::enable_shared_from_this<CPlexProfiler>
     ~CPlexProfiler();
 
     void Clear();
-    void StartFunction(CStdString functionName);
-    void EndFunction(CStdString functionName);
-    void SaveProfile(CStdString fileName="");
+    void StartFunction(std::string functionName);
+    void EndFunction(std::string functionName);
+    void SaveProfile(std::string fileName="");
     inline void Enable(bool state) { m_enabled = state; }
     inline CStopWatch GetStopWatch() { return m_stopWatch; }
 };
@@ -68,7 +67,7 @@ class CPlexProfiler : public boost::enable_shared_from_this<CPlexProfiler>
 class CProfiledFunction
 {
   protected:
-    CStdString  m_name;
+    std::string  m_name;
     float m_startTime;
     float m_endTime;
     float m_totalTime;
@@ -79,7 +78,7 @@ class CProfiledFunction
     CProfiledFunction *m_pParentFunction;
 
   public:
-    CProfiledFunction(CStdString aName)
+    CProfiledFunction(std::string aName)
     {
       m_name = aName;
       m_startTime = m_endTime =  m_totalTime = 0;
@@ -95,15 +94,15 @@ class CProfiledFunction
     inline float GetEndTime()         { return m_endTime; }
     inline float GetTotalTime()       { return m_totalTime; }
     inline float GetElapsedTime()			{ return (m_endTime - m_startTime); }
-    inline CStdString GetName()				{ return m_name; }
+    inline std::string GetName()				{ return m_name; }
     inline CProfiledFunction* GetParent()             { return m_pParentFunction; }
     inline void SetParent(CProfiledFunction *pParent) { m_pParentFunction = pParent; }
 
     inline static float GetTime()     { return g_plexApplication.profiler->GetStopWatch().GetElapsedSeconds();}
 
-    CProfiledFunction *FindChild(CStdString aName);
+    CProfiledFunction *FindChild(std::string aName);
     CProfiledFunction *AddChildFunction(CProfiledFunction *pFunc);
-    inline CProfiledFunction *AddChildFunction(CStdString aName) { return AddChildFunction(new CProfiledFunction(aName));}
+    inline CProfiledFunction *AddChildFunction(std::string aName) { return AddChildFunction(new CProfiledFunction(aName));}
 
     void Start();
     void End();
@@ -111,17 +110,17 @@ class CProfiledFunction
     void PrintStats(FILE* file,int Level);
 };
 
-inline CStdString GetClassMethod(const char *text)
+inline std::string GetClassMethod(const char *text)
 {
-  CStdString strName = text;
+  std::string strName = text;
   size_t pos1 = strName.find("::");
-  if (pos1!=CStdString::npos)
+  if (pos1!=std::string::npos)
   {
     size_t pos2 = strName.rfind(" ",pos1);
-    if (pos2!=CStdString::npos)
+    if (pos2!=std::string::npos)
     {
       size_t pos3 = strName.find("(",pos1);
-      if (pos3!=CStdString::npos)
+      if (pos3!=std::string::npos)
       {
         return strName.substr(pos2,pos3-pos2);
       }
@@ -138,7 +137,7 @@ inline CStdString GetClassMethod(const char *text)
 #define PROFILE_RESET         if (g_plexApplication.profiler) { g_plexApplication.profiler->Clear(); g_plexApplication.profiler->Enable(true);}
 #define PROFILE_START         if (g_plexApplication.profiler) g_plexApplication.profiler->StartFunction(GetClassMethod(__PRETTY_FUNCTION__)+"()");
 #define PROFILE_END           if (g_plexApplication.profiler) g_plexApplication.profiler->EndFunction(GetClassMethod(__PRETTY_FUNCTION__)+"()");
-#define PROFILE_STEP          CStdString fName;
+#define PROFILE_STEP          std::string fName;
 #define PROFILE_STEP_START(format,...)	fName.Format("%s() - " format, GetClassMethod(__PRETTY_FUNCTION__).c_str(), __VA_ARGS__); if (g_plexApplication.profiler) g_plexApplication.profiler->StartFunction(fName);
 #define PROFILE_STEP_END      if (g_plexApplication.profiler) g_plexApplication.profiler->.EndFunction(fName);
 #define PROFILE_SAVE          if (g_plexApplication.profiler) g_plexApplication.profiler->SaveProfile();

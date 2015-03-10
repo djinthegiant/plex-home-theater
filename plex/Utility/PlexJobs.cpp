@@ -12,11 +12,11 @@
 #include "FileSystem/PlexFile.h"
 
 #include "TextureCache.h"
-#include "File.h"
+#include "filesystem/File.h"
 #include "utils/Crc32.h"
-#include "PlexFile.h"
+#include "FileSystem/PlexFile.h"
 #include "video/VideoInfoTag.h"
-#include "Stopwatch.h"
+#include "utils/Stopwatch.h"
 #include "PlexUtils.h"
 #include "xbmc/Util.h"
 
@@ -55,13 +55,13 @@ bool CPlexMediaServerClientJob::DoWork()
   bool success = false;
   
   if (m_verb == "PUT")
-    success = m_http.Put(m_url.Get(), m_data);
+    success = m_http.Put(m_url, m_data);
   else if (m_verb == "GET")
-    success = m_http.Get(m_url.Get(), m_data);
+    success = m_http.Get(m_url, m_data);
   else if (m_verb == "DELETE")
-    success = m_http.Delete(m_url.Get(), m_data);
+    success = m_http.Delete(m_url, m_data);
   else if (m_verb == "POST")
-    success = m_http.Post(m_url.Get(), m_postData, m_data);
+    success = m_http.Post(m_url, m_postData, m_data);
   
   return success;
 }
@@ -72,14 +72,14 @@ bool CPlexVideoThumbLoaderJob::DoWork()
   if (!m_item->IsPlexMediaServer())
     return false;
 
-  CStdStringArray art;
+  std::vector<std::string> art;
   art.push_back("smallThumb");
   art.push_back("smallPoster");
   art.push_back("smallGrandparentThumb");
   art.push_back("banner");
 
   int i = 0;
-  BOOST_FOREACH(CStdString artKey, art)
+  BOOST_FOREACH(std::string artKey, art)
   {
     if (m_item->HasArt(artKey) &&
         !CTextureCache::Get().HasCachedImage(m_item->GetArt(artKey)))
@@ -161,8 +161,7 @@ bool CPlexThemeMusicPlayerJob::DoWork()
   Crc32 crc;
   crc.ComputeFromLowerCase(m_themeUrl);
 
-  CStdString hex;
-  hex.Format("%08x", (unsigned int)crc);
+  std::string hex = StringUtils::Format("%08x", (unsigned int)crc);
 
   m_fileToPlay = "special://masterprofile/ThemeMusicCache/" + hex + ".mp3";
 
@@ -179,7 +178,7 @@ bool CPlexThemeMusicPlayerJob::DoWork()
 
     bool failed = false;
 
-    if (plex.Open(m_themeUrl))
+    if (plex.Open(CURL(m_themeUrl)))
     {
       bool done = false;
       int64_t read = 0;
@@ -226,7 +225,7 @@ bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
   // unwrap the URL as required
   std::string additional_info;
   unsigned int width, height;
-  CStdString image = DecodeImageURL(m_url, width, height, additional_info);
+  std::string image = DecodeImageURL(m_url, width, height, additional_info);
 
   // generate the hash
   m_details.hash = GetImageHash(image);
@@ -241,7 +240,7 @@ bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
   // our buffer cache plus some padding
   m_inputFile.SetBufferSize(TEXTURE_CACHE_BUFFER_SIZE + 1024);
 
-  if (m_inputFile.Open(image))
+  if (m_inputFile.Open(CURL(image)))
   {
     while (true)
     {

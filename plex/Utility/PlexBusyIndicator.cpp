@@ -1,9 +1,9 @@
 #include "PlexBusyIndicator.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "dialogs/GUIDialogBusy.h"
 #include "guilib/GUIWindowManager.h"
 #include "boost/foreach.hpp"
-#include "log.h"
+#include "utils/log.h"
 #include "Application.h"
 #include "PlexJobs.h"
 

@@ -1,7 +1,7 @@
 #include "PlexAES.h"
-#include "log.h"
-#include "File.h"
-#include "Base64.h"
+#include "utils/log.h"
+#include "filesystem/File.h"
+#include "utils/Base64.h"
 
 #include <boost/foreach.hpp>
 

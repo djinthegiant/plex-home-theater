@@ -1,7 +1,7 @@
 #include "PlexGlobalTimer.h"
 #include "threads/SystemClock.h"
 #include <boost/foreach.hpp>
-#include "log.h"
+#include "utils/log.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 CPlexGlobalTimer::~CPlexGlobalTimer()
@@ -115,7 +115,7 @@ void CPlexGlobalTimer::RestartTimeout(int64_t msec, IPlexGlobalTimeout *callback
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexGlobalTimer::RemoveAllTimeoutsByName(const CStdString &name)
+void CPlexGlobalTimer::RemoveAllTimeoutsByName(const std::string &name)
 {
   CSingleLock lk(m_timerLock);
   std::vector<timeoutPair> toRemove;

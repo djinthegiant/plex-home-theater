@@ -43,7 +43,7 @@ class CPlexHTTPFetchJob : public CJob
     virtual bool operator==(const CJob* job) const;
   
     XFILE::CCurlFile m_http;
-    CStdString m_data;
+    std::string m_data;
     CURL m_url;
     CPlexServerPtr m_server;
 };
@@ -96,7 +96,7 @@ public:
 class CPlexRecursiveFetchJob : public CJob
 {
 public:
-  CPlexRecursiveFetchJob(const CStdString& url, const CStdString& exts, CFileItemList* list)
+  CPlexRecursiveFetchJob(const std::string& url, const std::string& exts, CFileItemList* list)
     : m_url(url), m_exts(exts)
   {
     m_list = list;
@@ -104,7 +104,7 @@ public:
 
   bool DoWork();
 
-  CStdString m_url, m_exts;
+  std::string m_url, m_exts;
   CFileItemList* m_list;
 };
 
@@ -127,9 +127,9 @@ public:
   
   CURL m_url;
   std::string m_verb;
-  CStdString m_data;
+  std::string m_data;
   CGUIMessage m_msg;
-  CStdString m_postData;
+  std::string m_postData;
   int m_errorMsg;
   XFILE::CPlexFile m_http;
 
@@ -183,15 +183,15 @@ public:
 class CPlexDownloadFileJob : public CJob
 {
   public:
-    CPlexDownloadFileJob(const CStdString& url, const CStdString& destination) :
+    CPlexDownloadFileJob(const std::string& url, const std::string& destination) :
       CJob(), m_failed(false), m_url(url), m_destination(destination)
     {};
 
     virtual void Cancel() { m_http.Cancel(); }
 
     bool DoWork();
-    CStdString m_url;
-    CStdString m_destination;
+    std::string m_url;
+    std::string m_destination;
     XFILE::CCurlFile m_http;
 
     bool m_failed;
@@ -201,10 +201,10 @@ class CPlexDownloadFileJob : public CJob
 class CPlexThemeMusicPlayerJob : public CJob
 {
   public:
-    CPlexThemeMusicPlayerJob(const CStdString& themeUrl) : m_themeUrl(themeUrl) {}
+    CPlexThemeMusicPlayerJob(const std::string& themeUrl) : m_themeUrl(themeUrl) {}
     bool DoWork();
-    CStdString m_themeUrl;
-    CStdString m_fileToPlay;
+    std::string m_themeUrl;
+    std::string m_fileToPlay;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +215,7 @@ private:
   XFILE::CFile m_outputFile;
 
 public:
-  CPlexTextureCacheJob(const CStdString& url, const CStdString& oldHash = "")
+  CPlexTextureCacheJob(const std::string& url, const std::string& oldHash = "")
     : CTextureCacheJob(url, oldHash)
   {
   }

@@ -2,7 +2,7 @@
 #ifndef _PLEXGLOBALCACHER_H_
 #define _PLEXGLOBALCACHER_H_
 
-#include "VideoThumbLoader.h"
+#include "video/VideoThumbLoader.h"
 #include "threads/Thread.h"
 #include "threads/Event.h"
 #include "dialogs/GUIDialogProgress.h"
@@ -28,7 +28,7 @@ public:
 
 private:
   CPlexGlobalCacher();
-  void SetProgress(CStdString& Line1, CStdString& Line2, int percentage);
+  void SetProgress(std::string& Line1, std::string& Line2, int percentage);
   void ProcessSection(CFileItemPtr Section, int iSection, int TotalSections);
 
   static CPlexGlobalCacher* m_globalCacher;

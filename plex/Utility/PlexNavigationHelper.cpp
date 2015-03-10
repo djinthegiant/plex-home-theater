@@ -1,21 +1,24 @@
 #include "PlexNavigationHelper.h"
 #include "FileItem.h"
 #include "PlexUtils.h"
-#include "Key.h"
-#include "Variant.h"
+#include "guilib/Key.h"
+#include "utils/Variant.h"
 #include "URL.h"
 #include "GUI/GUIPlexMediaWindow.h"
 #include "dialogs/GUIDialogBusy.h"
-#include "DirectoryCache.h"
+#include "filesystem/DirectoryCache.h"
 #include "threads/Event.h"
-#include "JobManager.h"
-#include "GUIKeyboardFactory.h"
+#include "utils/JobManager.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "ApplicationMessenger.h"
 #include "GUI/GUIDialogPlexPluginSettings.h"
 #include "dialogs/GUIDialogOK.h"
 #include "PlexBusyIndicator.h"
 #include "PlexApplication.h"
 #include "Application.h"
+#include "utils/log.h"
+#include "Utility/PlexJobs.h"
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
@@ -31,16 +34,16 @@ bool CPlexNavigationHelper::CacheUrl(const std::string& url, bool& cancel)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexNavigationHelper::navigateToNowPlaying()
 {
-  if (g_application.IsPlayingVideo())
+  if (g_application.m_pPlayer->IsPlayingVideo())
     g_windowManager.ActivateWindow(WINDOW_FULLSCREEN_VIDEO);
-  else if (g_application.IsPlayingAudio())
+  else if (g_application.m_pPlayer->IsPlayingAudio())
     g_windowManager.ActivateWindow(WINDOW_NOW_PLAYING);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &parentUrl, int windowId, bool swap)
+std::string CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &parentUrl, int windowId, bool swap)
 {
-  CStdString empty;
+  std::string empty;
 
   if (!item)
     return empty;
@@ -49,7 +52,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
       (item->GetPlexDirectoryType() == PLEX_DIR_TYPE_TRACK || item->GetPlexDirectoryType() == PLEX_DIR_TYPE_PHOTO)))
     return empty;
 
-  CStdString originalUrl = item->GetPath();
+  std::string originalUrl = item->GetPath();
 
   if (originalUrl.empty() && item->HasProperty("sectionPath"))
     originalUrl = item->GetProperty("sectionPath").asString();
@@ -69,7 +72,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
     }
   }
 
-  CStdString cacheUrl(originalUrl);
+  std::string cacheUrl(originalUrl);
 
   if (item->m_bIsFolder && (windowId == WINDOW_SHARED_CONTENT || windowId == WINDOW_HOME))
   {
@@ -98,7 +101,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
              item->GetPlexDirectoryType() == PLEX_DIR_TYPE_PHOTOALBUM)
       window = WINDOW_PICTURES;
 
-    std::vector<CStdString> args;
+    std::vector<std::string> args;
     args.push_back(originalUrl);
     args.push_back("return");
 
@@ -113,7 +116,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
        item->GetPlexDirectoryType() == PLEX_DIR_TYPE_CLIP ||
        item->GetPlexDirectoryType() == PLEX_DIR_TYPE_VIDEO))
   {
-    std::vector<CStdString> args;
+    std::vector<std::string> args;
     args.push_back(originalUrl);
     args.push_back("return");
     args.push_back(parentUrl.Get());
@@ -133,7 +136,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
     window = windowId;
   else if (type == PLEX_DIR_TYPE_CHANNEL)
   {
-    CStdString typeStr = item->GetProperty("type").asString();
+    std::string typeStr = item->GetProperty("type").asString();
     if (typeStr == "channel")
     {
       CURL u(item->GetPath());
@@ -157,7 +160,7 @@ CStdString CPlexNavigationHelper::navigateToItem(CFileItemPtr item, const CURL &
   if (windowId != window)
   {
     CLog::Log(LOGDEBUG, "CPlexNavigationHelper::navigateToItem navigating to %s (%s)", originalUrl.c_str(), item->GetLabel().c_str());
-    std::vector<CStdString> args;
+    std::vector<std::string> args;
     args.push_back(originalUrl);
     CApplicationMessenger::Get().ActivateWindow(window, args, swap);
   }
@@ -178,9 +181,9 @@ void CPlexNavigationHelper::OnJobComplete(unsigned int jobID, bool success, CJob
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexNavigationHelper::ShowPluginSearch(CFileItemPtr item)
+std::string CPlexNavigationHelper::ShowPluginSearch(CFileItemPtr item)
 {
-  CStdString strSearchTerm = "";
+  std::string strSearchTerm = "";
   if (CGUIKeyboardFactory::ShowAndGetInput(strSearchTerm, item->GetProperty("prompt").asString(), false))
   {
     // Find the ? if there is one.
@@ -188,14 +191,14 @@ CStdString CPlexNavigationHelper::ShowPluginSearch(CFileItemPtr item)
     u.SetOption("query", strSearchTerm);
     return u.Get();
   }
-  return CStdString();
+  return std::string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexNavigationHelper::ShowPluginSettings(CFileItemPtr item)
 {
   CFileItemList fileItems;
-  std::vector<CStdString> items;
+  std::vector<std::string> items;
   XFILE::CPlexDirectory plexDir;
 
   plexDir.GetDirectory(item->GetPath(), fileItems);

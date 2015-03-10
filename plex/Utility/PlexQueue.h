@@ -1,7 +1,7 @@
 #ifndef PLEXQUEUE_H
 #define PLEXQUEUE_H
 
-#include "log.h"
+#include "utils/log.h"
 #include "threads/Event.h"
 #include "threads/CriticalSection.h"
 

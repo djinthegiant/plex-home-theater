@@ -3,20 +3,21 @@
 
 #include "FileItem.h"
 #include "guilib/Key.h"
+#include "guilib/WindowIDs.h"
 #include "threads/Event.h"
-#include "JobManager.h"
+#include "utils/JobManager.h"
 #include "URL.h"
 
 class CPlexNavigationHelper : public IJobCallback
 {
   public:
-    CStdString navigateToItem(CFileItemPtr item, const CURL& parentURL = CURL(), int windowId = WINDOW_INVALID, bool swap = false);
+    std::string navigateToItem(CFileItemPtr item, const CURL& parentURL = CURL(), int windowId = WINDOW_INVALID, bool swap = false);
     bool CacheUrl(const std::string& url, bool& cancel);
     static void navigateToNowPlaying();
 
 private:
     void OnJobComplete(unsigned int jobID, bool success, CJob *job);
-    CStdString ShowPluginSearch(CFileItemPtr item);
+    std::string ShowPluginSearch(CFileItemPtr item);
     void ShowPluginSettings(CFileItemPtr item);
     bool m_cacheSuccess;
 };

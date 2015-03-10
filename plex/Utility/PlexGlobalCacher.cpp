@@ -7,7 +7,7 @@
 #include "TextureCache.h"
 #include "Client/PlexServerDataLoader.h"
 #include "guilib/GUIWindowManager.h"
-#include "LocalizeStrings.h"
+#include "guilib/LocalizeStrings.h"
 
 using namespace XFILE;
 
@@ -81,15 +81,15 @@ void CPlexGlobalCacher::Process()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexGlobalCacher::SetProgress(CStdString& Line1, CStdString& Line2, int percentage)
+void CPlexGlobalCacher::SetProgress(std::string& Line1, std::string& Line2, int percentage)
 {
-  CStdString progressMsg;
+  std::string progressMsg;
 
   m_dlgProgress->SetLine(0, Line1);
   m_dlgProgress->SetLine(1, Line2);
 
   if (percentage > 0)
-    progressMsg.Format(g_localizeStrings.Get(44405) + " : %2d%%", percentage);
+    progressMsg = StringUtils::Format((g_localizeStrings.Get(44405) + " : %2d%%").c_str(), percentage);
   else
     progressMsg = "";
 
@@ -100,14 +100,14 @@ void CPlexGlobalCacher::SetProgress(CStdString& Line1, CStdString& Line2, int pe
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexGlobalCacher::ProcessSection(CFileItemPtr Section, int iSection, int TotalSections)
 {
-  CStdString message1, message2;
+  std::string message1, message2;
   CStopWatch looptimer;
 
   looptimer.StartZero();
 
   // display section retrieval info
-  message1.Format(g_localizeStrings.Get(44401) + " %d / %d : '%s'", iSection + 1, TotalSections, Section->GetLabel());
-  message2.Format(g_localizeStrings.Get(44402) + " '%s'...", Section->GetLabel());
+  message1 = StringUtils::Format((g_localizeStrings.Get(44401) + " %d / %d : '%s'").c_str(), iSection + 1, TotalSections, Section->GetLabel().c_str());
+  message2 = StringUtils::Format((g_localizeStrings.Get(44402) + " '%s'...").c_str(), Section->GetLabel().c_str());
   SetProgress(message1, message2, 0);
 
   // gets all the data from one section
@@ -117,7 +117,7 @@ void CPlexGlobalCacher::ProcessSection(CFileItemPtr Section, int iSection, int T
   dir.GetDirectory(url, m_listToCache);
 
   // Grab the server Name for this section from the first item
-  CStdString ServerName = "<unknown>";
+  std::string ServerName = "<unknown>";
   if (m_listToCache.Size())
   {
     CPlexServerPtr pServer = g_plexApplication.serverManager->FindFromItem(m_listToCache.Get(0));
@@ -146,8 +146,8 @@ void CPlexGlobalCacher::ProcessSection(CFileItemPtr Section, int iSection, int T
     int progress = itemsProcessed * 100 / itemsToCache;
     itemsProcessed = itemsToCache - m_listToCache.Size();
 
-    message1.Format(g_localizeStrings.Get(44403) + " %d / %d : '%s' on '%s' ", iSection, TotalSections, Section->GetLabel(), ServerName);
-    message2.Format(g_localizeStrings.Get(44404) + " %d/%d ...", itemsProcessed, itemsToCache);
+    message1 = StringUtils::Format((g_localizeStrings.Get(44403) + " %d / %d : '%s' on '%s' ").c_str(), iSection, TotalSections, Section->GetLabel().c_str(), ServerName.c_str());
+    message2 = StringUtils::Format((g_localizeStrings.Get(44404) + " %d/%d ...").c_str(), itemsProcessed, itemsToCache);
     SetProgress(message1, message2, progress);
 
     Sleep(200);
@@ -185,7 +185,7 @@ void CPlexGlobalCacher::OnExit()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexGlobalCacherWorker::Process()
 {
-  CStdStringArray art;
+  std::vector<std::string> art;
   art.push_back("smallThumb");
   art.push_back("thumb");
   art.push_back("bigthumb");
@@ -201,7 +201,7 @@ void CPlexGlobalCacherWorker::Process()
   CFileItemPtr pItem;
   while ((pItem = m_pCacher->PickItem()))
   {
-    BOOST_FOREACH (CStdString artKey, art)
+    BOOST_FOREACH (std::string artKey, art)
     {
       if (pItem->HasArt(artKey) && !CTextureCache::Get().HasCachedImage(pItem->GetArt(artKey)))
         CTextureCache::Get().CacheImage(pItem->GetArt(artKey));
