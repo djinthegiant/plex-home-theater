@@ -21,6 +21,7 @@
 			<control type="label">
 				<visible>!IsEmpty(ListItem.Property(WizardWelcome))</visible>
 				<width>1160</width>
+				<height>1</height>
 				<include>DialogHeading</include>
 				<label>$LOCALIZE[32001]</label>
 				<textcolor>orangeLight</textcolor>
@@ -28,6 +29,7 @@
 			<control type="label">
 				<visible>!IsEmpty(ListItem.Property(WizardAudio))</visible>
 				<width>1160</width>
+				<height>1</height>
 				<include>DialogHeading</include>
 				<label>$LOCALIZE[32001]</label>
 				<textcolor>orangeLight</textcolor>
@@ -35,6 +37,7 @@
 			<control type="label">
 				<visible>!IsEmpty(ListItem.Property(WizardMyPlex))</visible>
 				<width>1160</width>
+				<height>1</height>
 				<include>DialogHeading</include>
 				<label>$LOCALIZE[32001]</label>
 				<textcolor>orangeLight</textcolor>

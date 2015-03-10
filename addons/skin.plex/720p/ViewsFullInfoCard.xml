@@ -274,6 +274,7 @@
 					<control type="group">
 						<posy>231</posy>
 						<posx>22</posx>
+						<width>368</width>
 						<include>ListItemUnwatchedCount</include>
 						<control type="label">
 							<width>340</width>
@@ -312,7 +313,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>$INFO[Listitem.Art(mediaTag::contentRating)]</texture>
@@ -322,7 +323,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>icon-photoalbum.png</texture>
@@ -332,7 +333,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>icon-video.png</texture>
@@ -342,7 +343,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>icon-music.png</texture>
@@ -352,7 +353,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>icon-photo.png</texture>
@@ -697,6 +698,7 @@
 					<control type="group">
 						<posy>231</posy>
 						<posx>22</posx>
+						<width>368</width>
 						<control type="label">
 							<width>300</width>
 							<align>left</align>
@@ -731,7 +733,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>$INFO[Container(11001).Listitem.Art(mediaTag::contentRating)]</texture>
@@ -741,7 +743,7 @@
 						</control>
 						<control type="image">
 							<posy>37</posy>
-							<posx>960r</posx>
+							<right>18</right>
 							<width>50</width>
 							<height>40</height>
 							<texture>$INFO[Container(11000).Listitem.Art(mediaTag::contentRating)]</texture>

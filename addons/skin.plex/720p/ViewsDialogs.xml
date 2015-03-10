@@ -34,8 +34,6 @@
 		<animation effect="fade" start="100" end="0" time="0">WindowClose</animation>
 	</include>
 	<include name="DialogArrow">
-		<width>30</width>
-		<height>14</height>
 		<include>ArrowBlackDown</include>
 	</include>
 	<include name="DialogPressButton">
@@ -509,6 +507,7 @@
 				<control type="label" id="1">
 					<description>Heading</description>
 					<width>600</width>
+					<height>1</height>
 					<include>DialogHeading</include>
 				</control>
 				<control type="group">
@@ -518,6 +517,7 @@
 						<posy>30</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="3">
@@ -525,6 +525,7 @@
 						<posy>50</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="4">
@@ -532,6 +533,7 @@
 						<posy>70</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="progress" id="20">
@@ -598,6 +600,7 @@
 					<description>Heading</description>
 					<posy>10</posy>
 					<width>600</width>
+					<height>1</height>
 					<textcolor>orangeLight</textcolor>
 					<include>DialogHeading</include>
 				</control>
@@ -608,6 +611,7 @@
 						<posy>30</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="3">
@@ -615,6 +619,7 @@
 						<posy>50</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="4">
@@ -622,6 +627,7 @@
 						<posy>70</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="group">
@@ -830,6 +836,7 @@
 				<control type="label" id="1">
 					<description>Heading</description>
 					<width>600</width>
+					<height>1</height>
 					<include>DialogHeading</include>
 				</control>
 				<control type="group">
@@ -839,6 +846,7 @@
 						<posy>30</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="3">
@@ -846,6 +854,7 @@
 						<posy>50</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="label" id="4">
@@ -853,6 +862,7 @@
 						<posy>70</posy>
 						<posx>20</posx>
 						<width>560</width>
+						<height>1</height>
 						<scroll>yes</scroll>
 					</control>
 					<control type="group">
@@ -1081,6 +1091,7 @@
 						<posy>3</posy>
 						<description>Header</description>
 						<width>500</width>
+						<height>1</height>
 						<label>-</label>
 						<include>DialogHeading</include>
 						<texturefocus>-</texturefocus>
@@ -1091,6 +1102,7 @@
 						<posy>40</posy>
 						<posx>10</posx>
 						<width>480</width>
+						<height>1</height>
 						<label>-</label>
 						<align>center</align>
 						<texturefocus>-</texturefocus>
@@ -1143,6 +1155,7 @@
 						<posy>3</posy>
 						<description>Header</description>
 						<width>500</width>
+						<height>1</height>
 						<label>-</label>
 						<include>DialogHeading</include>
 						<texturefocus>-</texturefocus>

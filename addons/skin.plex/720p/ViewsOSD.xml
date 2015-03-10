@@ -334,6 +334,7 @@
 					<!-- clock -->
 					<control type="label">
 						<width>200</width>
+						<height>1</height>
 						<align>left</align>
 						<font>Regular-16</font>
 						<label>$INFO[System.Time(short_no_meridian)]</label>
@@ -343,6 +344,7 @@
 					<control type="label">
 						<posx>1200</posx>
 						<width>200</width>
+						<height>1</height>
 						<align>right</align>
 						<font>Regular-16</font>
 						<label>$INFO[Player.FinishTime]</label>
@@ -355,6 +357,7 @@
 					<!-- time in media -->
 					<control type="label">
 						<width>200</width>
+						<height>1</height>
 						<align>left</align>
 						<font>Regular-16</font>
 						<label>$INFO[Player.Time]</label>
@@ -364,6 +367,7 @@
 					<control type="label">
 						<posx>1200</posx>
 						<width>200</width>
+						<height>1</height>
 						<align>right</align>
 						<font>Regular-16</font>
 						<label>$INFO[Player.Duration]</label>
@@ -377,6 +381,7 @@
 				<posx>20</posx>
 				<control type="label">
 					<width>200</width>
+					<height>1</height>
 					<align>left</align>
 					<font>Bold-18</font>
 					<label>$VAR[SeekingLabels]</label>
@@ -448,6 +453,7 @@
 					<!-- clock -->
 					<control type="label">
 						<width>200</width>
+						<height>1</height>
 						<align>left</align>
 						<font>Regular-18</font>
 						<label>$INFO[System.Time(short_no_meridian)]</label>
@@ -457,6 +463,7 @@
 					<control type="label">
 						<posx>1200</posx>
 						<width>200</width>
+						<height>1</height>
 						<align>right</align>
 						<font>Regular-16</font>
 						<label>$INFO[Player.FinishTime]</label>
@@ -469,6 +476,7 @@
 					<!-- time in media -->
 					<control type="label">
 						<width>200</width>
+						<height>1</height>
 						<align>left</align>
 						<font>Regular-18</font>
 						<label>$INFO[Player.Time]</label>
@@ -478,6 +486,7 @@
 					<control type="label">
 						<posx>1200</posx>
 						<width>200</width>
+						<height>1</height>
 						<align>right</align>
 						<font>Regular-18</font>
 						<label>$INFO[Player.Duration]</label>
@@ -493,6 +502,7 @@
 				<!-- time in media -->
 				<control type="label">
 					<width>200</width>
+					<height>1</height>
 					<align>left</align>
 					<font>Bold-18</font>
 					<label>$VAR[SeekingLabels]</label>
@@ -972,6 +982,7 @@
 					<control type="label" id="2">
 						<posy>20</posy>
 						<width>580</width>
+						<height>1</height>
 						<include>DialogHeading</include>
 					</control>
 					<!-- settings -->

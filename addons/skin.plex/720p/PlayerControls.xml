@@ -430,6 +430,8 @@
 								<control type="image">
 									<posx>0</posx>
 									<posy>10</posy>
+									<width>14</width>
+									<height>30</height>
 									<texture>arrow-big.png</texture>
 									<colordiffuse>orange</colordiffuse>
 									<visible>ListItem.IsPlaying</visible>
@@ -485,6 +487,8 @@
 								<control type="image">
 									<posx>0</posx>
 									<posy>10</posy>
+									<width>14</width>
+									<height>30</height>
 									<texture>arrow-big.png</texture>
 									<colordiffuse>orange</colordiffuse>
 									<visible>ListItem.IsPlaying</visible>

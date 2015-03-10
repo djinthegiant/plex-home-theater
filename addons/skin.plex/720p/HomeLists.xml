@@ -158,6 +158,7 @@
 			<posx>95</posx>
 			<control type="label">
 				<width>110</width>
+				<height>1</height>
 				<align>center</align>
 				<aligny>center</aligny>
 				<scroll>false</scroll>
@@ -170,6 +171,7 @@
 			</control>
 			<control type="label">
 				<width>110</width>
+				<height>1</height>
 				<align>center</align>
 				<aligny>center</aligny>
 				<scroll>false</scroll>
@@ -189,6 +191,7 @@
 			<posx>95</posx>
 			<control type="label">
 				<width>110</width>
+				<height>1</height>
 				<align>center</align>
 				<aligny>center</aligny>
 				<scroll>false</scroll>
@@ -201,6 +204,7 @@
 			</control>
 			<control type="label">
 				<width>110</width>
+				<height>1</height>
 				<align>center</align>
 				<aligny>center</aligny>
 				<scroll>false</scroll>
@@ -285,6 +289,7 @@
 	<include name="ListItemSquareTitle">
 		<control type="label">
 			<posy>214</posy>
+			<height>1</height>
 			<include>ListItemTitle1</include>
 			<label>$INFO[ListItem.Label]</label>
 		</control>
@@ -292,6 +297,7 @@
 	<include name="ListItemSquareTitleAlbum">
 		<control type="label">
 			<posy>214</posy>
+			<height>1</height>
 			<include>ListItemTitle1</include>
 			<label>$INFO[ListItem.Album]</label>
 		</control>
@@ -299,6 +305,7 @@
 	<include name="ListItemSquareTitleArtist">
 		<control type="label">
 			<posy>190</posy>
+			<height>1</height>
 			<include>ListItemTitle1</include>
 			<label>$INFO[ListItem.Artist]</label>
 		</control>
