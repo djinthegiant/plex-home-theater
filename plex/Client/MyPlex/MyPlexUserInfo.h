@@ -9,7 +9,7 @@
 #ifndef MYPLEXUSERINFO_H
 #define MYPLEXUSERINFO_H
 
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 #include "XBDateTime.h"
 #include <string>
 

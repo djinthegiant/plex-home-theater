@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GlobalsHandling.h"
+#include "utils/GlobalsHandling.h"
 #include "threads/Thread.h"
 #include "Client/PlexServer.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 #include "XBDateTime.h"
 
 #include "MyPlexPinInfo.h"
@@ -43,7 +43,7 @@ public:
   
   void StartPinLogin();
   void StopPinLogin();
-  void Login(const CStdString& username, const CStdString& password);
+  void Login(const std::string& username, const std::string& password);
   void SwitchHomeUser(int id, const std::string &pin = "");
   void Logout();
   void Refresh() { m_state = STATE_REFRESH; Poke(); }
@@ -52,7 +52,7 @@ public:
   const CMyPlexUserInfo& GetCurrentUserInfo() const { return m_currentUserInfo; }
   const CMyPlexPinInfo& GetCurrentPinInfo() const { return m_currentPinInfo; }
   
-  CStdString GetAuthToken() const;
+  std::string GetAuthToken() const;
   
   void Poke() { m_wakeEvent.Set(); }
   void Stop();
@@ -88,8 +88,8 @@ private:
   EMyPlexState m_state;
   EMyPlexError m_lastError;
   
-  CStdString m_username;
-  CStdString m_password;
+  std::string m_username;
+  std::string m_password;
   
   int m_homeId;
   std::string m_homePin;

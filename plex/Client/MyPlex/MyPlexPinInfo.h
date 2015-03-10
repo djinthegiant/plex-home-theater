@@ -11,7 +11,7 @@
 
 #include <string>
 #include "XBDateTime.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 
 class CMyPlexPinInfo
 {

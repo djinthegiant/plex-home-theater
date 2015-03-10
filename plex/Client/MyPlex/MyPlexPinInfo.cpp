@@ -7,7 +7,7 @@
 //
 
 #include "MyPlexPinInfo.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>

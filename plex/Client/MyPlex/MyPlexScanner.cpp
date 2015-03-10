@@ -8,12 +8,12 @@
 
 #include "MyPlexScanner.h"
 #include "Client/PlexServerManager.h"
-#include "XBMCTinyXML.h"
+#include "utils/XBMCTinyXML.h"
 #include "FileSystem/PlexFile.h"
 #include "FileSystem/PlexDirectory.h"
 #include "utils/StringUtils.h"
 #include "PlexApplication.h"
-#include "GUISettings.h"
+#include "settings/Settings.h"
 
 #define DEFAULT_PORT 32400
 
@@ -26,7 +26,7 @@ CMyPlexManager::EMyPlexError CMyPlexScanner::DoScan()
   XFILE::CPlexDirectory dir;
   CFileItemList list;
 
-  if (!dir.GetDirectory(url.Get(), list))
+  if (!dir.GetDirectory(url, list))
   {
     CLog::Log(LOGERROR, "CMyPlexScanner::DoScan not authorized from myPlex");
     if (dir.IsTokenInvalid())
@@ -44,14 +44,14 @@ CMyPlexManager::EMyPlexError CMyPlexScanner::DoScan()
     {
       bool synced = serverItem->GetProperty("synced").asBoolean();
 
-      if (synced && g_guiSettings.GetBool("myplex.hidecloudsync"))
+      if (synced && CSettings::Get().GetBool("myplex.hidecloudsync"))
       {
         CLog::Log(LOGDEBUG, "CMyPlexScanner::DoScan hiding cloudsync server");
         continue;
       }
 
-      CStdString uuid = serverItem->GetProperty("machineIdentifier").asString();
-      CStdString name = serverItem->GetProperty("name").asString();
+      std::string uuid = serverItem->GetProperty("machineIdentifier").asString();
+      std::string name = serverItem->GetProperty("name").asString();
       bool owned = serverItem->GetProperty("owned").asBoolean();
       bool home = serverItem->GetProperty("home").asBoolean(false);
 
@@ -64,10 +64,10 @@ CMyPlexManager::EMyPlexError CMyPlexScanner::DoScan()
         server->SetOwner(serverItem->GetProperty("sourceTitle").asString());
       server->SetHome(home);
 
-      CStdString address = serverItem->GetProperty("address").asString();
-      CStdString token = serverItem->GetProperty("accessToken").asString();
-      CStdString localAddresses = serverItem->GetProperty("localAddresses").asString();
-      CStdString schema = serverItem->GetProperty("scheme").asString();
+      std::string address = serverItem->GetProperty("address").asString();
+      std::string token = serverItem->GetProperty("accessToken").asString();
+      std::string localAddresses = serverItem->GetProperty("localAddresses").asString();
+      std::string schema = serverItem->GetProperty("scheme").asString();
       int port = serverItem->GetProperty("port").asInteger();
 
       if (token.empty())
@@ -82,8 +82,8 @@ CMyPlexManager::EMyPlexError CMyPlexScanner::DoScan()
       /* only add localConnections for non-shared servers */
       if ((owned || home) && !localAddresses.empty())
       {
-        CStdStringArray addressList = StringUtils::SplitString(localAddresses, ",", 0);
-        BOOST_FOREACH(CStdString laddress, addressList)
+        std::vector<std::string> addressList = StringUtils::Split(localAddresses, ",", 0);
+        BOOST_FOREACH(std::string laddress, addressList)
         {
           CPlexConnectionPtr lconn = CPlexConnectionPtr(new CPlexConnection(CPlexConnection::CONNECTION_MYPLEX, laddress, DEFAULT_PORT, schema, token));
           server->AddConnection(lconn);
