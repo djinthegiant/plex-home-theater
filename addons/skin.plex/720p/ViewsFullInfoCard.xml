@@ -776,7 +776,7 @@
 				<posy>160</posy>
 				<control type="label">
 					<width>600</width>
-					<height>0</height>
+					<height>1</height>
 					<label>$INFO[Container(300).ListItem(0).Label]</label>
 					<align>right</align>
 					<aligny>center</aligny>

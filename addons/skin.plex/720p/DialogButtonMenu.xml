@@ -36,6 +36,7 @@
 				<description>Title text</description>
 				<posy>10</posy>
 				<width>1048</width>
+				<height>1</height>
 				<label>$LOCALIZE[20144]</label>
 				<scroll>yes</scroll>
 				<visible>Control.HasFocus(3120)</visible>

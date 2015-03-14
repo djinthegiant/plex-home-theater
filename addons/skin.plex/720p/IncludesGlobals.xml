@@ -277,6 +277,8 @@
 			<control type="image">
 				<posx>157</posx>
 				<posy>246</posy>
+				<width>40</width>
+				<height>40</height>
 				<info>ListItem.Overlay</info>
 			</control>
 			<control type="label">

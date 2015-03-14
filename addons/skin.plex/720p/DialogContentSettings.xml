@@ -42,6 +42,7 @@
 				<control type="label">
 					<posy>60</posy>
 					<width>426</width>
+					<height>1</height>
 					<font>TitleCapsFont</font>
 					<align>center</align>
 					<label>$LOCALIZE[20018]</label>

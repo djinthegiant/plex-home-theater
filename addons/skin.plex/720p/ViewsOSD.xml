@@ -254,6 +254,7 @@
 					<control type="label" id="1">
 						<posy>-80</posy>
 						<width>1000</width>
+						<height>1</height>
 						<label>$INFO[VideoPlayer.TVShowTitle] &#xB7; S$INFO[VideoPlayer.Season]&#xB7;E$INFO[VideoPlayer.Episode]</label>
 						<align>left</align>
 						<include>White2</include>
@@ -263,6 +264,7 @@
 					<control type="label" id="1">
 						<posy>-30</posy>
 						<width>1000</width>
+						<height>1</height>
 						<label>$INFO[VideoPlayer.Title]</label>
 						<align>left</align>
 						<textcolor>white</textcolor>

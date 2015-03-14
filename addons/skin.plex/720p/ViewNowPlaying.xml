@@ -57,6 +57,7 @@
 		<control type="label">
 			<posy>5</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Bold-36</font>
 			<textcolor>white</textcolor>
 			<label>$INFO[MusicPlayer.Artist]</label>
@@ -65,6 +66,7 @@
 		<control type="label">
 			<posy>53</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-30</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Album]</label>
@@ -73,6 +75,7 @@
 		<control type="label">
 			<posy>100</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-30</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Title]</label>
@@ -82,6 +85,7 @@
 			<posy>278</posy>
 			<posx>5</posx>
 			<width>500</width>
+			<height>1</height>
 			<textcolor>white</textcolor>
 			<font>Regular-24</font>
 			<label>$INFO[MusicPlayer.Time]</label>
@@ -91,6 +95,7 @@
 			<posy>278</posy>
 			<posx>138r</posx>
 			<width>100</width>
+			<height>1</height>
 			<textcolor>white</textcolor>
 			<font>Regular-24</font>
 			<label>$INFO[MusicPlayer.Duration]</label>
@@ -102,6 +107,7 @@
 		<control type="label">
 			<posy>48</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Bold-28</font>
 			<textcolor>white</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Artist]</label>
@@ -111,6 +117,7 @@
 		<control type="label">
 			<posy>90</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-26</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Title]</label>
@@ -120,6 +127,7 @@
 		<control type="label">
 			<posy>130</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-26</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Album]</label>
@@ -131,6 +139,7 @@
 		<control type="label">
 			<posy>10</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Bold-36</font>
 			<textcolor>white</textcolor>
 			<label>$INFO[MusicPlayer.Artist]</label>
@@ -140,6 +149,7 @@
 		<control type="label">
 			<posy>58</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-30</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Album]</label>
@@ -149,6 +159,7 @@
 		<control type="label">
 			<posy>105</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-30</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Title]</label>
@@ -159,6 +170,7 @@
 			<posy>282</posy>
 			<posx>-780</posx>
 			<width>500</width>
+			<height>1</height>
 			<textcolor>white</textcolor>
 			<font>Regular-24</font>
 			<label>$INFO[MusicPlayer.Time]</label>
@@ -168,6 +180,7 @@
 			<posy>282</posy>
 			<posx>-10</posx>
 			<width>500</width>
+			<height>1</height>
 			<textcolor>white</textcolor>
 			<font>Regular-24</font>
 			<label>$INFO[MusicPlayer.Duration]</label>
@@ -180,6 +193,7 @@
 		<control type="label">
 			<posy>33</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Bold-28</font>
 			<textcolor>white</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Artist]</label>
@@ -188,6 +202,7 @@
 		<control type="label">
 			<posy>77</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-26</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Title]</label>
@@ -196,6 +211,7 @@
 		<control type="label">
 			<posy>117</posy>
 			<width>800</width>
+			<height>1</height>
 			<font>Regular-26</font>
 			<textcolor>greyLighter</textcolor>
 			<label>$INFO[MusicPlayer.Offset(1).Album]</label>
@@ -497,6 +513,7 @@
 					<control type="label">
 						<posy>10</posy>
 						<width>200</width>
+						<height>1</height>
 						<label>$INFO[MusicPlayer.Title]</label>
 						<font>Bold-16</font>
 						<textcolor>white</textcolor>
@@ -506,6 +523,7 @@
 					<control type="label">
 						<posy>32</posy>
 						<width>200</width>
+						<height>1</height>
 						<label>$INFO[MusicPlayer.Artist]</label>
 						<font>Regular-16</font>
 						<textcolor>white</textcolor>
@@ -515,6 +533,7 @@
 					<control type="label">
 						<posy>54</posy>
 						<width>200</width>
+						<height>1</height>
 						<label>$INFO[MusicPlayer.Album]</label>
 						<font>Regular-16</font>
 						<textcolor>FF999999</textcolor>

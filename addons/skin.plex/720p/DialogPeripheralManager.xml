@@ -51,6 +51,7 @@
 				<posx>0</posx>
 				<posy>40</posy>
 				<width>600</width>
+				<height>1</height>
 			</control>
 			<control type="list" id="20">
 				<posx>20</posx>
