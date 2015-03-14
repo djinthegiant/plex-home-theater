@@ -410,6 +410,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     CStdString m_userAgent;
 
     /* PLEX */
+    int m_nowPlayingFlipTime;
     bool m_bEnableGDM;
     bool m_bHideFanouts;
     bool m_bForceJpegImageFormat;

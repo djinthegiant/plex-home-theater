@@ -96,7 +96,7 @@ bool CGUIWindowNowPlaying::OnMessage(CGUIMessage& message)
         g_windowManager.GetWindow(g_windowManager.GetTopMostModalDialogID(true))->Close();
 
       m_isFlipped = false;
-      //MERGE: g_plexApplication.timer->SetTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
+      g_plexApplication.timer->SetTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
       break;
     }
   }
@@ -110,5 +110,5 @@ void CGUIWindowNowPlaying::OnTimeout()
   m_isFlipped = !m_isFlipped;
   SetInvalid();
 
-  //MERGE: g_plexApplication.timer->RestartTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
+  g_plexApplication.timer->RestartTimeout(g_advancedSettings.m_nowPlayingFlipTime * 1000, this);
 }

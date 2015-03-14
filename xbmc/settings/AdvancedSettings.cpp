@@ -421,6 +421,7 @@ void CAdvancedSettings::Initialize()
   m_userAgent = g_sysinfo.GetUserAgent();
 
   /* PLEX */
+  m_nowPlayingFlipTime = 120;
   m_bEnableGDM = true;
   m_bHideFanouts = false;
   m_bForceJpegImageFormat = false;
@@ -1186,6 +1187,7 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   }
 
   /* PLEX */
+  XMLUtils::GetInt(pRootElement, "nowplayingfliptime", m_nowPlayingFlipTime, 10, 6000);
   XMLUtils::GetBoolean(pRootElement, "enablegdm", m_bEnableGDM);
   XMLUtils::GetBoolean(pRootElement, "hidefanouts", m_bHideFanouts);
   XMLUtils::GetBoolean(pRootElement, "forcejpegimageformat", m_bForceJpegImageFormat);
