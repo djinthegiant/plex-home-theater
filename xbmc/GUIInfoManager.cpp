@@ -98,6 +98,7 @@ static CLinuxResourceCounter m_resourceCounter;
 /* PLEX */
 #include "GUI/GUIWindowPlexSearch.h"
 #include "GUI/GUIWindowNowPlaying.h"
+#include "playlists/PlayList.h"
 #include "plex/Client/PlexServerManager.h"
 #include "plex/PlexApplication.h"
 #include "GUI/GUIPlexMediaWindow.h"
@@ -126,7 +127,7 @@ CGUIInfoManager::CGUIInfoManager(void) :
   m_nextWindowID = WINDOW_INVALID;
   m_prevWindowID = WINDOW_INVALID;
   m_stringParameters.push_back("__ZZZZ__");   // to offset the string parameters by 1 to assure that all entries are non-zero
-  m_currentFile = new CFileItem;
+  m_currentFile = CFileItemPtr(new CFileItem);
   m_currentSlide = new CFileItem;
   m_frameCounter = 0;
   m_lastFPSTime = 0;
@@ -134,13 +135,23 @@ CGUIInfoManager::CGUIInfoManager(void) :
   m_playerShowCodec = false;
   m_playerShowInfo = false;
   m_fps = 0.0f;
+  /* PLEX */
+  m_slideshowShowDescription = false;
+  m_musicThumbLoader = new CMusicThumbLoader();//(1, 200);
+  /* END PLEX */
   ResetLibraryBools();
 }
 
 CGUIInfoManager::~CGUIInfoManager(void)
 {
+#ifndef __PLEX__
   delete m_currentFile;
+#endif
   delete m_currentSlide;
+
+  /* PLEX */
+  delete m_musicThumbLoader;
+  /* END PLEX */
 }
 
 bool CGUIInfoManager::OnMessage(CGUIMessage &message)
@@ -325,7 +336,7 @@ const infomap system_param[] =   {{ "hasalarm",         SYSTEM_HAS_ALARM },
                                   { "setting",          SYSTEM_SETTING },
                                   { "hasaddon",         SYSTEM_HAS_ADDON },
                                   /* PLEX */
-                                  //{ "plexplayqueue",    SYSTEM_PLEX_PLAYQUEUE },
+                                  { "plexplayqueue",    SYSTEM_PLEX_PLAYQUEUE },
                                   /* END PLEX */
                                   { "coreusage",        SYSTEM_GET_CORE_USAGE }};
 
@@ -448,11 +459,11 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "isstereoscopic",   VIDEOPLAYER_IS_STEREOSCOPIC },
                                   { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE }
                                   /* PLEX */
-                                  //{ "audiostream",      VIDEOPLAYER_AUDIOSTREAM },
-                                  //{ "subtitlestream",   VIDEOPLAYER_SUBTITLESTREAM },
-                                  //{ "durationstr",      VIDEOPLAYER_DURATION_STRING },
-                                  //{ "plexcontentstr",   VIDEOPLAYER_PLEXCONTENT_STRING },
-                                  //{ "hasnext",          VIDEOPLAYER_HASNEXT },
+                                  ,{ "audiostream",      VIDEOPLAYER_AUDIOSTREAM },
+                                  { "subtitlestream",   VIDEOPLAYER_SUBTITLESTREAM },
+                                  { "durationstr",      VIDEOPLAYER_DURATION_STRING },
+                                  { "plexcontentstr",   VIDEOPLAYER_PLEXCONTENT_STRING },
+                                  { "hasnext",          VIDEOPLAYER_HASNEXT },
                                   /* END PLEX */
 };
 
@@ -469,7 +480,7 @@ const infomap mediacontainer[] = {{ "hasfiles",         CONTAINER_HASFILES },
                                   { "totaltime",        CONTAINER_TOTALTIME },
                                   { "hasthumb",         CONTAINER_HAS_THUMB },
                                   /* PLEX */
-                                  //{ "thumb",            CONTAINER_THUMB },
+                                  { "thumb",            CONTAINER_THUMB },
                                   /* END PLEX */
                                   { "sortmethod",       CONTAINER_SORT_METHOD },
                                   { "showplot",         CONTAINER_SHOWPLOT }};
@@ -1399,6 +1410,17 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition, bool 
           return AddMultiInfo(GUIInfo(ret, id, offset, INFOFLAG_LISTITEM_WRAP));
       }
     }
+    /* PLEX */
+    else if (info[0].name == "videoplayer")
+    {
+      if (info[1].name == "offset")
+      {
+        int position = atoi(info[1].param().c_str());
+        int value = TranslateVideoPlayerString(info[2].name);
+        return AddMultiInfo(GUIInfo(value, 1, position));
+      }
+    }
+    /* END PLEX */
   }
 
   return 0;
@@ -1642,6 +1664,15 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *f
       }
     }
     break;
+  /* PLEX */
+    case PLAYER_PLAYLIST:
+    {
+      CPlexPlayQueuePtr pq = g_plexApplication.playQueueManager->getPlayingPlayQueue();
+      if (pq)
+        return pq->getPlaylistTitle();
+      break;
+    }
+  /* END PLEX */
   case MUSICPLAYER_TITLE:
   case MUSICPLAYER_ALBUM:
   case MUSICPLAYER_ARTIST:
@@ -2834,11 +2865,11 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
       break;
 
     /* PLEX */
-    //case SLIDESHOW_SHOW_DESCRIPTION:
-    //  {
-    //    bReturn = m_slideshowShowDescription;
-    //  }
-    //  break;
+    case SLIDESHOW_SHOW_DESCRIPTION:
+      {
+        bReturn = m_slideshowShowDescription;
+      }
+      break;
     case MUSICPLAYER_NOW_PLAYING_FLIPPED:
       {
         CGUIWindowNowPlaying *nowPlayingWindow = (CGUIWindowNowPlaying*)g_windowManager.GetWindow(WINDOW_NOW_PLAYING);
@@ -2850,11 +2881,11 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
         bReturn = false;
         if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_MUSIC /*PLEX*/ && g_playlistPlayer.GetCurrentSong() >= 0 /* END PLEX */)
         {
-          //if (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() - 1))
-          //{
-          //  CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
-          //  bReturn = !(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[g_playlistPlayer.GetNextSong()]->GetArt(PLEX_ART_THUMB));
-          //}
+          if (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() - 1))
+          {
+            PLAYLIST::CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
+            bReturn = !(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[g_playlistPlayer.GetNextSong()]->GetArt(PLEX_ART_THUMB));
+          }
         }
         break;
       }
@@ -2862,22 +2893,22 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
       bReturn = g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_MUSIC;
       break;
 
-    //case PLAYER_ONNEW:
-    //  {
-    //    bReturn = false;
-    //    if (g_application.IsPlaying() && !g_application.IsPaused())
-    //    {
-    //      int seconds = 5;
-    //      if (g_application.CurrentFileItem().m_lStartOffset -1 &&
-    //          g_application.CurrentFileItem().HasProperty("viewOffset") &&
-    //          g_application.CurrentFileItem().IsVideo())
-    //        seconds += (int)(g_application.CurrentFileItem().GetProperty("viewOffset").asInteger() / 1000.0);
+    case PLAYER_ONNEW:
+      {
+        bReturn = false;
+        if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+        {
+          int seconds = 5;
+          if (g_application.CurrentFileItem().m_lStartOffset -1 &&
+              g_application.CurrentFileItem().HasProperty("viewOffset") &&
+              g_application.CurrentFileItem().IsVideo())
+            seconds += (int)(g_application.CurrentFileItem().GetProperty("viewOffset").asInteger() / 1000.0);
 
-    //      if (g_application.GetTime() < seconds)
-    //        bReturn = true;
-    //    }
-    //    break;
-    //  }
+          if (g_application.GetTime() < seconds)
+            bReturn = true;
+        }
+        break;
+      }
 
     /* END PLEX */
 
@@ -2918,8 +2949,11 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
 
       if (!window) // If we don't have a window already (from lookup above), get one
         window = GetWindowWithCondition(contextWindow, 0);
-
+#ifndef __PLEX__
       if (window)
+#else
+      if (window && !item)
+#endif
       {
         const CGUIControl *control = window->GetControl(data1);
         if (control && control->IsContainer())
@@ -3353,37 +3387,37 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
             bReturn = ((CGUIPlexMediaWindow *)window)->MatchUniformProperty(property);
         }
         break;
-      //case SYSTEM_PLEX_PLAYQUEUE:
-      //  {
-      //    CStdString pq = m_stringParameters[info.GetData1()];
-      //    boost::to_lower(pq);
+      case SYSTEM_PLEX_PLAYQUEUE:
+        {
+          CStdString pq = m_stringParameters[info.GetData1()];
+          boost::to_lower(pq);
 
-      //    if (pq == "music" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_MUSIC))
-      //      bReturn = true;
-      //    else if (pq == "clip" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) == PLEX_DIR_TYPE_CLIP)
-      //      bReturn = true;
-      //    else if (pq == "video" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) != PLEX_DIR_TYPE_CLIP)
-      //      bReturn = true;
-      //    else if (pq == "any" && g_plexApplication.playQueueManager->getPlayQueuesCount())
-      //      bReturn = true;
-      //  }
-      //case VIDEOPLAYER_PLEXCONTENT:
-      //{
-      //  CStdString matchStr = m_stringParameters[info.GetData1()];
+          if (pq == "music" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_MUSIC))
+            bReturn = true;
+          else if (pq == "clip" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) == PLEX_DIR_TYPE_CLIP)
+            bReturn = true;
+          else if (pq == "video" && g_plexApplication.playQueueManager->getPlayQueueOfType(PLEX_MEDIA_TYPE_VIDEO) && g_plexApplication.playQueueManager->getPlayQueueDirType(PLEX_MEDIA_TYPE_VIDEO) != PLEX_DIR_TYPE_CLIP)
+            bReturn = true;
+          else if (pq == "any" && g_plexApplication.playQueueManager->getPlayQueuesCount())
+            bReturn = true;
+        }
+      case VIDEOPLAYER_PLEXCONTENT:
+      {
+        std::string matchStr = m_stringParameters[info.GetData1()];
 
-      //  CStdStringArray matchVec = StringUtils::SplitString(matchStr, ";");
-      //  CStdString content = PlexUtils::GetPlexContent(*m_currentFile);
+        std::vector<std::string> matchVec = StringUtils::Split(matchStr, ";");
+        std::string content = PlexUtils::GetPlexContent(*m_currentFile);
 
-      //  BOOST_FOREACH(CStdString& match, matchVec)
-      //  {
-      //    match = StringUtils::Trim(match);
-      //    if(match.Equals(content))
-      //    {
-      //      bReturn = true;
-      //      break;
-      //    }
-      //  }
-      //}
+        BOOST_FOREACH(std::string& match, matchVec)
+        {
+          match = StringUtils::Trim(match);
+          if (StringUtils::EqualsNoCase(match, content))
+          {
+            bReturn = true;
+            break;
+          }
+        }
+      }
      /* END PLEX */
     }
   }
@@ -3460,6 +3494,23 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
 
     if (item) // If we got a valid item, do the lookup
       return GetItemImage(item.get(), info.m_info, fallback); // Image prioritizes images over labels (in the case of music item ratings for instance)
+    /* PLEX */
+    else
+    {
+       // we dont have a valid item use the selected item
+      CGUIMediaWindow *window = (CGUIMediaWindow*)GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+      if (window)
+      {
+        CFileItemPtr item = window->GetCurrentListItem();
+        
+        if ((info.m_info == LISTITEM_COMPOSITE_IMAGE) && (item))
+        {
+          CStdString args = m_stringParameters[info.GetData1()];
+          return PlexUtils::GetCompositeImageUrl(*item, args);
+        }
+      }
+    }
+    /* END PLEX */
   }
   else if (info.m_info == PLAYER_TIME)
   {
@@ -3632,6 +3683,34 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
     if (playlistid > PLAYLIST_NONE)
       return GetPlaylistLabel(info.m_info, playlistid);
   }
+  /* PLEX */
+  else if (info.m_info >= VIDEOPLAYER_TITLE && info.m_info <= VIDEOPLAYER_HAS_EPG)
+  {
+    return GetVideoPlaylistInfo(info);
+  }
+  else if (info.m_info == CONTAINER_FIRST_TITLE)
+  {
+    CGUIMediaWindow *window = (CGUIMediaWindow*)GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+    {
+      if (window->CurrentDirectory().HasProperty("title1"))
+        return window->CurrentDirectory().GetProperty("title1").asString();
+      else
+        return window->CurrentDirectory().GetLabel();
+    }
+  }
+  else if (info.m_info == CONTAINER_SECOND_TITLE)
+  {
+    CGUIMediaWindow *window = (CGUIMediaWindow*)GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+    {
+      if (window->CurrentDirectory().HasProperty("title2"))
+        return window->CurrentDirectory().GetProperty("title2").asString();
+      else
+        return window->CurrentDirectory().GetLabel();
+    }
+  }
+ /* END PLEX */
 
   return StringUtils::EmptyString;
 }
@@ -3665,12 +3744,12 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *f
   else if (info == MUSICPLAYER_RATING)
   {
     if (!g_application.m_pPlayer->IsPlayingAudio()) return "";
-    return GetItemImage(m_currentFile, LISTITEM_RATING);
+    return GetItemImage(m_currentFile.get(), LISTITEM_RATING);
   }
   else if (info == PLAYER_STAR_RATING)
   {
     if (!g_application.m_pPlayer->IsPlaying()) return "";
-    return GetItemImage(m_currentFile, LISTITEM_STAR_RATING);
+    return GetItemImage(m_currentFile.get(), LISTITEM_STAR_RATING);
   }
   else if (info == VIDEOPLAYER_COVER)
   {
@@ -3700,12 +3779,12 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *f
       return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("season.thumb");
   }
   /* PLEX */
-  //else if (info == CONTAINER_THUMB)
-  //{
-  //  CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
-  //  if (window)
-  //    return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("thumb");
-  //}
+  else if (info == CONTAINER_THUMB)
+  {
+    CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
+    if (window)
+      return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("thumb");
+  }
   /* END PLEX */
   else if (info == LISTITEM_THUMB || info == LISTITEM_ICON || info == LISTITEM_ACTUAL_ICON ||
           info == LISTITEM_OVERLAY || info == LISTITEM_RATING || info == LISTITEM_STAR_RATING)
@@ -3725,12 +3804,12 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, std::string *f
     {
       if (g_playlistPlayer.GetCurrentSong() < (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() - 1))
       {
-        //CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
-        //for (int i=g_playlistPlayer.GetCurrentSong()+1; i < g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size(); i++)
-        //{
-        //  if (!(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[i]->GetArt(PLEX_ART_THUMB)))
-        //    return playlist[i]->GetArt(PLEX_ART_THUMB);
-        //}
+        PLAYLIST::CPlayList playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
+        for (int i=g_playlistPlayer.GetCurrentSong()+1; i < g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size(); i++)
+        {
+          if (!(playlist[g_playlistPlayer.GetCurrentSong()]->GetArt(PLEX_ART_THUMB) == playlist[i]->GetArt(PLEX_ART_THUMB)))
+            return playlist[i]->GetArt(PLEX_ART_THUMB);
+        }
       }
     }
     return "";
@@ -3987,9 +4066,9 @@ CStdString CGUIInfoManager::GetMusicLabel(int item)
     }
     break;
   case MUSICPLAYER_LYRICS:
-    return GetItemLabel(m_currentFile, AddListItemProp("lyrics"));
+    return GetItemLabel(m_currentFile.get(), AddListItemProp("lyrics"));
   }
-  return GetMusicTagLabel(item, m_currentFile);
+  return GetMusicTagLabel(item, m_currentFile.get());
 }
 
 CStdString CGUIInfoManager::GetMusicTagLabel(int info, const CFileItem *item)
@@ -4080,6 +4159,7 @@ CStdString CGUIInfoManager::GetMusicTagLabel(int info, const CFileItem *item)
   return "";
 }
 
+#ifndef __PLEX__
 CStdString CGUIInfoManager::GetVideoLabel(int item)
 {
   if (!g_application.m_pPlayer->IsPlaying())
@@ -4309,6 +4389,7 @@ CStdString CGUIInfoManager::GetVideoLabel(int item)
   }
   return "";
 }
+#endif
 
 int64_t CGUIInfoManager::GetPlayTime() const
 {
@@ -4362,9 +4443,19 @@ CStdString CGUIInfoManager::GetCurrentPlayTimeRemaining(TIME_FORMAT format) cons
 
 void CGUIInfoManager::ResetCurrentItem()
 {
+  /* PLEX */
+  std::string art;
+  if (m_currentFile->HasArt("thumb") && m_currentFile->GetArt("thumb") == "special://temp/airtunes_album_thumb.jpg")
+    art = m_currentFile->GetArt("thumb");
+  /* END PLEX */
   m_currentFile->Reset();
   m_currentMovieThumb = "";
   m_currentMovieDuration = "";
+
+  /* PLEX */
+  if (art.empty() == false)
+    m_currentFile->SetArt("thumb", art);
+  /* END PLEX */
 }
 
 void CGUIInfoManager::SetCurrentItem(CFileItem &item)
@@ -4403,6 +4494,10 @@ void CGUIInfoManager::SetCurrentAlbumThumb(const CStdString &thumbFileName)
 void CGUIInfoManager::SetCurrentSong(CFileItem &item)
 {
   CLog::Log(LOGDEBUG,"CGUIInfoManager::SetCurrentSong(%s)",item.GetPath().c_str());
+  /* PLEX */
+  if (m_currentFile->HasArt("thumb") && m_currentFile->GetArt("thumb") == "special://temp/airtunes_album_thumb.jpg" && !item.HasArt("thumb"))
+    item.SetArt("thumb", m_currentFile->GetArt("thumb"));
+  /* END PLEX */
   *m_currentFile = item;
 
   m_currentFile->LoadMusicTag();
@@ -4426,15 +4521,27 @@ void CGUIInfoManager::SetCurrentSong(CFileItem &item)
       if (streamingItem.HasArt("thumb"))
         m_currentFile->SetArt("thumb", streamingItem.GetArt("thumb"));
     }
+    /* PLEX */
+    else
+    {
+      CFileItemList list;
+      list.Add(m_currentFile);
+
+      if (m_musicThumbLoader->IsLoading())
+        m_musicThumbLoader->StopThread();
+
+      m_musicThumbLoader->Load(list);
+    }
+    /* END PLEX */
   }
   else
   {
     CMusicThumbLoader loader;
-    loader.LoadItem(m_currentFile);
+    loader.LoadItem(m_currentFile.get());
   }
   m_currentFile->FillInDefaultIcon();
 
-  CMusicInfoLoader::LoadAdditionalTagInfo(m_currentFile);
+  CMusicInfoLoader::LoadAdditionalTagInfo(m_currentFile.get());
 }
 
 void CGUIInfoManager::SetCurrentMovie(CFileItem &item)
@@ -4461,7 +4568,7 @@ void CGUIInfoManager::SetCurrentMovie(CFileItem &item)
   if (!item.HasArt("thumb"))
   {
     CVideoThumbLoader loader;
-    loader.LoadItem(m_currentFile);
+    loader.LoadItem(m_currentFile.get());
   }
 
   // find a thumb for this stream
@@ -4718,6 +4825,13 @@ bool CGUIInfoManager::GetItemInt(int &value, const CGUIListItem *item, int info)
   if (info >= LISTITEM_PROPERTY_START && info - LISTITEM_PROPERTY_START < (int)m_listitemProperties.size())
   { // grab the property
     CStdString property = m_listitemProperties[info - LISTITEM_PROPERTY_START];
+    /* PLEX */
+    // If we don't have fanart (yet?) and we have fallback fanart, use it.
+    if (property == "fanart_image" &&
+        item->GetProperty(property).size() == 0 &&
+        item->GetProperty("fanart_image_fallback").size() > 0)
+      return item->GetProperty("fanart_image_fallback").asBoolean();
+    /* END PLEX */
     CStdString val = item->GetProperty(property).asString();
     value = atoi(val);
     return true;
@@ -4990,7 +5104,7 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
         rating = StringUtils::Format("%2.2f", item->GetProperty("rating").asDouble());
       }
       /* END PLEX */
-      if (item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_fRating > 0.f) // movie rating
+      else if (item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_fRating > 0.f) // movie rating
         rating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
       else if (item->HasMusicInfoTag() && item->GetMusicInfoTag()->GetRating() > '0')
       { // song rating.  Images will probably be better than numbers for this in the long run
@@ -5138,9 +5252,9 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
     return item->GetIconImage();
 
   /* PLEX */
-  //case LISTITEM_BANNER:
-  //    return item->GetArt(PLEX_ART_BANNER);
- case LISTITEM_GRANDPARENT_THUMB:
+  case LISTITEM_BANNER:
+      return item->GetArt(PLEX_ART_BANNER);
+  case LISTITEM_GRANDPARENT_THUMB:
     return item->GetArt(PLEX_ART_TVSHOW_THUMB);
   /* END PLEX */
 
@@ -5513,6 +5627,19 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::s
         stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(item->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
       return stereoMode;
     }
+    /* PLEX */
+    case LISTITEM_STAR_DIFFUSE:
+      {
+        std::string communityRatingColor = item->GetProperty("communityRatingColor").asString();
+        if (item->HasProperty("userRating"))
+          return "FFFFCC00";
+        else if (communityRatingColor.size() > 0)
+          return communityRatingColor;
+        else
+          return "FFFFFFFF";
+       }
+       break;
+    /* END PLEX */
   }
   return "";
 }
@@ -5537,7 +5664,11 @@ CStdString CGUIInfoManager::GetItemImage(const CFileItem *item, int info, std::s
       CStdString rating;
       if (item->HasVideoInfoTag())
       { // rating for videos is assumed 0..10, so convert to 0..5
+#ifndef __PLEX__
         rating = StringUtils::Format("rating%ld.png", (long)((item->GetVideoInfoTag()->m_fRating * 0.5f) + 0.5f));
+#else
+        rating = StringUtils::Format("rating%ld.png", (long)(item->GetVideoInfoTag()->m_fRating + 0.5f));
+#endif
       }
       else if (item->HasMusicInfoTag())
       { // song rating.
@@ -5780,6 +5911,12 @@ bool CGUIInfoManager::CheckWindowCondition(CGUIWindow *window, int condition) co
 
 CGUIWindow *CGUIInfoManager::GetWindowWithCondition(int contextWindow, int condition) const
 {
+  /* PLEX */
+  // Home doesn't have a parent, so sometimes it comes through as 0.
+  if (contextWindow == 0)
+    contextWindow = WINDOW_HOME;
+  /* END PLEX */
+
   CGUIWindow *window = g_windowManager.GetWindow(contextWindow);
   if (CheckWindowCondition(window, condition))
     return window;
@@ -6047,7 +6184,7 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition, int s
           }
         }
         
-        return fitem->GetPath() == gitem->GetPath();
+        return fitem->GetPath() == gitem->GetPath(); // TODO: nocase??
       }
     }
     return false;
@@ -6057,24 +6194,24 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition, int s
     uint32_t param = secondCondition > 0 ? secondCondition : condition;
     if (param > m_stringParameters.size())
       return false;
-    return item->GetProperty("type").asString() == m_stringParameters[param];
+    return item->GetProperty("type").asString() == m_stringParameters[param]; // TODO: nocase??
   }
-  //else if (condition == LISTITEM_STATUS)
-  //{
-  //  CStdString lhs;
-  //  switch (item->GetOverlayImageID())
-  //  {
-  //  case CGUIListItem::ICON_OVERLAY_IN_PROGRESS: lhs = "inprogress"; break;
-  //  case CGUIListItem::ICON_OVERLAY_UNWATCHED: lhs = "unwatched"; break;
-  //  case CGUIListItem::ICON_OVERLAY_WATCHED: lhs = "watched"; break;
-  //  default: break;
-  //  }
+  else if (condition == LISTITEM_STATUS)
+  {
+    std::string lhs;
+    switch (item->GetOverlayImageID())
+    {
+    case CGUIListItem::ICON_OVERLAY_IN_PROGRESS: lhs = "inprogress"; break;
+    case CGUIListItem::ICON_OVERLAY_UNWATCHED: lhs = "unwatched"; break;
+    case CGUIListItem::ICON_OVERLAY_WATCHED: lhs = "watched"; break;
+    default: break;
+    }
 
-  //  uint32_t param = secondCondition > 0 ? secondCondition : condition;
-  //  if (param > m_stringParameters.size())
-  //    return false;
-  //  return lhs.CompareNoCase(m_stringParameters[param]) == 0;
-  //}
+    uint32_t param = secondCondition > 0 ? secondCondition : condition;
+    if (param > m_stringParameters.size())
+      return false;
+    return StringUtils::CompareNoCase(lhs, m_stringParameters[param]) == 0;
+  }
   else if (condition == LISTITEM_ISSELECTED)
     return item->IsSelected();
   else if (condition == LISTITEM_IS_FOLDER)
@@ -6084,6 +6221,299 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition, int s
   return false;
 }
 
+int CGUIInfoManager::TranslateVideoPlayerString(const CStdString& info) const
+{
+  for (size_t i = 0; i < sizeof(videoplayer) / sizeof(infomap); i++)
+  {
+    if (info == videoplayer[i].str)
+      return videoplayer[i].val;
+  }
+  return 0;
+}
+
+const CStdString CGUIInfoManager::GetVideoPlaylistInfo(const GUIInfo& info)
+{
+  PLAYLIST::CPlayList& playlist = g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO);
+  if (playlist.size() < 1)
+    return "";
+  int index = info.GetData2();
+  if (info.GetData1() == 1)
+  { // relative index (requires current playlist is PLAYLIST_MUSIC)
+    if (g_playlistPlayer.GetCurrentPlaylist() != PLAYLIST_VIDEO)
+      return "";
+    index = g_playlistPlayer.GetNextSong(index);
+  }
+  if (index < 0 || index >= playlist.size())
+    return "";
+  CFileItemPtr playlistItem = playlist[index];
+
+  if (info.m_info == VIDEOPLAYER_COVER)
+    return playlistItem->HasArt("thumb") ? playlistItem->GetArt("thumb") : "DefaultVideoCover.png";
+
+  return GetVideoLabel(info.m_info, playlistItem);
+}
+
+CStdString CGUIInfoManager::GetVideoLabel(int item, const CFileItemPtr& file)
+{
+  if (!g_application.m_pPlayer->IsPlaying())
+    return "";
+
+  CFileItemPtr fileItem = file;
+  if (!file)
+    fileItem = m_currentFile;
+
+  if (item == VIDEOPLAYER_TITLE)
+  {
+    if (g_application.m_pPlayer->IsPlayingVideo())
+      return GetLabel(PLAYER_TITLE);
+  }
+  else if (item == VIDEOPLAYER_PLAYLISTLEN)
+  {
+    if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_VIDEO)
+      return GetPlaylistLabel(PLAYLIST_LENGTH);
+  }
+  else if (item == VIDEOPLAYER_PLAYLISTPOS)
+  {
+    if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_VIDEO)
+      return GetPlaylistLabel(PLAYLIST_POSITION);
+  }
+  else if (fileItem->HasPVRChannelInfoTag())
+  {
+    CPVRChannel* tag = fileItem->GetPVRChannelInfoTag();
+    CEpgInfoTag epgTag;
+
+    switch (item)
+    {
+      /* Now playing infos */
+    case VIDEOPLAYER_ORIGINALTITLE:
+      return tag->GetEPGNow(epgTag) ?
+        epgTag.Title() :
+        CSettings::Get().GetBool("epg.hidenoinfoavailable") ?
+        StringUtils::EmptyString :
+        g_localizeStrings.Get(19055); // no information available
+    case VIDEOPLAYER_GENRE:
+      return tag->GetEPGNow(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : "";
+    case VIDEOPLAYER_PLOT:
+      return tag->GetEPGNow(epgTag) ? epgTag.Plot() : "";
+    case VIDEOPLAYER_PLOT_OUTLINE:
+      return tag->GetEPGNow(epgTag) ? epgTag.PlotOutline() : "";
+    case VIDEOPLAYER_STARTTIME:
+      return tag->GetEPGNow(epgTag) ? epgTag.StartAsLocalTime().GetAsLocalizedTime("", false) : CDateTime::GetCurrentDateTime().GetAsLocalizedTime("", false);
+    case VIDEOPLAYER_ENDTIME:
+      return tag->GetEPGNow(epgTag) ? epgTag.EndAsLocalTime().GetAsLocalizedTime("", false) : CDateTime::GetCurrentDateTime().GetAsLocalizedTime("", false);
+
+      /* Next playing infos */
+    case VIDEOPLAYER_NEXT_TITLE:
+      return tag->GetEPGNext(epgTag) ?
+        epgTag.Title() :
+        CSettings::Get().GetBool("epg.hidenoinfoavailable") ?
+        StringUtils::EmptyString :
+        g_localizeStrings.Get(19055); // no information available
+    case VIDEOPLAYER_NEXT_GENRE:
+      return tag->GetEPGNext(epgTag) ? StringUtils::Join(epgTag.Genre(), g_advancedSettings.m_videoItemSeparator) : "";
+    case VIDEOPLAYER_NEXT_PLOT:
+      return tag->GetEPGNext(epgTag) ? epgTag.Plot() : "";
+    case VIDEOPLAYER_NEXT_PLOT_OUTLINE:
+      return tag->GetEPGNext(epgTag) ? epgTag.PlotOutline() : "";
+    case VIDEOPLAYER_NEXT_STARTTIME:
+      return tag->GetEPGNext(epgTag) ? epgTag.StartAsLocalTime().GetAsLocalizedTime("", false) : CDateTime::GetCurrentDateTime().GetAsLocalizedTime("", false);
+    case VIDEOPLAYER_NEXT_ENDTIME:
+      return tag->GetEPGNext(epgTag) ? epgTag.EndAsLocalTime().GetAsLocalizedTime("", false) : CDateTime::GetCurrentDateTime().GetAsLocalizedTime("", false);
+    case VIDEOPLAYER_NEXT_DURATION:
+    {
+      CStdString duration;
+      if (tag->GetEPGNext(epgTag) && epgTag.GetDuration() > 0)
+        duration = StringUtils::SecondsToTimeString(epgTag.GetDuration());
+      return duration;
+    }
+
+    case VIDEOPLAYER_PARENTAL_RATING:
+    {
+      CStdString rating;
+      if (tag->GetEPGNow(epgTag) && epgTag.ParentalRating() > 0)
+        rating = StringUtils::Format("%i", epgTag.ParentalRating());
+      return rating;
+    }
+    break;
+
+    /* General channel infos */
+    case VIDEOPLAYER_CHANNEL_NAME:
+      return tag->ChannelName();
+
+    case VIDEOPLAYER_CHANNEL_NUMBER:
+      return StringUtils::Format("%i", tag->ChannelNumber());
+
+    case VIDEOPLAYER_SUB_CHANNEL_NUMBER:
+      return StringUtils::Format("%i", tag->SubChannelNumber());
+
+    case VIDEOPLAYER_CHANNEL_NUMBER_LBL:
+      return tag->FormattedChannelNumber();
+
+    case VIDEOPLAYER_CHANNEL_GROUP:
+    {
+      if (tag && !tag->IsRadio())
+        return g_PVRManager.GetPlayingTVGroupName();
+    }
+    }
+  }
+  else if (fileItem->HasVideoInfoTag())
+  {
+    switch (item)
+    {
+    case VIDEOPLAYER_ORIGINALTITLE:
+      return fileItem->GetVideoInfoTag()->m_strOriginalTitle;
+      break;
+    case VIDEOPLAYER_GENRE:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_genre, g_advancedSettings.m_videoItemSeparator);
+      break;
+    case VIDEOPLAYER_DIRECTOR:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_director, g_advancedSettings.m_videoItemSeparator);
+      break;
+    case VIDEOPLAYER_RATING:
+    {
+      CStdString strRating;
+      if (fileItem->GetVideoInfoTag()->m_fRating > 0.f)
+        strRating = StringUtils::Format("%.1f", fileItem->GetVideoInfoTag()->m_fRating);
+      return strRating;
+    }
+    break;
+    case VIDEOPLAYER_RATING_AND_VOTES:
+    {
+      CStdString strRatingAndVotes;
+      if (fileItem->GetVideoInfoTag()->m_fRating > 0.f)
+      {
+        if (fileItem->GetVideoInfoTag()->m_strVotes.empty())
+          strRatingAndVotes = StringUtils::Format("%.1f",
+          fileItem->GetVideoInfoTag()->m_fRating);
+        else
+          strRatingAndVotes = StringUtils::Format("%.1f (%s %s)",
+          fileItem->GetVideoInfoTag()->m_fRating,
+          fileItem->GetVideoInfoTag()->m_strVotes.c_str(),
+          g_localizeStrings.Get(20350).c_str());
+      }
+      return strRatingAndVotes;
+    }
+    break;
+    case VIDEOPLAYER_VOTES:
+      return fileItem->GetVideoInfoTag()->m_strVotes;
+    case VIDEOPLAYER_YEAR:
+    {
+      CStdString strYear;
+      if (fileItem->GetVideoInfoTag()->m_iYear > 0)
+        strYear = StringUtils::Format("%i", fileItem->GetVideoInfoTag()->m_iYear);
+      return strYear;
+    }
+    break;
+    case VIDEOPLAYER_PREMIERED:
+    {
+      CDateTime dateTime;
+      if (fileItem->GetVideoInfoTag()->m_firstAired.IsValid())
+        dateTime = fileItem->GetVideoInfoTag()->m_firstAired;
+      else if (fileItem->GetVideoInfoTag()->m_premiered.IsValid())
+        dateTime = fileItem->GetVideoInfoTag()->m_premiered;
+
+      if (dateTime.IsValid())
+        return dateTime.GetAsLocalizedDate();
+      break;
+    }
+    break;
+    case VIDEOPLAYER_PLOT:
+      return fileItem->GetVideoInfoTag()->m_strPlot;
+    case VIDEOPLAYER_TRAILER:
+      return fileItem->GetVideoInfoTag()->m_strTrailer;
+    case VIDEOPLAYER_PLOT_OUTLINE:
+      return fileItem->GetVideoInfoTag()->m_strPlotOutline;
+    case VIDEOPLAYER_EPISODE:
+      if (fileItem->GetVideoInfoTag()->m_iEpisode > 0)
+      {
+        CStdString strEpisode;
+        if (fileItem->GetVideoInfoTag()->m_iSeason == 0) // prefix episode with 'S'
+          strEpisode = StringUtils::Format("S%i", fileItem->GetVideoInfoTag()->m_iEpisode);
+        else
+          strEpisode = StringUtils::Format("%i", fileItem->GetVideoInfoTag()->m_iEpisode);
+        return strEpisode;
+      }
+      break;
+    case VIDEOPLAYER_SEASON:
+      if (fileItem->GetVideoInfoTag()->m_iSeason > 0)
+      {
+        return StringUtils::Format("%i", fileItem->GetVideoInfoTag()->m_iSeason);
+      }
+      break;
+    case VIDEOPLAYER_TVSHOW:
+      return fileItem->GetVideoInfoTag()->m_strShowTitle;
+
+    case VIDEOPLAYER_STUDIO:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_studio, g_advancedSettings.m_videoItemSeparator);
+    case VIDEOPLAYER_COUNTRY:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_country, g_advancedSettings.m_videoItemSeparator);
+    case VIDEOPLAYER_MPAA:
+      return fileItem->GetVideoInfoTag()->m_strMPAARating;
+    case VIDEOPLAYER_TOP250:
+    {
+      CStdString strTop250;
+      if (fileItem->GetVideoInfoTag()->m_iTop250 > 0)
+        strTop250 = StringUtils::Format("%i", fileItem->GetVideoInfoTag()->m_iTop250);
+      return strTop250;
+    }
+    break;
+    case VIDEOPLAYER_CAST:
+      return fileItem->GetVideoInfoTag()->GetCast();
+    case VIDEOPLAYER_CAST_AND_ROLE:
+      return fileItem->GetVideoInfoTag()->GetCast(true);
+    case VIDEOPLAYER_ARTIST:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_artist, g_advancedSettings.m_videoItemSeparator);
+    case VIDEOPLAYER_ALBUM:
+      return fileItem->GetVideoInfoTag()->m_strAlbum;
+    case VIDEOPLAYER_WRITER:
+      return StringUtils::Join(fileItem->GetVideoInfoTag()->m_writingCredits, g_advancedSettings.m_videoItemSeparator);
+    case VIDEOPLAYER_TAGLINE:
+      return fileItem->GetVideoInfoTag()->m_strTagLine;
+    case VIDEOPLAYER_LASTPLAYED:
+    {
+      if (fileItem->GetVideoInfoTag()->m_lastPlayed.IsValid())
+        return fileItem->GetVideoInfoTag()->m_lastPlayed.GetAsLocalizedDateTime();
+      break;
+    }
+    /* PLEX */
+    case VIDEOPLAYER_AUDIOSTREAM:
+      {
+        if (g_application.CurrentFileItemPtr()->HasProperty("selectedAudioStream"))
+          return g_application.CurrentFileItemPtr()->GetProperty("selectedAudioStream").asString();
+        return g_localizeStrings.Get(1446);
+      }
+    case VIDEOPLAYER_SUBTITLESTREAM:
+      {
+        if (g_application.CurrentFileItemPtr()->HasProperty("selectedSubtitleStream"))
+          return g_application.CurrentFileItemPtr()->GetProperty("selectedSubtitleStream").asString();
+        return g_localizeStrings.Get(1446);
+      }
+    case VIDEOPLAYER_DURATION_STRING:
+      {
+        if (fileItem->HasVideoInfoTag())
+        {
+          if (fileItem->GetVideoInfoTag()->GetDuration() > 0)
+            return StringUtils::SecondsToTimeString(fileItem->GetVideoInfoTag()->GetDuration(), TIME_FORMAT_GUESS);
+        }
+        else
+          return GetItemLabel(fileItem.get(), LISTITEM_DURATION);
+      }
+    case VIDEOPLAYER_PLEXCONTENT_STRING:
+      {
+        return PlexUtils::GetPlexContent(*fileItem);
+      }
+    /* END PLEX */
+    case VIDEOPLAYER_PLAYCOUNT:
+    {
+      CStdString strPlayCount;
+      if (fileItem->GetVideoInfoTag()->m_playCount > 0)
+        strPlayCount = StringUtils::Format("%i", fileItem->GetVideoInfoTag()->m_playCount);
+      return strPlayCount;
+    }
+    }
+  }
+  return "";
+}
 
 /* END PLEX */
 

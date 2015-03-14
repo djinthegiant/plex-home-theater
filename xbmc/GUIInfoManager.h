@@ -39,6 +39,11 @@
 #include <list>
 #include <map>
 
+/* PLEX */
+#include "ThumbLoader.h"
+#include "music/MusicThumbLoader.h"
+/* END PLEX */
+
 namespace MUSIC_INFO
 {
   class CMusicInfoTag;
@@ -412,7 +417,7 @@ namespace INFO
 #define SYSTEM_ADDON_VERSION        718
 #define SYSTEM_DPMS_ACTIVE          719
 /* PLEX */
-//#define SYSTEM_PLEX_PLAYQUEUE       718
+#define SYSTEM_PLEX_PLAYQUEUE       760
 /* END PLEX */
 
 #define LIBRARY_HAS_MUSIC           720
@@ -815,7 +820,9 @@ public:
 
   CStdString GetMusicLabel(int item);
   CStdString GetMusicTagLabel(int info, const CFileItem *item);
+#ifndef __PLEX__
   CStdString GetVideoLabel(int item);
+#endif
   CStdString GetPlaylistLabel(int item, int playlistid = -1 /* PLAYLIST_NONE */) const;
   CStdString GetMusicPartyModeLabel(int item);
   const CStdString GetMusicPlaylistInfo(const GUIInfo& info);
@@ -884,6 +891,11 @@ public:
 
   /// \brief iterates through boolean conditions and compares their stored values to current values. Returns true if any condition changed value.
   bool ConditionsChangedValues(const std::map<INFO::InfoPtr, bool>& map);
+
+  /* PLEX */
+  CStdString GetVideoLabel(int item, const CFileItemPtr& file = CFileItemPtr());
+  const CStdString GetVideoPlaylistInfo(const GUIInfo &info);
+  /* END PLEX */
 
 protected:
   friend class INFO::InfoSingle;
@@ -954,7 +966,7 @@ protected:
   CStdString m_currentMovieDuration;
 
   // Current playing stuff
-  CFileItem* m_currentFile;
+  CFileItemPtr m_currentFile;
   CStdString m_currentMovieThumb;
   CFileItem* m_currentSlide;
 
@@ -996,7 +1008,10 @@ protected:
   CCriticalSection m_critInfo;
 
   /* PLEX */
+  int TranslateVideoPlayerString(const CStdString& info) const;
   bool GetItemBool(const CGUIListItem *item, int condition, int secondCondition=0) const;
+  bool m_slideshowShowDescription;
+  CMusicThumbLoader *m_musicThumbLoader;
   /* END PLEX */
 };
 
