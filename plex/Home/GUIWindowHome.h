@@ -76,13 +76,14 @@ private:
   bool GetContentTypesFromSection(const std::string& url, std::vector<int> &types);
   bool GetContentListFromSection(const std::string& url, int contentType, CFileItemList &list);
   void SectionNeedsRefresh(const std::string& url);
+  void SectionsNeedsRefresh();
   void OpenItem(CFileItemPtr item);
   bool OnClick(const CGUIMessage& message);
   void OnSectionLoaded(const CGUIMessage& message);
   void OnWatchStateChanged(const CGUIMessage& message);
 
-  void AddPlaylists(std::vector<CGUIListItemPtr>& list, bool& updated);
-  void AddPlayQueues(std::vector<CGUIListItemPtr>& list,  bool& updated);
+  void AddPlaylists(std::vector<CGUIStaticItemPtr>& list, bool& updated);
+  void AddPlayQueues(std::vector<CGUIStaticItemPtr>& list, bool& updated);
   int GetPlayQueueType();
 
   void OnJobComplete(unsigned int jobID, bool success, CJob *job);

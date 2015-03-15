@@ -89,6 +89,7 @@
 #include "GUI/GUIDialogPlexError.h"
 
 #include "PlexSectionFanout.h"
+#include "GUIInfoManager.h"
 
 
 using namespace std;
@@ -163,7 +164,7 @@ bool CGUIWindowHome::OnAction(const CAction &action)
         m_lastSelectedItem = GetCurrentItemName();
         m_lastSelectedSubItem.clear();
         if (g_plexApplication.timer)
-          g_plexApplication.timer->SetTimeout(200, this);
+          g_plexApplication.timer->RestartTimeout(200, this);
       }
 
       if (action.GetID() == ACTION_SELECT_ITEM && pItem->HasProperty("sectionPath") &&
@@ -381,12 +382,15 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
     {
       UpdateSections();
 
+      SectionsNeedsRefresh();
+
+      m_globalArt = false;
+
       RestoreSection();
 
-      if (m_lastSelectedItem == "Search")
-        RefreshSection("global://art/", CPlexSectionFanout::SECTION_TYPE_GLOBAL_FANART);
-      
-      RefreshAllSections(false);
+      if (g_plexApplication.timer)
+        g_plexApplication.timer->RestartTimeout(200, this);
+
       g_plexApplication.themeMusicPlayer->playForItem(CFileItem());
       
       break;
@@ -394,7 +398,7 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
 
     case GUI_MSG_PLEX_BEST_SERVER_UPDATED:
     {
-      RefreshAllSections(true);
+      SectionsNeedsRefresh();
       return true;
     }
 
@@ -653,7 +657,7 @@ void CGUIWindowHome::OnWatchStateChanged(const CGUIMessage& message)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CGUIWindowHome::OpenItem(CFileItemPtr item)
 {
-  if (item->GetProperty("sectionpath").asString().empty())
+  if (item->GetProperty("sectionPath").asString().empty())
   {
     if ((item->GetPlexDirectoryType() == PLEX_DIR_TYPE_PLAYLIST) && item->GetProperty("leafCount").asInteger() == 0)
     {
@@ -743,15 +747,24 @@ void CGUIWindowHome::UpdateSections()
     return;
   }
 
-  vector<CGUIStaticItemPtr>& oldList = vector<CGUIStaticItemPtr>();
-  BOOST_FOREACH(CGUIListItemPtr fileItem, control->GetItems())
-    oldList.push_back(boost::static_pointer_cast<CGUIStaticItem>(fileItem));
+  bool listUpdated = false;
+
+  vector<CGUIStaticItemPtr> oldList;
+  int numItems = boost::lexical_cast<int>(control->GetLabel(CONTAINER_NUM_ITEMS));
+  vector<CGUIListItemPtr> controlItems = control->GetItems();
+  controlItems.erase(controlItems.begin() + numItems, controlItems.end());
+  BOOST_FOREACH(CGUIListItemPtr item, controlItems)
+  {
+    if (!item->HasProperty("sectionPath") || m_sections.find(item->GetProperty("sectionPath").asString()) != m_sections.end())
+      oldList.push_back(boost::static_pointer_cast<CGUIStaticItem>(item));
+    else
+      listUpdated = true;
+  }
 
   CFileItemListPtr sections = g_plexApplication.dataLoader->GetAllSections();
   vector<CGUIStaticItemPtr> newList;
   vector<CGUIStaticItemPtr> newSections;
 
-  bool listUpdated = false;
   bool haveShared = false;
   bool haveChannels = false;
   bool haveUpdate = false;
@@ -892,14 +905,13 @@ void CGUIWindowHome::UpdateSections()
     listUpdated = true;
   }
 
-  //MERGE:
-  //if (!havePlaylists &&
-  //    g_plexApplication.serverManager->GetBestServer() &&
-  //    g_plexApplication.dataLoader->AnyOwnedServerHasPlaylists())
-  //  AddPlaylists(newList, listUpdated);
-  //
-  //if ((!havePlayqueues) && g_plexApplication.playQueueManager->getPlayQueuesCount())
-  //  AddPlayQueues(newList, listUpdated);
+  if (!havePlaylists &&
+      g_plexApplication.serverManager->GetBestServer() &&
+      g_plexApplication.dataLoader->AnyOwnedServerHasPlaylists())
+    AddPlaylists(newList, listUpdated);
+  
+  if ((!havePlayqueues) && g_plexApplication.playQueueManager->getPlayQueuesCount())
+    AddPlayQueues(newList, listUpdated);
 
   if (listUpdated)
   {
@@ -911,7 +923,7 @@ void CGUIWindowHome::UpdateSections()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::AddPlaylists(std::vector<CGUIListItemPtr>& list, bool& updated)
+void CGUIWindowHome::AddPlaylists(std::vector<CGUIStaticItemPtr>& list, bool& updated)
 {
   updated = true;
 
@@ -931,7 +943,7 @@ void CGUIWindowHome::AddPlaylists(std::vector<CGUIListItemPtr>& list, bool& upda
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void CGUIWindowHome::AddPlayQueues(std::vector<CGUIListItemPtr>& list, bool& updated)
+void CGUIWindowHome::AddPlayQueues(std::vector<CGUIStaticItemPtr>& list, bool& updated)
 {
   updated = true;
   
@@ -1058,6 +1070,15 @@ void CGUIWindowHome::SectionNeedsRefresh(const std::string &url)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void CGUIWindowHome::SectionsNeedsRefresh()
+{
+  BOOST_FOREACH(nameSectionPair p, m_sections)
+  {
+    p.second->m_needsRefresh = true;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void CGUIWindowHome::OnTimeout()
 {
   if (GetCurrentItemName() == m_lastSelectedItem)
@@ -1144,8 +1165,9 @@ bool CGUIWindowHome::ShowSection(const std::string &url)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIWindowHome::ShowCurrentSection()
 {
-  if (!GetCurrentItemName(true).empty())
-    return ShowSection(GetCurrentItemName(true));
+  std::string name = GetCurrentItemName(true);
+  if (!name.empty())
+    return ShowSection(name);
   return false;
 }
 
@@ -1194,6 +1216,7 @@ void CGUIWindowHome::RestoreSection()
 
           if (fItem->HasProperty("sectionPath"))
             ShowSection(fItem->GetProperty("sectionPath").asString());
+          return;
         }
       }
       idx++;
