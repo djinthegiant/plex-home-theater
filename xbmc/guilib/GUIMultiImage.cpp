@@ -192,8 +192,7 @@ bool CGUIMultiImage::OnMessage(CGUIMessage &message)
       m_plexLabels[list->Get(i)->GetPath()] = list->Get(i)->GetLabel();
     }
     
-    m_directoryStatus = UNLOADED;
-    AllocResources();
+    LoadDirectory();
     
     return true;
   }
