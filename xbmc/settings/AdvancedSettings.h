@@ -415,6 +415,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     bool m_bHideFanouts;
     bool m_bForceJpegImageFormat;
     bool m_bUseMatroskaTranscodes;
+    bool m_bSharedSectionsOnHome;
     /* END PLEX */
   private:
     void setExtraLogLevel(const std::vector<CVariant> &components);

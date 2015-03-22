@@ -426,6 +426,7 @@ void CAdvancedSettings::Initialize()
   m_bHideFanouts = false;
   m_bForceJpegImageFormat = false;
   m_bUseMatroskaTranscodes = true;
+  m_bSharedSectionsOnHome = false;
   /* END PLEX */
 
   m_initialized = true;
@@ -1192,6 +1193,7 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   XMLUtils::GetBoolean(pRootElement, "hidefanouts", m_bHideFanouts);
   XMLUtils::GetBoolean(pRootElement, "forcejpegimageformat", m_bForceJpegImageFormat);
   XMLUtils::GetBoolean(pRootElement, "usematroskatranscode", m_bUseMatroskaTranscodes);
+  XMLUtils::GetBoolean(pRootElement, "sharedsectionsonhome", m_bSharedSectionsOnHome);
   /* END PLEX */
 
   // load in the settings overrides

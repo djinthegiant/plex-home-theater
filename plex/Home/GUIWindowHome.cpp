@@ -691,7 +691,10 @@ CGUIStaticItemPtr CGUIWindowHome::ItemToSection(CFileItemPtr item)
 {
   CGUIStaticItemPtr newItem = CGUIStaticItemPtr(new CGUIStaticItem);
   newItem->SetLabel(item->GetLabel());
-  newItem->SetLabel2(item->GetProperty("serverName").asString());
+  if (item->HasProperty("serverOwner"))
+    newItem->SetLabel2(item->GetProperty("serverOwner").asString());
+  else
+    newItem->SetLabel2(item->GetProperty("serverName").asString());
   newItem->SetProperty("sectionNameCollision", item->GetProperty("sectionNameCollision"));
   newItem->SetProperty("plex", true);
   newItem->SetProperty("sectionPath", item->GetPath());
@@ -770,6 +773,20 @@ void CGUIWindowHome::UpdateSections()
   bool haveUpdate = false;
   bool havePlaylists = false;
   bool havePlayqueues = false;
+
+  if (g_advancedSettings.m_bSharedSectionsOnHome && g_plexApplication.dataLoader->HasSharedSections())
+  {
+    CFileItemListPtr sharedSections = g_plexApplication.dataLoader->GetAllSharedSections();
+    for (int i = 0; i < sharedSections->Size(); i++)
+    {
+      CFileItemPtr sectionItem = sharedSections->Get(i);
+      CPlexServerPtr server = g_plexApplication.serverManager->FindByUUID(sectionItem->GetProperty("serverUUID").asString());
+      if (!server) continue;
+      sectionItem->SetProperty("serverOwner", server->GetOwner());
+      sectionItem->SetProperty("sectionNameCollision", "yes");
+      sections->Add(sectionItem);
+    }
+  }
 
   for (int i = 0; i < oldList.size(); i ++)
   {
@@ -892,7 +909,7 @@ void CGUIWindowHome::UpdateSections()
   }
 
 
-  if (g_plexApplication.dataLoader->HasSharedSections() && !haveShared)
+  if (!g_advancedSettings.m_bSharedSectionsOnHome && g_plexApplication.dataLoader->HasSharedSections() && !haveShared)
   {
     CGUIStaticItemPtr item = CGUIStaticItemPtr(new CGUIStaticItem);
     item->SetLabel(g_localizeStrings.Get(44020));
