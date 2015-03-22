@@ -24,7 +24,7 @@ void CPlexManualServerManager::checkManualServersAsync()
   m_waitingForThreads = 1;
   m_manualServers.clear();
 
-#ifndef TARGET_RASPBERRY_PI
+#ifndef TARGET_RASPLEX
   // Ignore localhost if the current user is restricted. That can only lead to
   // ugly things.
   //
