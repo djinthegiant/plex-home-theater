@@ -374,15 +374,16 @@ public:
   void SetRenderGUI(bool renderGUI);
   bool GetRenderGUI() const { return m_renderGUI; };
 
+  /* PLEX */
+  CFileItemPtr& CurrentFileItemPtr() { return m_itemCurrentFile; };
+  /* END PLEX */
+
   bool SetLanguage(const CStdString &strLanguage);
 
   ReplayGainSettings& GetReplayGainSettings() { return m_replayGainSettings; }
 
   void SetLoggingIn(bool loggingIn) { m_loggingIn = loggingIn; }
 
-  /* PLEX */
-  CFileItemPtr& CurrentFileItemPtr() { return m_itemCurrentFile; };
-  /* END PLEX */
 protected:
   virtual bool OnSettingsSaving() const;
 
