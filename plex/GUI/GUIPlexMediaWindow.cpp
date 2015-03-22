@@ -653,7 +653,7 @@ bool CGUIPlexMediaWindow::GetDirectory(const std::string &strDirectory, CFileIte
         }
       }
       
-      for (int i = 0; i < NeededRangeStart; i++)
+      for (int i = NeededRangeStart - 1; i >= 0; i--)
       {
         CFileItemPtr item = CFileItemPtr(new CFileItem);
         item->SetPath(boost::lexical_cast<std::string>(i));

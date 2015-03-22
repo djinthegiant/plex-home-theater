@@ -562,10 +562,14 @@ void CGUIBaseContainer::OnJumpLetter(char letter, bool skip /*=false*/)
   do
   {
     CGUIListItemPtr item = m_items[i];
+#ifndef __PLEX__
     std::string label = item->GetLabel();
     if (CSettings::Get().GetBool("filelists.ignorethewhensorting"))
       label = SortUtils::RemoveArticles(label);
     if (0 == strnicmp(label.c_str(), m_match.c_str(), m_match.size()))
+#else
+    if (0 == strnicmp((const char *)item->GetSortLabel().c_str(), m_match.c_str(), m_match.size()))
+#endif
     {
       SelectItem(i);
       return;
