@@ -34,9 +34,9 @@ namespace XFILE
   {
   public:
     CPlexDirectory()
-      : m_verb("GET")
-      , m_xmlData(new char[1024])
+      : m_xmlData(new char[1024])
       , m_cacheStrategy(CPlexDirectoryCache::CACHE_STRATEGY_ITEM_COUNT)
+      , m_verb("GET")
       , m_showErrors(false)
     {
     }

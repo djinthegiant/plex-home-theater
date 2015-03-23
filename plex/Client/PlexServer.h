@@ -35,7 +35,7 @@ class CPlexServer : public boost::enable_shared_from_this<CPlexServer>
 {
 public:
   CPlexServer(const std::string& uuid, const std::string& name, bool owned, bool synced = false)
-    : m_owned(owned), m_uuid(uuid), m_name(name), m_synced(synced), m_lastRefreshed(0), m_home(false) {}
+    : m_owned(owned), m_home(false), m_synced(synced), m_uuid(uuid), m_name(name), m_lastRefreshed(0) {}
 
   CPlexServer() {}
 

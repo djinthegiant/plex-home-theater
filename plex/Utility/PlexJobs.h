@@ -184,7 +184,7 @@ class CPlexDownloadFileJob : public CJob
 {
   public:
     CPlexDownloadFileJob(const std::string& url, const std::string& destination) :
-      CJob(), m_failed(false), m_url(url), m_destination(destination)
+      CJob(), m_url(url), m_destination(destination), m_failed(false)
     {};
 
     virtual void Cancel() { m_http.Cancel(); }

@@ -11,7 +11,7 @@
 class CPlexTimeline
 {
   public:
-    CPlexTimeline(ePlexMediaType type = PLEX_MEDIA_TYPE_UNKNOWN) : m_state(PLEX_MEDIA_STATE_STOPPED), m_continuing(false), m_type(type) {}
+    CPlexTimeline(ePlexMediaType type = PLEX_MEDIA_TYPE_UNKNOWN) : m_state(PLEX_MEDIA_STATE_STOPPED), m_type(type), m_continuing(false) {}
 
     CPlexTimeline(const CPlexTimeline& other)
     {

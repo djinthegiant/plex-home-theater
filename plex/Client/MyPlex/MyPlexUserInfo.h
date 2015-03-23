@@ -27,7 +27,7 @@ public:
     ROLE_USER = 16
   };
   
-  CMyPlexUserInfo() : roles(ROLE_USER), id(-1), restricted(false), home(false) {}
+  CMyPlexUserInfo() : id(-1), home(false), restricted(false), roles(ROLE_USER) {}
   
   bool SetFromXmlElement(TiXmlElement* root);
   

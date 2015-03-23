@@ -29,8 +29,8 @@ class NetworkInterface
     : m_index(index)
     , m_name(name)
     , m_address(address)
-    , m_loopback(loopback)
-    , m_netmask(netmask) {}
+    , m_netmask(netmask)
+    , m_loopback(loopback) {}
 
   virtual ~NetworkInterface() {}
   
