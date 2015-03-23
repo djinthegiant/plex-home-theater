@@ -677,7 +677,8 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
       {
         CGUIDialog* pDialog = (CGUIDialog*)g_windowManager.GetWindow(pMsg->param1);
         if (!pDialog) return ;
-        pDialog->DoModal();
+        // PLEX - added the arguments here
+        pDialog->DoModal(WINDOW_INVALID, pMsg->strParam);
       }
       break;
 

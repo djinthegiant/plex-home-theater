@@ -893,6 +893,7 @@ public:
   bool ConditionsChangedValues(const std::map<INFO::InfoPtr, bool>& map);
 
   /* PLEX */
+  bool GetSeeking() const { return m_playerSeeking; };
   CStdString GetVideoLabel(int item, const CFileItemPtr& file = CFileItemPtr());
   const CStdString GetVideoPlaylistInfo(const GUIInfo &info);
   /* END PLEX */

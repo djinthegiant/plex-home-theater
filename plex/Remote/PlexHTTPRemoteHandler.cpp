@@ -175,7 +175,7 @@ CPlexRemoteResponse CPlexHTTPRemoteHandler::showDetails(const ArgMap &arguments)
 
   if (!PlexUtils::CurrentSkinHasPreplay() ||
       g_application.IsPlayingFullScreenVideo() ||
-      //MERGE: g_application.IsVisualizerActive() ||
+      g_application.IsVisualizerActive() ||
       g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW)
     return CPlexRemoteResponse();
 

@@ -1071,7 +1071,9 @@ void CPVRManager::CloseStream(void)
     UpdateLastWatched(*channel.get());
 
     // store channel settings
+#ifndef __PLEX__
     g_application.SaveFileState();
+#endif
   }
 
   m_addons->CloseStream();
@@ -1320,7 +1322,9 @@ bool CPVRManager::PerformChannelSwitch(CPVRChannel &channel, bool bPreview)
 
     // save previous and load new channel's settings (view mode is updated in 
     // the player)
+#ifndef __PLEX__
     g_application.SaveFileState();
+#endif
     g_application.LoadVideoSettings(channel.Path());
     
     // set channel as selected item

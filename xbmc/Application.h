@@ -176,8 +176,10 @@ public:
   bool PlayMediaSync(const CFileItem& item, int iPlaylist = PLAYLIST_MUSIC);
   bool ProcessAndStartPlaylist(const CStdString& strPlayList, PLAYLIST::CPlayList& playlist, int iPlaylist, int track=0);
   PlayBackRet PlayFile(const CFileItem& item, bool bRestart = false);
+#ifndef __PLEX__
   void SaveFileState(bool bForeground = false);
   void UpdateFileState();
+#endif
   void LoadVideoSettings(const std::string &path);
   void StopPlaying();
   void Restart(bool bSamePosition = true);
@@ -375,7 +377,12 @@ public:
   bool GetRenderGUI() const { return m_renderGUI; };
 
   /* PLEX */
+  void UpdateFileState(const std::string& state="", bool force=false);
+  void UpdateViewOffset();
   CFileItemPtr& CurrentFileItemPtr() { return m_itemCurrentFile; };
+  bool IsBuffering() const;
+  bool IsVisualizerActive();
+  void ActivateVisualizer();
   /* END PLEX */
 
   bool SetLanguage(const CStdString &strLanguage);
