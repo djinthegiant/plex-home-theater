@@ -52,6 +52,12 @@
 #include "URL.h"
 #include "cores/FFmpeg.h"
 
+/* PLEX */
+#include "plex/FileSystem/PlexFile.h"
+#include <boost/foreach.hpp>
+typedef std::pair<std::string, std::string> stringPair;
+/* END PLEX */
+
 extern "C" {
 #include "libavutil/opt.h"
 }
@@ -257,6 +263,15 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
         strFile = url.Get();
       } 
     }
+    /* PLEX - We need to translate the plexserver:// URL here */
+    else if (url.IsProtocol("plexserver"))
+    {
+      url.SetProtocolOptions("");
+      
+      XFILE::CPlexFile::BuildHTTPURL(url);
+      strFile = url.Get();
+    }
+    /* END PLEX */
     if (result < 0 && avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
     {
       CLog::Log(LOGDEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
@@ -595,12 +610,22 @@ AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromURL(const CURL &url)
 
   AVDictionary *options = NULL;
 
-  if (url.IsProtocol("http") || url.IsProtocol("https"))
+  if (url.IsProtocol("http") || url.IsProtocol("https") || url.IsProtocol("plexserver"))
   {
     std::map<std::string, std::string> protocolOptions;
     url.GetProtocolOptions(protocolOptions);
     std::string headers;
     bool hasUserAgent = false;
+
+    /* PLEX */
+    if (url.IsProtocol("plexserver"))
+    {
+      std::vector<stringPair> hdrs = XFILE::CPlexFile::GetHeaderList();
+      BOOST_FOREACH(stringPair sp, hdrs)
+        headers.append(sp.first).append(": ").append(sp.second).append("\r\n");
+    }
+    /* END PLEX */
+
     for(std::map<std::string, std::string>::const_iterator it = protocolOptions.begin(); it != protocolOptions.end(); ++it)
     {
       std::string name = it->first; StringUtils::ToLower(name);

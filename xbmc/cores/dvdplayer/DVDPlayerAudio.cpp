@@ -123,7 +123,8 @@ CDVDPlayerAudio::CDVDPlayerAudio(CDVDClock* pClock, CDVDMessageQueue& parent)
   m_prevskipped = false;
   m_maxspeedadjust = 0.0;
 
-  m_messageQueue.SetMaxDataSize(6 * 1024 * 1024);
+  // PLEX - we upped the max data size here
+  m_messageQueue.SetMaxDataSize(15 * 1024 * 1024);
   m_messageQueue.SetMaxTimeSize(8.0);
 }
 

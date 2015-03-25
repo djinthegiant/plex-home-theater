@@ -43,6 +43,10 @@
 #include "filesystem/File.h"
 #include "utils/URIUtils.h"
 
+/* PLEX */
+#include "settings/Settings.h"
+#include "plex/FileSystem/PlexFile.h"
+/* END PLEX */
 
 CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, const std::string& file, const std::string& content)
 {
@@ -119,6 +123,23 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
     item.FillInMimeType();
     if (item.GetMimeType() == "application/vnd.apple.mpegurl")
       return new CDVDInputStreamFFmpeg();
+
+/* PLEX */
+#ifdef TARGET_RASPBERRY_PI
+    if ((file.substr(0, 13) == "plexserver://") && (CSettings::Get().GetBool("videoplayer.useffmpegavio")))
+    {
+      // translte the url
+      CURL finalURL(file);
+      XFILE::CPlexFile::BuildHTTPURL(finalURL);
+
+      if (finalURL.GetProtocol() != "https" &&
+          !boost::starts_with(finalURL.GetFileName(), "services/iva/assets"))
+        return new CDVDInputStreamFFmpeg();
+      else
+        return new CDVDInputStreamFile();
+    }
+#endif
+/* END PLEX */
   }
 
   // our file interface handles all these types of streams
