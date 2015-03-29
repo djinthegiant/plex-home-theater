@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <settings>
-  <section id="services">
-    <category id="plex" label="10" help="10">
+  <section id="music">
+    <category id="musicplayer" label="14086" help="36264">
+      <group id="4">
+        <setting id="musicplayer.visualisation">
+          <default>visualization.nowplaying</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="system">
+    <category id="plex" label="" help="">
       <group id="1">
         <setting id="system.uuid" type="string" label="99999" help="99999">
           <level>3</level>
@@ -11,8 +20,23 @@
           </constraints>
           <control type="edit" format="string" />
         </setting>
+        <setting id="system.firstrunwizard" type="boolean" label="99999" help="99999">
+          <level>3</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="system.mostrecentplayqueue" type="string" label="99999" help="99999">
+          <level>3</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
       </group>
-      <group id="2">
+    </category>
+    <category id="myplex" label="10" help="10">
+      <group id="1">
         <setting id="myplex.uid" type="string" label="99999" help="99999">
           <level>3</level>
           <default></default>
@@ -37,11 +61,88 @@
           </constraints>
           <control type="edit" format="string" />
         </setting>
+        <setting id="myplex.signin" type="action" label="44100" help="44100">
+          <level>3</level>
+          <control type="button" format="action" />
+        </setting>
+        <setting id="myplex.searchsharedlibraries" type="boolean" label="13143" help="13143">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="myplex.enablequeueandrec" type="boolean" label="52210" help="52210">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="myplex.hidecloudsync" type="boolean" label="52505" help="52505">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="myplex.automaticlogin" type="boolean" label="52211" help="52211">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="videos">
+    <category id="videoacceleration">
+      <group id="4">
+        <setting id="videoplayer.useffmpegavio" type="boolean" label="44406" help="44406">
+          <level>0</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
+      </group>
+    </category>
+    <category id="extras" label="44408" help="44408">
+      <group id="1">
+        <setting id="videoplayer.playtrailercount" type="integer" label="44407" help="44407">
+          <level>0</level>
+          <default>0</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>5</maximum>
+          </constraints>
+          <control type="spinner" format="integer" />
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="services">
+    <category id="plexmediaserver" label="40210" help="40210">
+      <group id="1">
         <setting id="plexmediaserver.manualaddress" type="boolean" label="40211" help="40211">
           <level>0</level>
           <default>false</default>
           <control type="toggle" />
         </setting>
+        <setting id="plexmediaserver.address" type="string" label="40212" help="40212">
+          <level>0</level>
+          <default>0.0.0.0</default>
+          <dependencies>
+            <dependency type="enable" setting="plexmediaserver.manualaddress">true</dependency>
+          </dependencies>
+          <control type="edit" format="ip" />
+        </setting>
+        <setting id="plexmediaserver.port" type="integer" label="792" help="792">
+          <level>0</level>
+          <default>32400</default>
+          <constraints>
+            <minimum>1</minimum>
+            <step>1</step>
+            <maximum>65535</maximum>
+          </constraints>
+          <dependencies>
+            <dependency type="enable" setting="plexmediaserver.manualaddress">true</dependency>
+          </dependencies>
+          <control type="edit" format="integer" />
+        </setting>
+		
         <setting id="services.plexplayer" type="boolean" label="44300" help="44300">
           <level>0</level>
           <default>true</default>
