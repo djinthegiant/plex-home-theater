@@ -228,17 +228,6 @@
 			<animation effect="fade" start="100" end="50" time="300" condition="ControlGroup(7001).HasFocus">Conditional</animation>
 		</control>
 	</include>
-	<include name="ListItemPosterDimmer">
-		<posx>37</posx>
-		<posy>50</posy>
-		<width>126</width>
-		<height>176</height>
-		<aspectratio scalediffuse="false" align="center">scale</aspectratio>
-		<texture diffuse="posterMaskSmall.png" background="true">posterMaskSmall.png</texture>
-		<colordiffuse>FF000000</colordiffuse>
-		<animation effect="fade" start="0" end="50" time="400" condition="true">Visible</animation>
-		<animation effect="fade" start="50" end="0" time="300" condition="true">Hidden</animation>
-	</include>
 	<!-- Square Items -->
 	<include name="ListItemSquare">
 		<control type="image">
@@ -663,10 +652,6 @@
 									<include>ListItemPosterTitleTV2</include>
 									<include>ListItemInProgress</include>
 								</control>
-								<control type="image">
-									<visible>ControlGroup(7001).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
-								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
 							<control type="group">
@@ -682,10 +667,6 @@
 									<include>ListItemPosterCard</include>
 									<include>ListItemPosterTitleTV2</include>
 									<include>ListItemInProgress</include>
-								</control>
-								<control type="image">
-									<visible>ControlGroup(7001).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
 								</control>
 							</control>
 						</itemlayout>
@@ -705,10 +686,6 @@
 									<include>ListItemPosterTitleTV2</include>
 									<include>ListItemInProgress</include>
 								</control>
-								<control type="image">
-									<visible>ControlGroup(7001).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
-								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
 							<control type="group">
@@ -724,10 +701,6 @@
 									<include>ListItemPosterCard</include>
 									<include>ListItemPosterTitleTV2</include>
 									<include>ListItemInProgress</include>
-								</control>
-								<control type="image">
-									<visible>ControlGroup(7001).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
 								</control>
 							</control>
 						</focusedlayout>
@@ -801,10 +774,6 @@
 									<include>ListItemPosterTitleTV3</include>
 									<include>ListItemInProgress</include>
 								</control>
-								<control type="image">
-									<visible>ControlGroup(7002).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
-								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
 							<control type="group">
@@ -861,10 +830,6 @@
 									<include>ListItemPosterCard</include>
 									<include>ListItemPosterTitleTV3</include>
 									<include>ListItemInProgress</include>
-								</control>
-								<control type="image">
-									<visible>ControlGroup(7002).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
 								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
@@ -1282,10 +1247,6 @@
 									<include>ListItemPosterTitleTV3</include>
 									<include>ListItemInProgress</include>
 								</control>
-								<control type="image">
-									<visible>ControlGroup(7006).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
-								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
 							<control type="group">
@@ -1328,10 +1289,6 @@
 									<include>ListItemPosterCard</include>
 									<include>ListItemPosterTitleTV3</include>
 									<include>ListItemInProgress</include>
-								</control>
-								<control type="image">
-									<visible>ControlGroup(7006).HasFocus</visible>
-									<include>ListItemPosterDimmer</include>
 								</control>
 							</control>
 							<!-- movie & episode when only this list is visible -->
