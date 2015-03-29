@@ -73,7 +73,7 @@ public:
    \param url location of the image
    \return a hash string for this image
    */
-  bool CacheTexture(CBaseTexture **texture = NULL);
+  virtual bool CacheTexture(CBaseTexture **texture = NULL);
 
   CStdString m_url;
   CStdString m_oldHash;

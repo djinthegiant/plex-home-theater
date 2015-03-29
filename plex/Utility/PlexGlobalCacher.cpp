@@ -146,7 +146,7 @@ void CPlexGlobalCacher::ProcessSection(CFileItemPtr Section, int iSection, int T
     int progress = itemsProcessed * 100 / itemsToCache;
     itemsProcessed = itemsToCache - m_listToCache.Size();
 
-    message1 = StringUtils::Format((g_localizeStrings.Get(44403) + " %d / %d : '%s' on '%s' ").c_str(), iSection, TotalSections, Section->GetLabel().c_str(), ServerName.c_str());
+    message1 = StringUtils::Format((g_localizeStrings.Get(44403) + " %d / %d : '%s' on '%s' ").c_str(), iSection + 1, TotalSections, Section->GetLabel().c_str(), ServerName.c_str());
     message2 = StringUtils::Format((g_localizeStrings.Get(44404) + " %d/%d ...").c_str(), itemsProcessed, itemsToCache);
     SetProgress(message1, message2, progress);
 

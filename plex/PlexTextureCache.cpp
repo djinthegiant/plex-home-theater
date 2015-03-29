@@ -16,70 +16,24 @@ void CPlexTextureCache::Deinitialize()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexTextureCache::HasCachedImage(const CStdString &url)
-{
-  CTextureDetails details;
-  return GetCachedTexture(url,details);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexTextureCache::GetCachedImage(const CStdString &image, CTextureDetails &details, bool trackUsage)
-{
-  if (GetCachedTexture(image, details))
-  {
-    return GetCachedPath(details.file);
-  }
-  return "";
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-CStdString CPlexTextureCache::CheckCachedImage(const CStdString &url, bool returnDDS, bool &needsRecaching)
-{
-  CTextureDetails details;
-  CStdString cachedImage = GetCachedImage(url, details);
-
-  needsRecaching = (!cachedImage.empty());
-  return cachedImage;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexTextureCache::BackgroundCacheImage(const CStdString &url)
-{
-  CTextureDetails details;
-  if (GetCachedTexture(url, details))
-    return; // image is already cached and doesn't need to be checked further
-
-  // needs (re)caching
-  AddJob(new CPlexTextureCacheJob(CTextureUtils::UnwrapImageURL(url), details.hash));
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void CPlexTextureCache::ClearCachedImage(const CStdString &url, bool deleteSource /*= false */)
-{
-  CTextureDetails details;
-  CStdString path = GetCachedImage(url, details);
-  CFile::Delete(path);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CPlexTextureCache::GetCachedTexture(const CStdString &url, CTextureDetails &details)
 {
   CStdString fileprefix = CTextureCache::GetCacheFile(url);
   CStdString path = CTextureCache::GetCachedPath(fileprefix);
 
   // first check if we have a jpg matching
-  if  (CFile::Exists(path + ".jpg"))
+  if (CFile::Exists(path + ".jpg"))
   {
     details.file = fileprefix + ".jpg";
-    details.hash = StringUtils::Right(fileprefix, 8);
+    //details.hash = StringUtils::Right(fileprefix, 8); // Only set hash when the file should be recached
     return true;
   }
 
   // if not we might have a png
-  if  (CFile::Exists(path + ".png"))
+  if (CFile::Exists(path + ".png"))
   {
     details.file = fileprefix + ".png";
-    details.hash = StringUtils::Right(fileprefix, 8);
+    //details.hash = StringUtils::Right(fileprefix, 8); // Only set hash when the file should be recached
     return true;
   }
 
@@ -95,7 +49,6 @@ bool CPlexTextureCache::AddCachedTexture(const CStdString &url, const CTextureDe
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void CPlexTextureCache::IncrementUseCount(const CTextureDetails &details)
 {
-  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,22 +58,19 @@ bool CPlexTextureCache::SetCachedTextureValid(const CStdString &url, bool update
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexTextureCache::ClearCachedTexture(const CStdString &url, CStdString &cachedURL)
+bool CPlexTextureCache::ClearCachedTexture(const CStdString &url, CStdString &cachedFile)
 {
-  return true;
+  CTextureDetails details;
+  if (GetCachedTexture(url, details))
+  {
+    cachedFile = details.file;
+    return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//MERGE:
-//void CPlexTextureCache::OnCachingComplete(bool success, CTextureCacheJob *job)
-//{
-//  // remove from our processing list
-//  CSingleLock lock(m_processingSection);
-//  std::set<std::string>::iterator i = m_processing.find(job->m_url);
-//  if (i != m_processing.end())
-//    m_processing.erase(i);
-//
-//  m_completeEvent.Set();
-//}
-
-
+bool CPlexTextureCache::ClearCachedTexture(int id, CStdString &cachedURL)
+{
+  return false;
+}

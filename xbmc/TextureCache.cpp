@@ -31,7 +31,10 @@
 #include "URL.h"
 #include "utils/StringUtils.h"
 
+/* PLEX */
 #include "plex/PlexTextureCache.h"
+#include "plex/Utility/PlexJobs.h"
+/* END PLEX */
 
 using namespace XFILE;
 
@@ -136,7 +139,11 @@ void CTextureCache::BackgroundCacheImage(const CStdString &url)
     return; // image is already cached and doesn't need to be checked further
 
   // needs (re)caching
+#ifdef __PLEX__
+  AddJob(new CPlexTextureCacheJob(CTextureUtils::UnwrapImageURL(url), details.hash));
+#else
   AddJob(new CTextureCacheJob(CTextureUtils::UnwrapImageURL(url), details.hash));
+#endif
 }
 
 bool CTextureCache::CacheImage(const CStdString &image, CTextureDetails &details)
@@ -157,7 +164,11 @@ CStdString CTextureCache::CacheImage(const CStdString &image, CBaseTexture **tex
     m_processinglist.insert(url);
     lock.Leave();
     // cache the texture directly
+#ifdef __PLEX__
+    CPlexTextureCacheJob job(url);
+#else
     CTextureCacheJob job(url);
+#endif
     bool success = job.CacheTexture(texture);
     OnCachingComplete(success, &job);
     if (success && details)

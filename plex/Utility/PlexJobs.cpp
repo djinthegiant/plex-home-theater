@@ -225,7 +225,9 @@ bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
   // unwrap the URL as required
   std::string additional_info;
   unsigned int width, height;
-  std::string image = DecodeImageURL(m_url, width, height, additional_info);
+  CStdString image = DecodeImageURL(m_url, width, height, additional_info);
+
+  m_details.updateable = additional_info != "music" && UpdateableURL(image);
 
   // generate the hash
   m_details.hash = GetImageHash(image);

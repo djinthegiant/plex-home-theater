@@ -42,6 +42,11 @@ class CBaseTexture;
 class CTextureCache : public CJobQueue
 {
 public:
+  /* PLEX */
+#ifdef __PLEX__
+  friend class CPlexTextureCache;
+#endif
+  /* END PLEX */
   /*!
    \brief The only way through which the global instance of the CTextureCache should be accessed.
    \return the global instance.
@@ -50,11 +55,11 @@ public:
 
   /*! \brief Initalize the texture cache
    */
-  void Initialize();
+  virtual void Initialize();
 
   /*! \brief Deinitialize the texture cache
    */
-  void Deinitialize();
+  virtual void Deinitialize();
 
   /*! \brief Check whether we already have this image cached
 
@@ -146,7 +151,7 @@ public:
    \param details the texture details to add
    \return true if we successfully added to the database, false otherwise.
    */
-  bool AddCachedTexture(const CStdString &image, const CTextureDetails &details);
+  virtual bool AddCachedTexture(const CStdString &image, const CTextureDetails &details);
 
   /*! \brief Export a (possibly) cached image to a file
    \param image url of the original image
@@ -156,7 +161,7 @@ public:
    */
   bool Export(const CStdString &image, const CStdString &destination, bool overwrite);
   bool Export(const CStdString &image, const CStdString &destination); // TODO: BACKWARD COMPATIBILITY FOR MUSIC THUMBS
-protected: // PLEX
+private:
   // private construction, and no assignements; use the provided singleton methods
   CTextureCache();
   CTextureCache(const CTextureCache&);
@@ -184,7 +189,7 @@ protected: // PLEX
    \param details [out] texture details from the database (if available)
    \return true if we have a cached version of this image, false otherwise.
    */
-  bool GetCachedTexture(const CStdString &url, CTextureDetails &details);
+  virtual bool GetCachedTexture(const CStdString &url, CTextureDetails &details);
 
   /*! \brief Clear an image from the database
    Thread-safe wrapper of CTextureDatabase::ClearCachedTexture
@@ -192,14 +197,14 @@ protected: // PLEX
    \param cacheFile [out] url of the cached original (if available)
    \return true if we had a cached version of this image, false otherwise.
    */
-  bool ClearCachedTexture(const CStdString &url, CStdString &cacheFile);
-  bool ClearCachedTexture(int textureID, CStdString &cacheFile);
+  virtual bool ClearCachedTexture(const CStdString &url, CStdString &cacheFile);
+  virtual bool ClearCachedTexture(int textureID, CStdString &cacheFile);
 
   /*! \brief Increment the use count of a texture
    Stores locally before calling CTextureDatabase::IncrementUseCount via a CUseCountJob
    \sa CUseCountJob, CTextureDatabase::IncrementUseCount
    */
-  void IncrementUseCount(const CTextureDetails &details);
+  virtual void IncrementUseCount(const CTextureDetails &details);
 
   /*! \brief Set a previously cached texture as valid in the database
    Thread-safe wrapper of CTextureDatabase::SetCachedTextureValid
@@ -207,7 +212,7 @@ protected: // PLEX
    \param updateable whether this image should be checked for updates
    \return true if successful, false otherwise.
    */
-  bool SetCachedTextureValid(const CStdString &url, bool updateable);
+  virtual bool SetCachedTextureValid(const CStdString &url, bool updateable);
 
   virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job);
   virtual void OnJobProgress(unsigned int jobID, unsigned int progress, unsigned int total, const CJob *job);
