@@ -1054,6 +1054,7 @@ bool CGUIPlexMediaWindow::OnBack(int actionID)
 
   if (currPath.Get() == m_startDirectory || parent.Get().empty())
   {
+    m_history.ClearPathHistory();
     g_windowManager.PreviousWindow();
     return true;
   }

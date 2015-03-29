@@ -296,6 +296,7 @@ void CGUIWindowPlexPreplayVideo::Share()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CGUIWindowPlexPreplayVideo::OnBack(int actionID)
 {
+  m_history.ClearPathHistory();
   g_windowManager.PreviousWindow();
   return true;
 }
