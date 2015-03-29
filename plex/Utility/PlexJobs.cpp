@@ -220,7 +220,7 @@ bool CPlexRecursiveFetchJob::DoWork()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
+bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **out_texture)
 {
   // unwrap the URL as required
   std::string additional_info;
@@ -296,6 +296,8 @@ bool CPlexTextureCacheJob::CacheTexture(CBaseTexture **texture)
     m_outputFile.Flush();
     m_inputFile.Close();
     m_outputFile.Close();
+    if (out_texture)
+      *out_texture = LoadImage(CTextureCache::GetCachedPath(m_details.file), width, height, additional_info, true);
     return true;
   }
   else
