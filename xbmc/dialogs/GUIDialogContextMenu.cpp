@@ -179,6 +179,7 @@ void CGUIDialogContextMenu::SetupButtons()
     m_defaultControl = pGroupList->GetID();
 }
 
+#ifndef __PLEX__
 void CGUIDialogContextMenu::SetPosition(float posX, float posY)
 {
   if (posY + GetHeight() > m_coordsRes.iHeight)
@@ -189,6 +190,14 @@ void CGUIDialogContextMenu::SetPosition(float posX, float posY)
   if (posX < 0) posX = 0;
   CGUIDialog::SetPosition(posX, posY);
 }
+#else
+void CGUIDialogContextMenu::SetPosition(float posX, float posY)
+{
+  posX = (m_coordsRes.iWidth - GetWidth()) / 2;
+  posY = (m_coordsRes.iHeight - GetHeight()) / 2;
+  CGUIDialog::SetPosition(posX, posY);
+}
+#endif
 
 float CGUIDialogContextMenu::GetHeight() const
 {
