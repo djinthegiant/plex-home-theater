@@ -1585,11 +1585,7 @@ bool CApplication::Initialize()
 #endif
       ADDON::CAddonMgr::Get().StartServices(false);
 
-#ifndef __PLEX__
-      // let's start the PVR manager and decide if the PVR manager handle the startup window activation
-      if (!StartPVRManager())
-        g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow());
-#else
+/* PLEX */
       if (g_SkinInfo->HasSkinFile("PlexStartupHelper.xml") && !CSettings::Get().GetBool("system.firstrunwizard"))
       {
         g_windowManager.ActivateWindow(WINDOW_PLEX_STARTUP_HELPER);
@@ -1601,9 +1597,11 @@ bool CApplication::Initialize()
         if (window)
           window->allowEscOut(false);
 
-        g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow());
+        // let's start the PVR manager and decide if the PVR manager handle the startup window activation
+        if (!StartPVRManager())
+          g_windowManager.ActivateWindow(g_SkinInfo->GetFirstWindow());
       }
-#endif
+/* END PLEX */
 
       CStereoscopicsManager::Get().Initialize();
     }
