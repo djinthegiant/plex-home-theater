@@ -194,6 +194,7 @@ set WORKSPACE=%CD%\..\..
   rem Exclude skins as they're copied by their own script
   Echo addons\skin.re-touched\>>exclude.txt
   Echo addons\skin.confluence\>>exclude.txt
+  Echo addons\skin.plex\>>exclude.txt
   
   md BUILD_WIN32\application
 
@@ -234,6 +235,11 @@ set WORKSPACE=%CD%\..\..
   ECHO ------------------------------------------------------------
   ECHO Building Confluence Skin...
   cd ..\..\addons\skin.confluence
+  call build.bat > NUL
+  cd %build_path%
+  
+  ECHO Building Plex Skin...
+  cd ..\..\addons\skin.plex
   call build.bat > NUL
   cd %build_path%
   

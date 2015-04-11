@@ -36,7 +36,7 @@ IF EXIST %1 (
   ECHO Using downloaded %1
 ) ELSE (
   CALL :setSubStageName Downloading %1...
-  %WGET% "http://mirrors.xbmc.org/build-deps/win32/%1" || EXIT /B 7
+  %WGET% "http://rasplex.azurewebsites.net/build-deps/win32/%1" || EXIT /B 7
   TITLE Getting %1
 )
 

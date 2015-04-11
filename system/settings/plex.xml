@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <settings>
+  <section id="appearance">
+    <category id="lookandfeel">
+      <group id="1">
+        <setting id="lookandfeel.skin">
+          <default>skin.plex</default>
+        </setting>
+      </group>
+    </category>
+  </section>
   <section id="music">
     <category id="musicplayer" label="14086" help="36264">
       <group id="4">
