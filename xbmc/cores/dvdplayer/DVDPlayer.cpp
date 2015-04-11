@@ -3167,12 +3167,10 @@ void CDVDPlayer::SetSubtitleVisible(bool bVisible)
   /* PLEX */
   // Send the change to the Media Server.
   CFileItemPtr item = g_application.CurrentFileItemPtr();
-  int partID = GetPlexMediaPartID();
-  int subtitleStreamID = GetSubtitlePlexID();
 
   // Don't send the message over if we're just hiding the initial sub.
   if (m_hidingSub == false)
-    g_plexApplication.mediaServerClient->SelectStream(item, partID, CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn ? subtitleStreamID : 0, -1);
+    g_plexApplication.mediaServerClient->SelectStream(item, GetPlexMediaPartID(), CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn ? GetSubtitlePlexID() : 0, -1);
   /* END PLEX */
 }
 
@@ -4687,6 +4685,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
     return;
 
   // open subtitle stream
+  count = m_SelectionStreams.Count(STREAM_SUBTITLE);
   valid = false;
 
   // Open subtitle stream.
