@@ -29,6 +29,8 @@
 #include "settings/Settings.h"
 #include "Playlists/PlexPlayQueueManager.h"
 #include "ApplicationMessenger.h"
+#include "utils/URIUtils.h"
+#include "utils/Mime.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 bool CPlexMediaDecisionEngine::checkItemPlayability(const CFileItem& item)
@@ -129,6 +131,7 @@ bool CPlexMediaDecisionEngine::resolveItem(const CFileItem& _item, CFileItem &re
     resolvedItem.SetProperty("playQueueID", item.GetProperty("playQueueID"));
     resolvedItem.SetProperty("playQueueVersion", item.GetProperty("playQueueVersion"));
     resolvedItem.GetMusicInfoTag()->SetDatabaseId(PlexUtils::GetItemListID(item), "video");
+    resolvedItem.SetMimeType(CMime::GetMimeType(URIUtils::GetExtension(resolvedItem.GetPath())));
 
     if (item.HasProperty("playQueueItemID") && !resolvedItem.HasProperty("playQueueItemID"))
       resolvedItem.SetProperty("playQueueItemID", item.GetProperty("playQueueItemID"));
