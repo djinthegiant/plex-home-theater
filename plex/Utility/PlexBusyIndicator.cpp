@@ -23,46 +23,21 @@ bool CPlexBusyIndicator::blockWaitingForJob(CJob* job, IJobCallback* callback, C
   m_resultMap[id] = result;
 
   lk.Leave();
-  m_blockEvent.WaitMSec(300); // wait an initial 300ms if this is a fast operation.
-
-  CGUIDialogBusy* busy = NULL;
-
-  if (g_application.IsCurrentThread())
-  {
-    busy = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-    if (busy)
-      busy->Show();
-  }
-
-  lk.Enter();
 
   bool success = true;
-  while (m_callbackMap.size() > 0)
+  if (!CGUIDialogBusy::WaitOnEvent(m_blockEvent, 300))
   {
-    lk.Leave();
-    while (!m_blockEvent.WaitMSec(20))
-    {
-      lk.Enter();
-      if (busy && busy->IsCanceled())
-      {
-        std::pair<int, IJobCallback*> p;
-        BOOST_FOREACH(p, m_callbackMap)
-          CJobManager::GetInstance().CancelJob(p.first);
-
-        // Let's get out of here.
-        m_callbackMap.clear();
-        m_resultMap.clear();
-        m_blockEvent.Set();
-        success = false;
-      }
-      lk.Leave();
-      g_windowManager.ProcessRenderLoop();
-    }
     lk.Enter();
-  }
+    std::pair<int, IJobCallback*> p;
+    BOOST_FOREACH(p, m_callbackMap)
+      CJobManager::GetInstance().CancelJob(p.first);
 
-  if (busy && busy->IsActive())
-    busy->Close();
+    // Let's get out of here.
+    m_callbackMap.clear();
+    m_resultMap.clear();
+    m_blockEvent.Set();
+    success = false;
+  }
 
   return success;
 }
@@ -75,7 +50,6 @@ void CPlexBusyIndicator::OnJobComplete(unsigned int jobID, bool success, CJob* j
   if (m_callbackMap.find(jobID) != m_callbackMap.end())
   {
     IJobCallback* cb = m_callbackMap[jobID];
-    lk.Leave();
     if (cb)
       cb->OnJobComplete(jobID, success, job);
 
@@ -88,7 +62,6 @@ void CPlexBusyIndicator::OnJobComplete(unsigned int jobID, bool success, CJob* j
       }
     }
 
-    lk.Enter();
     m_callbackMap.erase(jobID);
     m_resultMap.erase(jobID);
 

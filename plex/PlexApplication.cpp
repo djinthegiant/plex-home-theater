@@ -107,6 +107,12 @@ void PlexApplication::preShutdown()
   serverManager->Stop();
   dataLoader->Stop();
   timelineManager->Stop();
+
+  CGUIDialogBusy* dialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+  if (dialog)
+  {
+    dialog->OnBack(0);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

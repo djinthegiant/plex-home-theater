@@ -371,22 +371,11 @@ void CGUIPlexMediaWindow::OnFilterButton(int filterButtonId)
       m_waitingForFilter = currentFilter->getFilterKey();
 
       m_sectionFilter->loadFilterValues(currentFilter);
-      CGUIDialogBusy *busy = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-      if (busy)
+      if (!CGUIDialogBusy::WaitOnEvent(m_filterValuesEvent))
       {
-        busy->Show();
-        while(!m_filterValuesEvent.WaitMSec(10))
-        {
-          g_windowManager.ProcessRenderLoop(false);
-          if (busy->IsCanceled())
-          {
-            CSingleLock lk(m_filterValuesSection);
-            m_filterValuesEvent.Set();
-            m_waitingForFilter.clear();
-            break;
-          }
-        }
-        busy->Close();
+        CSingleLock lk(m_filterValuesSection);
+        m_filterValuesEvent.Set();
+        m_waitingForFilter.clear();
       }
 
       CGUIDialogFilterSort* dialog = (CGUIDialogFilterSort*)g_windowManager.GetWindow(WINDOW_DIALOG_FILTER_SORT);
