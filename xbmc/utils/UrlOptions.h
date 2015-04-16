@@ -24,10 +24,44 @@
 
 #include "utils/Variant.h"
 
+/* PLEX */
+#ifndef TARGET_WINDOWS
+#include "config.h"
+#if defined(HAVE_STRINGS_H) && !defined(TARGET_WINDOWS)
+#include <strings.h>
+#endif
+#endif /* TARGET_WINDOWS */
+
+struct PlexUrlComp : std::binary_function<std::string, std::string, bool>
+{
+  bool operator() (const std::string& a, const std::string& b) const
+  {
+    if(a.find("X-Plex") != std::string::npos &&
+       b.find("X-Plex") == std::string::npos)
+      return false;
+
+    else if(b.find("X-Plex") != std::string::npos &&
+            a.find("X-Plex") == std::string::npos)
+      return true;
+    
+#ifndef TARGET_WINDOWS
+    return ::strcasecmp(a.c_str(), b.c_str()) < 0 ? 1 : 0;
+#else
+    return _stricmp(a.c_str(), b.c_str()) < 0 ? 1 : 0;
+#endif
+  }
+};
+
+/* END PLEX */
+
 class CUrlOptions
 {
 public:
+#ifndef __PLEX__
   typedef std::map<std::string, CVariant> UrlOptions;
+#else
+  typedef std::map<std::string, CVariant, PlexUrlComp> UrlOptions;
+#endif
 
   CUrlOptions();
   CUrlOptions(const std::string &options, const char *strLead = "");
