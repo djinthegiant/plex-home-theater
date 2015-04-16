@@ -541,8 +541,8 @@ void CGUIPlexDefaultActionHandler::PlayAll(CFileItemListPtr container, bool shuf
   }
 
   CPlexServerPtr server;
-  if (container->HasProperty("plexServer"))
-    server = g_plexApplication.serverManager->FindByUUID(container->GetProperty("plexServer").asString());
+  if (container->HasProperty("plexserver"))
+    server = g_plexApplication.serverManager->FindByUUID(container->GetProperty("plexserver").asString());
 
   std::string fromHereKey;
   if (fromHere)

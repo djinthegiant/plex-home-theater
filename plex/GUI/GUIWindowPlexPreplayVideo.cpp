@@ -159,7 +159,7 @@ bool CGUIWindowPlexPreplayVideo::OnAction(const CAction &action)
     CFileItemPtr extraItem = getSelectedExtraItem();
     if (extraItem)
     {
-      g_application.PlayFile(*extraItem, extraItem->GetProperty("extratype").asInteger() == 1);
+      g_application.PlayFile(*extraItem, extraItem->GetProperty("extraType").asInteger() == 1);
       return true;
     }
   }
