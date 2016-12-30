@@ -37,7 +37,7 @@ configure_file(${CORE_SOURCE_DIR}/tools/Linux/kodi-standalone.sh.in
 
 # Configure cmake files
 configure_file(${PROJECT_SOURCE_DIR}/KodiConfig.cmake.in
-               ${CORE_BUILD_DIR}/scripts/${APP_NAME}Config.cmake @ONLY)
+               ${CORE_BUILD_DIR}/scripts/KodiConfig.cmake @ONLY)
 
 # Configure xsession entry
 configure_file(${CORE_SOURCE_DIR}/tools/Linux/kodi-xsession.desktop.in
@@ -161,7 +161,7 @@ install(FILES ${CORE_SOURCE_DIR}/xbmc/addons/kodi-addon-dev-kit/include/kodi/kod
         COMPONENT kodi-addon-dev)
 
 # Install kodi-addon-dev add-on bindings
-install(FILES ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/scripts/${APP_NAME}Config.cmake
+install(FILES ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/scripts/KodiConfig.cmake
               ${CORE_SOURCE_DIR}/project/cmake/scripts/common/AddonHelpers.cmake
               ${CORE_SOURCE_DIR}/project/cmake/scripts/common/AddOptions.cmake
               ${CORE_SOURCE_DIR}/project/cmake/scripts/common/ArchSetup.cmake
