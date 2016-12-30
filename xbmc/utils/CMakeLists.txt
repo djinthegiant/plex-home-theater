@@ -172,10 +172,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 endif()
 
 if(NOT CORE_SYSTEM_NAME STREQUAL windows)
-  list(APPEND SOURCES CryptThreading.cpp
-                      GLUtils.cpp)
-  list(APPEND HEADERS CryptThreading.h
-                      GLUtils.h)
+  list(APPEND SOURCES GLUtils.cpp)
+  list(APPEND HEADERS GLUtils.h)
 endif()
 
 if(CORE_SYSTEM_NAME STREQUAL android OR AML_FOUND)
