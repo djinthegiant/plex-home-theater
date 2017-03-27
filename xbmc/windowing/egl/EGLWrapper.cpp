@@ -37,6 +37,9 @@
 #if defined(TARGET_LINUX) && defined(HAS_LIBAMCODEC)
 #include "EGLNativeTypeAmlogic.h"
 #endif
+#if defined(HAS_RKMPP)
+  #include "EGLNativeTypeRockchip.h"
+#endif
 #include "EGLWrapper.h"
 
 #define CheckError() m_result = eglGetError(); if(m_result != EGL_SUCCESS) CLog::Log(LOGERROR, "EGL error in %s: %x",__FUNCTION__, m_result);
@@ -101,6 +104,8 @@ bool CEGLWrapper::Initialize(const std::string &implementation)
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeIMX>(implementation))
 #elif defined(TARGET_LINUX) && defined(HAS_LIBAMCODEC)
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlogic>(implementation))
+#elif defined(HAS_RKMPP)
+      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRockchip>(implementation))
 #endif
       )
   {
