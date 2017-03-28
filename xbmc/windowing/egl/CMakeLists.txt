@@ -1,5 +1,5 @@
 if (NOT GBM_FOUND)
-  if(OPENGLES_FOUND OR AML_FOUND OR IMX_FOUND OR MMAL_FOUND)
+  if(OPENGLES_FOUND OR AML_FOUND OR IMX_FOUND OR MMAL_FOUND OR RK_FOUND)
     set(SOURCES EGLWrapper.cpp)
 
     set(HEADERS EGLNativeType.h
@@ -35,6 +35,11 @@ endif()
 if(IMX_FOUND)
   list(APPEND SOURCES EGLNativeTypeIMX.cpp)
   list(APPEND HEADERS EGLNativeTypeIMX.h)
+endif()
+
+if(RK_FOUND)
+  list(APPEND SOURCES EGLNativeTypeRockchip.cpp)
+  list(APPEND HEADERS EGLNativeTypeRockchip.h)
 endif()
 
 if(SOURCES)
