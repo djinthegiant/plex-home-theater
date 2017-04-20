@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@
 #include "guilib/gui3d.h"
 #include "utils/log.h"
 #include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 
 #include "GBMUtils.h"
 
@@ -42,6 +44,7 @@ static struct gbm_bo *m_bo = nullptr;
 static struct gbm_bo *m_next_bo = nullptr;
 
 static drmModeResPtr m_drm_resources = nullptr;
+static drmModePlaneResPtr m_drm_plane_resources = nullptr;
 static drmModeConnectorPtr m_drm_connector = nullptr;
 static drmModeEncoderPtr m_drm_encoder = nullptr;
 static drmModeCrtcPtr m_orig_crtc = nullptr;
@@ -174,7 +177,7 @@ drm_fb * CGBMUtils::DrmFbGetFromBo(struct gbm_bo *bo)
   auto ret = drmModeAddFB(m_drm->fd,
                           width,
                           height,
-                          24,
+                          32,
                           32,
                           stride,
                           handle,
@@ -273,10 +276,71 @@ void CGBMUtils::FlipPage()
   WaitingForFlip();
 }
 
+void CGBMUtils::SetVideoPlane(uint32_t width, uint32_t height, av_drmprime* drmprime)
+{
+  uint32_t gem_handle;
+  int ret;
+  uint32_t pitches[4] = { 0, 0, 0, 0 };
+  uint32_t offsets[4] = { 0, 0, 0, 0 };
+  uint32_t handles[4] = { 0, 0, 0, 0 };
+  uint32_t fb_id = 0;
+
+  ret = drmPrimeFDToHandle(m_drm->fd, drmprime->fd, &gem_handle);
+  if (ret < 0) {
+    CLog::Log(LOGERROR, "CGBMUtils::%s - failed to retrieve the Prime Handle", __FUNCTION__);
+    return;
+  }
+
+  handles[0] = gem_handle;
+  pitches[0] = drmprime->strides[0];
+  offsets[0] = drmprime->offsets[0];
+
+  handles[1] = gem_handle;
+  pitches[1] = drmprime->strides[1];
+  offsets[1] = drmprime->offsets[1];
+
+  if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+    CLog::Log(LOGDEBUG, "CGBMUtils::%s - set video plane width:%u height:%u hor_stride:%u ver_stride:%u hdisplay:%d vdisplay:%d", __FUNCTION__, width, height, drmprime->strides[0], drmprime->offsets[1] / drmprime->strides[1], m_drm->mode->hdisplay, m_drm->mode->vdisplay);
+
+  ret = drmModeAddFB2(m_drm->fd, width, height, drmprime->format, handles, pitches, offsets, &fb_id, 0);
+  if (ret < 0) {
+    CLog::Log(LOGERROR, "CGBMUtils::%s - failed add drm layer %d", __FUNCTION__, fb_id);
+    return;
+  }
+
+  int32_t crtc_x = 0;
+  int32_t crtc_y = 0;
+  uint32_t crtc_w = m_drm->mode->hdisplay;
+  uint32_t crtc_h = m_drm->mode->vdisplay;
+  uint32_t src_x = 0;
+  uint32_t src_y = 0;
+  uint32_t src_w = width << 16;
+  uint32_t src_h = height << 16;
+
+  ret = drmModeSetPlane(m_drm->fd, m_drm->video_plane_id, m_drm->crtc_id, fb_id, 0,
+                        crtc_x, crtc_y, crtc_w, crtc_h,
+                        src_x, src_y, src_w, src_h);
+  if (ret < 0) {
+    CLog::Log(LOGERROR, "CGBMUtils::%s - failed to set the plane %d (buffer %d)", __FUNCTION__, m_drm->video_plane_id, fb_id);
+    return;
+  }
+
+  if (m_drm->video_fb_id)
+    drmModeRmFB(m_drm->fd, m_drm->video_fb_id);
+
+  m_drm->video_fb_id = fb_id;
+}
+
 bool CGBMUtils::GetResources()
 {
   m_drm_resources = drmModeGetResources(m_drm->fd);
   if(!m_drm_resources)
+  {
+    return false;
+  }
+
+  m_drm_plane_resources = drmModeGetPlaneResources(m_drm->fd);
+  if (!m_drm_plane_resources)
   {
     return false;
   }
@@ -411,6 +475,18 @@ drm * CGBMUtils::InitDrm()
     }
   }
 
+  m_drm->video_plane_id = 0;
+  for (uint32_t i = 0; i < m_drm_plane_resources->count_planes; i++)
+  {
+    drmModePlane *plane = drmModeGetPlane(m_drm->fd, m_drm_plane_resources->planes[i]);
+    if (!plane)
+      continue;
+    if (!m_drm->video_plane_id && plane->possible_crtcs & (1 << m_drm->crtc_index))
+      m_drm->video_plane_id = plane->plane_id;
+    drmModeFreePlane(plane);
+  }
+
+  drmModeFreePlaneResources(m_drm_plane_resources);
   drmModeFreeResources(m_drm_resources);
 
   drmSetMaster(m_drm->fd);
@@ -485,6 +561,11 @@ void CGBMUtils::DestroyDrm()
     drmModeFreeConnector(m_drm_connector);
   }
 
+  if (m_drm_plane_resources)
+  {
+     drmModeFreePlaneResources(m_drm_plane_resources);
+  }
+
   if(m_drm_resources)
   {
     drmModeFreeResources(m_drm_resources);
@@ -496,6 +577,7 @@ void CGBMUtils::DestroyDrm()
   m_drm_encoder = nullptr;
   m_drm_connector = nullptr;
   m_drm_resources = nullptr;
+  m_drm_plane_resources = nullptr;
 
   m_drm->connector = nullptr;
   m_drm->connector_id = 0;
@@ -503,6 +585,8 @@ void CGBMUtils::DestroyDrm()
   m_drm->crtc_id = 0;
   m_drm->crtc_index = 0;
   m_drm->fd = 0;
+  m_drm->video_plane_id = 0;
+  m_drm->video_fb_id = 0;
   m_drm->gbm = nullptr;
   m_drm->mode = nullptr;
 

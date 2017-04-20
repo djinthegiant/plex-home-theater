@@ -55,6 +55,9 @@
 #if defined(HAS_LIBAMCODEC)
 #include "HwDecRender/RendererAML.h"
 #endif
+#if defined(HAS_RKMPP)
+#include "HwDecRender/RendererRKMPP.h"
+#endif
 #if defined(HAVE_LIBOPENMAX)
 #include "HwDecRender/RendererOpenMax.h"
 #endif
@@ -111,6 +114,7 @@ static std::string GetRenderFormatName(ERenderFormat format)
     case RENDER_FMT_IMXMAP:    return "IMXMAP";
     case RENDER_FMT_MMAL:      return "MMAL";
     case RENDER_FMT_AML:       return "AMLCODEC";
+    case RENDER_FMT_RKMPP:     return "RKMPP";
     case RENDER_FMT_NONE:      return "NONE";
   }
   return "UNKNOWN";
@@ -580,6 +584,12 @@ void CRenderManager::CreateRenderer()
     {
 #if defined(HAS_LIBAMCODEC)
       m_pRenderer = new CRendererAML;
+#endif
+    }
+    else if (m_format == RENDER_FMT_RKMPP)
+    {
+#if defined(HAS_RKMPP)
+      m_pRenderer = new CRendererRKMPP;
 #endif
     }
     else if (m_format != RENDER_FMT_NONE)
@@ -1146,6 +1156,7 @@ int CRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   || pic.format == RENDER_FMT_MEDIACODEC
   || pic.format == RENDER_FMT_MEDIACODECSURFACE
   || pic.format == RENDER_FMT_AML
+  || pic.format == RENDER_FMT_RKMPP
   || pic.format == RENDER_FMT_IMXMAP
   || pic.format == RENDER_FMT_MMAL
   || m_pRenderer->IsPictureHW(pic))

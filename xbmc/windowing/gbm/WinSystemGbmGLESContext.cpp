@@ -19,6 +19,8 @@
  */
 
 #include "WinSystemGbmGLESContext.h"
+#include "linux/XTimeUtils.h"
+#include "settings/AdvancedSettings.h"
 #include "utils/log.h"
 
 bool CWinSystemGbmGLESContext::InitWindowSystem()
@@ -90,13 +92,23 @@ bool CWinSystemGbmGLESContext::SetFullScreen(bool fullScreen, RESOLUTION_INFO& r
   return true;
 }
 
-void CWinSystemGbmGLESContext::PresentRenderImpl(bool rendered)
+void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
 {
-  if (rendered)
+  if (!m_bRenderCreated)
+    return;
+
+  if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+    CLog::Log(LOGDEBUG, "CWinSystemGbmGLESContext::%s - present render %p rendered:%d videoLayer:%d", __FUNCTION__, this, rendered, videoLayer);
+
+  if (rendered || videoLayer)
   {
     m_pGLContext.SwapBuffers();
     CGBMUtils::FlipPage();
   }
+
+  // if video is rendered to a separate layer, we should not block this thread
+  if (!rendered && !videoLayer)
+    Sleep(40);
 }
 
 EGLDisplay CWinSystemGbmGLESContext::GetEGLDisplay() const
@@ -117,4 +129,12 @@ EGLContext CWinSystemGbmGLESContext::GetEGLContext() const
 EGLConfig  CWinSystemGbmGLESContext::GetEGLConfig() const
 {
   return m_pGLContext.m_eglConfig;
+}
+
+void CWinSystemGbmGLESContext::SetVideoPlane(uint32_t width, uint32_t height, av_drmprime* drmprime) const
+{
+  if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+    CLog::Log(LOGDEBUG, "CWinSystemGbmGLESContext::%s - set video plane %p width:%u height:%u drmprime:%p", __FUNCTION__, this, width, height, drmprime);
+
+  CGBMUtils::SetVideoPlane(width, height, drmprime);
 }

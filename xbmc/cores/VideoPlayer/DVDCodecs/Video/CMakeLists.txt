@@ -58,6 +58,11 @@ if(IMX_FOUND)
   list(APPEND HEADERS DVDVideoCodecIMX.h)
 endif()
 
+if(RK_FOUND)
+  list(APPEND SOURCES RKMPP.cpp)
+  list(APPEND HEADERS RKMPP.h)
+endif()
+
 if(CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND SOURCES DVDVideoCodecAndroidMediaCodec.cpp)
   list(APPEND HEADERS DVDVideoCodecAndroidMediaCodec.h)
