@@ -21,7 +21,6 @@
 #pragma once
 
 #include "EGL/egl.h"
-#include "gbm.h"
 
 class CGLContextEGL
 {
@@ -29,15 +28,17 @@ public:
   CGLContextEGL();
   virtual ~CGLContextEGL();
 
-  bool CreateDisplay(gbm_device* connection,
+  bool CreateDisplay(EGLDisplay display,
                      EGLint renderable_type,
                      EGLint rendering_api);
 
-  bool CreateSurface(gbm_surface* surface);
+  bool CreateSurface(EGLNativeWindowType surface);
   bool CreateContext();
   bool BindContext();
+  bool SurfaceAttrib();
   void Destroy();
   void Detach();
+  bool SetVSync(bool enable);
   void SwapBuffers();
 
   EGLDisplay m_eglDisplay;

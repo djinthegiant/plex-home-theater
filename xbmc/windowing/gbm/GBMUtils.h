@@ -52,8 +52,6 @@ struct drm
 {
   int fd;
 
-  struct gbm *gbm;
-
   struct crtc *crtc;
   struct connector *connector;
   int crtc_index;
@@ -72,7 +70,9 @@ struct drm_fb
 class CGBMUtils
 {
 public:
-  static drm * InitDrm();
+  static gbm * GetGbm();
+  static drm * GetDrm();
+  static bool InitDrm();
   static bool InitGbm(RESOLUTION_INFO res);
   static void DestroyGbm();
   static bool SetVideoMode(RESOLUTION_INFO res);

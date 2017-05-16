@@ -27,18 +27,34 @@
 #include "utils/log.h"
 
 CWinSystemGbm::CWinSystemGbm() :
-  m_drm(nullptr)
+  m_gbm(nullptr),
+  m_drm(nullptr),
+  m_nativeDisplay(nullptr),
+  m_nativeWindow(nullptr)
 {
   m_eWindowSystem = WINDOW_SYSTEM_GBM;
 }
 
 bool CWinSystemGbm::InitWindowSystem()
 {
-  m_drm = CGBMUtils::InitDrm();
+  if (!CGBMUtils::InitDrm())
+  {
+    CLog::Log(LOGERROR, "CWinSystemGbm::%s - failed to initialize DRM", __FUNCTION__);
+    return false;
+  }
+
+  m_drm = CGBMUtils::GetDrm();
+  m_gbm = CGBMUtils::GetGbm();
+
+  m_nativeDisplay = m_gbm->dev;
 
   if (!m_drm)
   {
-    CLog::Log(LOGERROR, "CWinSystemGbm::%s - failed to initialize DRM", __FUNCTION__);
+    return false;
+  }
+
+  if (!m_gbm)
+  {
     return false;
   }
 
@@ -49,7 +65,9 @@ bool CWinSystemGbm::InitWindowSystem()
 bool CWinSystemGbm::DestroyWindowSystem()
 {
   CGBMUtils::DestroyDrm();
+  m_nativeDisplay = nullptr;
   m_drm = nullptr;
+  m_gbm = nullptr;
 
   CLog::Log(LOGDEBUG, "CWinSystemGbm::%s - deinitialized DRM", __FUNCTION__);
   return true;
@@ -66,6 +84,8 @@ bool CWinSystemGbm::CreateNewWindow(const std::string& name,
     return false;
   }
 
+  m_nativeWindow = m_gbm->surface;
+
   CLog::Log(LOGDEBUG, "CWinSystemGbm::%s - initialized GBM", __FUNCTION__);
   return true;
 }
@@ -73,6 +93,7 @@ bool CWinSystemGbm::CreateNewWindow(const std::string& name,
 bool CWinSystemGbm::DestroyWindow()
 {
   CGBMUtils::DestroyGbm();
+  m_nativeWindow = nullptr;
 
   CLog::Log(LOGDEBUG, "CWinSystemGbm::%s - deinitialized GBM", __FUNCTION__);
   return true;

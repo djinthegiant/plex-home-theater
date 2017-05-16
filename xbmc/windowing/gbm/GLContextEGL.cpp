@@ -20,10 +20,11 @@
 
 #include "GLContextEGL.h"
 
-#include <EGL/eglext.h>
 #include "guilib/IDirtyRegionSolver.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
+
+#include <EGL/eglext.h>
 
 CGLContextEGL::CGLContextEGL() :
   m_eglDisplay(EGL_NO_DISPLAY),
@@ -38,12 +39,18 @@ CGLContextEGL::~CGLContextEGL()
   Destroy();
 }
 
-bool CGLContextEGL::CreateDisplay(gbm_device* display,
+bool CGLContextEGL::CreateDisplay(EGLDisplay display,
                                   EGLint renderable_type,
                                   EGLint rendering_api)
 {
   EGLint neglconfigs = 0;
   int major, minor;
+
+  EGLint surface_type = EGL_WINDOW_BIT;
+  // for the non-trivial dirty region modes, we need the EGL buffer to be preserved across updates
+  if (g_advancedSettings.m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_COST_REDUCTION ||
+      g_advancedSettings.m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_UNION)
+    surface_type |= EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
 
   EGLint attribs[] =
   {
@@ -55,7 +62,7 @@ bool CGLContextEGL::CreateDisplay(gbm_device* display,
     EGL_STENCIL_SIZE,    0,
     EGL_SAMPLE_BUFFERS,  0,
     EGL_SAMPLES,         0,
-    EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+    EGL_SURFACE_TYPE,    surface_type,
     EGL_RENDERABLE_TYPE, renderable_type,
     EGL_NONE
   };
@@ -142,13 +149,32 @@ bool CGLContextEGL::BindContext()
   return true;
 }
 
-bool CGLContextEGL::CreateSurface(gbm_surface* surface)
+bool CGLContextEGL::SurfaceAttrib()
 {
-  EGLNativeWindowType egl_nwin = (EGLNativeWindowType)surface;
+  // for the non-trivial dirty region modes, we need the EGL buffer to be preserved across updates
+  if (g_advancedSettings.m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_COST_REDUCTION ||
+      g_advancedSettings.m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_UNION)
+  {
+    if ((m_eglDisplay == EGL_NO_DISPLAY) || (m_eglSurface == EGL_NO_SURFACE))
+    {
+      return false;
+    }
 
+    if (!eglSurfaceAttrib(m_eglDisplay, m_eglSurface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED))
+    {
+      CLog::Log(LOGDEBUG, "%s: Could not set EGL_SWAP_BEHAVIOR",__FUNCTION__);
+    }
+  }
+
+  return true;
+}
+
+bool CGLContextEGL::CreateSurface(EGLNativeWindowType surface)
+{
   m_eglSurface = eglCreateWindowSurface(m_eglDisplay,
                                         m_eglConfig,
-                                        egl_nwin, nullptr);
+                                        surface,
+                                        nullptr);
 
   if (m_eglSurface == EGL_NO_SURFACE)
   {
@@ -193,6 +219,16 @@ void CGLContextEGL::Detach()
     eglDestroySurface(m_eglDisplay, m_eglSurface);
     m_eglSurface = EGL_NO_SURFACE;
   }
+}
+
+bool CGLContextEGL::SetVSync(bool enable)
+{
+  if (!eglSwapInterval(m_eglDisplay, enable))
+  {
+    return false;
+  }
+
+  return true;
 }
 
 void CGLContextEGL::SwapBuffers()

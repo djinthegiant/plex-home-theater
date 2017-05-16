@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gbm.h>
+#include <EGL/egl.h>
 
 #include "threads/CriticalSection.h"
 #include "windowing/WinSystem.h"
@@ -55,5 +56,9 @@ public:
   virtual void Unregister(IDispResource *resource);
 
 protected:
+  gbm* m_gbm;
   drm* m_drm;
+
+  EGLDisplay m_nativeDisplay;
+  EGLNativeWindowType m_nativeWindow;
 };

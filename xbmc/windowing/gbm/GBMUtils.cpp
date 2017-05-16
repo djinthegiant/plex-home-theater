@@ -38,6 +38,8 @@
 static struct drm *m_drm = new drm;
 static struct drm_fb *m_drm_fb = new drm_fb;
 
+static struct gbm *m_gbm = new gbm;
+
 static struct gbm_bo *m_bo = nullptr;
 static struct gbm_bo *m_next_bo = nullptr;
 
@@ -50,49 +52,59 @@ static struct pollfd m_drm_fds;
 static drmEventContext m_drm_evctx;
 static int flip_happening = 0;
 
+drm * CGBMUtils::GetDrm()
+{
+  return m_drm;
+}
+
+gbm * CGBMUtils::GetGbm()
+{
+  return m_gbm;
+}
+
 bool CGBMUtils::InitGbm(RESOLUTION_INFO res)
 {
   GetMode(res);
 
-  m_drm->gbm->width = m_drm->mode->hdisplay;
-  m_drm->gbm->height = m_drm->mode->vdisplay;
+  m_gbm->width = m_drm->mode->hdisplay;
+  m_gbm->height = m_drm->mode->vdisplay;
 
-  m_drm->gbm->surface = gbm_surface_create(m_drm->gbm->dev,
-                                           m_drm->gbm->width,
-                                           m_drm->gbm->height,
-                                           GBM_FORMAT_ARGB8888,
-                                           GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+  m_gbm->surface = gbm_surface_create(m_gbm->dev,
+                                      m_gbm->width,
+                                      m_gbm->height,
+                                      GBM_FORMAT_ARGB8888,
+                                      GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
 
-  if(!m_drm->gbm->surface)
+  if(!m_gbm->surface)
   {
     CLog::Log(LOGERROR, "CGBMUtils::%s - failed to create surface", __FUNCTION__);
     return false;
   }
 
   CLog::Log(LOGDEBUG, "CGBMUtils::%s - created surface with size %dx%d", __FUNCTION__,
-                                                                         m_drm->gbm->width,
-                                                                         m_drm->gbm->height);
+                                                                         m_gbm->width,
+                                                                         m_gbm->height);
 
   return true;
 }
 
 void CGBMUtils::DestroyGbm()
 {
-  if(m_drm->gbm->surface)
+  if(m_gbm->surface)
   {
-    gbm_surface_destroy(m_drm->gbm->surface);
+    gbm_surface_destroy(m_gbm->surface);
   }
 
-  m_drm->gbm->surface = nullptr;
+  m_gbm->surface = nullptr;
 }
 
 bool CGBMUtils::SetVideoMode(RESOLUTION_INFO res)
 {
   GetMode(res);
 
-  gbm_surface_release_buffer(m_drm->gbm->surface, m_bo);
+  gbm_surface_release_buffer(m_gbm->surface, m_bo);
 
-  m_bo = gbm_surface_lock_front_buffer(m_drm->gbm->surface);
+  m_bo = gbm_surface_lock_front_buffer(m_gbm->surface);
   m_drm_fb = DrmFbGetFromBo(m_bo);
 
   auto ret = drmModeSetCrtc(m_drm->fd,
@@ -230,7 +242,7 @@ bool CGBMUtils::WaitingForFlip()
     }
   }
 
-  gbm_surface_release_buffer(m_drm->gbm->surface, m_bo);
+  gbm_surface_release_buffer(m_gbm->surface, m_bo);
   m_bo = m_next_bo;
 
   return false;
@@ -238,7 +250,7 @@ bool CGBMUtils::WaitingForFlip()
 
 bool CGBMUtils::QueueFlip()
 {
-  m_next_bo = gbm_surface_lock_front_buffer(m_drm->gbm->surface);
+  m_next_bo = gbm_surface_lock_front_buffer(m_gbm->surface);
   m_drm_fb = DrmFbGetFromBo(m_next_bo);
 
   auto ret = drmModePageFlip(m_drm->fd,
@@ -265,7 +277,7 @@ void CGBMUtils::FlipPage()
 
   flip_happening = QueueFlip();
 
-  if(g_Windowing.NoOfBuffers() >= 3 && gbm_surface_has_free_buffers(m_drm->gbm->surface))
+  if(g_Windowing.NoOfBuffers() >= 3 && gbm_surface_has_free_buffers(m_gbm->surface))
   {
     return;
   }
@@ -367,7 +379,7 @@ bool CGBMUtils::GetPreferredMode()
   return true;
 }
 
-drm * CGBMUtils::InitDrm()
+bool CGBMUtils::InitDrm()
 {
   const char *device = "/dev/dri/card0";
 
@@ -375,22 +387,22 @@ drm * CGBMUtils::InitDrm()
 
   if(m_drm->fd < 0)
   {
-    return nullptr;
+    return false;
   }
 
   if(!GetResources())
   {
-    return nullptr;
+    return false;
   }
 
   if(!GetConnector())
   {
-    return nullptr;
+    return false;
   }
 
   if(!GetEncoder())
   {
-    return nullptr;
+    return false;
   }
   else
   {
@@ -399,7 +411,7 @@ drm * CGBMUtils::InitDrm()
 
   if(!GetPreferredMode())
   {
-    return nullptr;
+    return false;
   }
 
   for(auto i = 0; i < m_drm_resources->count_crtcs; i++)
@@ -415,9 +427,8 @@ drm * CGBMUtils::InitDrm()
 
   drmSetMaster(m_drm->fd);
 
-  m_drm->gbm = new gbm;
-  m_drm->gbm->dev = gbm_create_device(m_drm->fd);
-  m_drm->gbm->surface = nullptr;
+  m_gbm->dev = gbm_create_device(m_drm->fd);
+  m_gbm->surface = nullptr;
 
   m_drm_fds.fd = m_drm->fd;
   m_drm_fds.events = POLLIN;
@@ -428,7 +439,7 @@ drm * CGBMUtils::InitDrm()
   m_drm->connector_id = m_drm_connector->connector_id;
   m_orig_crtc = drmModeGetCrtc(m_drm->fd, m_drm->crtc_id);
 
-  return m_drm;
+  return true;
 }
 
 bool CGBMUtils::RestoreOriginalMode()
@@ -465,14 +476,14 @@ void CGBMUtils::DestroyDrm()
 {
   RestoreOriginalMode();
 
-  if(m_drm->gbm->surface)
+  if(m_gbm->surface)
   {
-    gbm_surface_destroy(m_drm->gbm->surface);
+    gbm_surface_destroy(m_gbm->surface);
   }
 
-  if(m_drm->gbm->dev)
+  if(m_gbm->dev)
   {
-    gbm_device_destroy(m_drm->gbm->dev);
+    gbm_device_destroy(m_gbm->dev);
   }
 
   if(m_drm_encoder)
@@ -503,8 +514,9 @@ void CGBMUtils::DestroyDrm()
   m_drm->crtc_id = 0;
   m_drm->crtc_index = 0;
   m_drm->fd = -1;
-  m_drm->gbm = nullptr;
   m_drm->mode = nullptr;
+
+  m_gbm = nullptr;
 
   m_bo = nullptr;
   m_next_bo = nullptr;
