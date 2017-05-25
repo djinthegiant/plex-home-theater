@@ -25,6 +25,7 @@
 #include "utils/log.h"
 
 #include <EGL/eglext.h>
+#include <string.h>
 
 CGLContextEGL::CGLContextEGL() :
   m_eglDisplay(EGL_NO_DISPLAY),
@@ -67,8 +68,14 @@ bool CGLContextEGL::CreateDisplay(EGLDisplay display,
     EGL_NONE
   };
 
-#ifdef EGL_EXT_platform_base
-  if (m_eglDisplay == EGL_NO_DISPLAY)
+  const char *client_extensions = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+  CLog::Log(LOGNOTICE, "EGL_EXTENSIONS = %s", client_extensions);
+
+#if defined(EGL_EXT_platform_base) && defined(EGL_KHR_platform_gbm)
+  if (m_eglDisplay == EGL_NO_DISPLAY &&
+      client_extensions != NULL &&
+      strstr(client_extensions, "EGL_EXT_platform_base") &&
+      strstr(client_extensions, "EGL_KHR_platform_gbm"))
   {
     PFNEGLGETPLATFORMDISPLAYEXTPROC getPlatformDisplayEXT = (PFNEGLGETPLATFORMDISPLAYEXTPROC)eglGetProcAddress("eglGetPlatformDisplayEXT");
     if (getPlatformDisplayEXT)
@@ -109,6 +116,9 @@ bool CGLContextEGL::CreateDisplay(EGLDisplay display,
     CLog::Log(LOGERROR, "No suitable EGL configs found");
     return false;
   }
+
+  const char *display_extensions = eglQueryString(m_eglDisplay, EGL_EXTENSIONS);
+  CLog::Log(LOGNOTICE, "EGL_EXTENSIONS = %s", display_extensions);
 
   return true;
 }
