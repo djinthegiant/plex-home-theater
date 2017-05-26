@@ -45,6 +45,11 @@ CRendererRKMPP::~CRendererRKMPP()
   if (g_advancedSettings.CanLogComponent(LOGVIDEO))
     CLog::Log(LOGDEBUG, "%s::%s - destroy %p", CLASSNAME, __FUNCTION__, this);
 
+#ifdef HAVE_GBM
+  // inject empty video frame into gbm windowing system
+  g_Windowing.SetVideoPlane(0, 0, nullptr, m_destRect);
+#endif
+
   for (int i = 0; i < m_numRenderBuffers; ++i)
     ReleaseBuffer(i);
 }
@@ -156,6 +161,11 @@ void CRendererRKMPP::RenderUpdate(bool clear, unsigned int flags, unsigned int a
   {
     if (g_advancedSettings.CanLogComponent(LOGVIDEO))
       CLog::Log(LOGDEBUG, "%s::%s - drmprime:%p pts:%" PRId64, CLASSNAME, __FUNCTION__, info, info->GetPTS());
+
+#ifdef HAVE_GBM
+    // inject video frame into gbm windowing system
+    g_Windowing.SetVideoPlane(info->GetWidth(), info->GetHeight(), info->GetDrmPrime(), m_destRect);
+#endif
   }
 
   m_iLastRenderBuffer = m_iRenderBuffer;

@@ -25,7 +25,12 @@
 #include <gbm.h>
 #include <vector>
 
+#include "guilib/Geometry.h"
 #include "guilib/Resolution.h"
+
+extern "C" {
+#include "libavcodec/drmprime.h"
+}
 
 struct gbm
 {
@@ -59,6 +64,10 @@ struct drm
   drmModeModeInfo *mode;
   uint32_t crtc_id;
   uint32_t connector_id;
+
+  uint32_t video_plane_id;
+  uint32_t video_fb_id;
+  uint32_t video_gem_handle;
 };
 
 struct drm_fb
@@ -76,6 +85,7 @@ public:
   static bool InitGbm(RESOLUTION_INFO res);
   static void DestroyGbm();
   static bool SetVideoMode(RESOLUTION_INFO res);
+  static void SetVideoPlane(uint32_t width, uint32_t height, av_drmprime* drmprime, const CRect& dest);
   static void FlipPage();
   static void DestroyDrm();
   static bool GetModes(std::vector<RESOLUTION_INFO> &resolutions);

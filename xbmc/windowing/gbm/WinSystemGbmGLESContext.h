@@ -25,6 +25,10 @@
 #include "utils/GlobalsHandling.h"
 #include "WinSystemGbm.h"
 
+extern "C" {
+#include "libavcodec/drmprime.h"
+}
+
 class CWinSystemGbmGLESContext : public CWinSystemGbm, public CRenderSystemGLES
 {
 public:
@@ -38,13 +42,16 @@ public:
                        PHANDLE_EVENT_FUNC userFunction) override;
 
   bool SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays) override;
+  void PresentRender(bool rendered, bool videoLayer) override;
   EGLDisplay GetEGLDisplay() const;
   EGLSurface GetEGLSurface() const;
   EGLContext GetEGLContext() const;
   EGLConfig  GetEGLConfig() const;
+
+  void SetVideoPlane(uint32_t width, uint32_t height, av_drmprime* drmprime, const CRect& dest) const;
 protected:
   void SetVSyncImpl(bool enable) override { return; };
-  void PresentRenderImpl(bool rendered) override;
+  void PresentRenderImpl(bool rendered) override {};
 
 private:
   CGLContextEGL m_pGLContext;
