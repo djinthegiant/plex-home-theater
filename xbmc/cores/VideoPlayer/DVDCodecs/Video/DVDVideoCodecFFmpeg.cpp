@@ -61,6 +61,9 @@
 #ifdef HAS_MMAL
 #include "MMALFFmpeg.h"
 #endif
+#ifdef HAS_RKMPP
+#include "RKMPP.h"
+#endif
 #include "utils/StringUtils.h"
 
 extern "C" {
@@ -254,6 +257,21 @@ enum AVPixelFormat CDVDVideoCodecFFmpeg::GetFormat(struct AVCodecContext * avctx
         dec->Release();
     }
 #endif
+
+#ifdef HAS_RKMPP
+    if (*cur == AV_PIX_FMT_RKMPP)
+    {
+      RKMPP::CDecoder* dec = new RKMPP::CDecoder(ctx->m_processInfo);
+      if (dec->Open(avctx, ctx->m_pCodecContext, *cur, ctx->m_uSurfacesCount))
+      {
+        ctx->m_processInfo.SetVideoPixelFormat(pixFmtName ? pixFmtName : "");
+        ctx->SetHardware(dec);
+        return *cur;
+      }
+      else
+        dec->Release();
+    }
+#endif
     cur++;
   }
 
@@ -305,7 +323,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   m_hints = hints;
   m_options = options;
 
-  AVCodec* pCodec;
+  AVCodec* pCodec = NULL;
 
   m_iOrientation = hints.orientation;
 
@@ -321,7 +339,20 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   }
   m_formats.push_back(AV_PIX_FMT_NONE); /* always add none to get a terminated list in ffmpeg world */
 
-  pCodec = avcodec_find_decoder(hints.codec);
+#ifdef HAS_RKMPP
+  if (!hints.software)
+  {
+    if (hints.codec == AV_CODEC_ID_H264)
+      pCodec = avcodec_find_decoder_by_name("h264_rkmpp");
+    else if (hints.codec == AV_CODEC_ID_HEVC)
+      pCodec = avcodec_find_decoder_by_name("hevc_rkmpp");
+    else if (hints.codec == AV_CODEC_ID_VP8)
+      pCodec = avcodec_find_decoder_by_name("vp8_rkmpp");
+  }
+#endif
+
+  if (pCodec == NULL)
+    pCodec = avcodec_find_decoder(hints.codec);
 
   if(pCodec == NULL)
   {
@@ -363,6 +394,9 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
       tryhw = true;
 #endif
 #ifdef HAS_MMAL
+    tryhw = true;
+#endif
+#ifdef HAS_RKMPP
     tryhw = true;
 #endif
     if (tryhw && m_decoderState == STATE_NONE)
