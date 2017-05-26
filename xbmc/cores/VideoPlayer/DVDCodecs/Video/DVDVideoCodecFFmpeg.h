@@ -50,6 +50,7 @@ public:
     virtual bool Open(AVCodecContext* avctx, AVCodecContext* mainctx, const enum AVPixelFormat, unsigned int surfaces) = 0;
     virtual int  Decode(AVCodecContext* avctx, AVFrame* frame) = 0;
     virtual bool GetPicture(AVCodecContext* avctx, AVFrame* frame, DVDVideoPicture* picture) = 0;
+    virtual void ClearPicture(DVDVideoPicture* picture) {};
     virtual int  Check(AVCodecContext* avctx) = 0;
     virtual void Reset() {}
     virtual unsigned GetAllowedReferences() { return 0; }
@@ -66,6 +67,7 @@ public:
   virtual void Reopen() override;
   bool GetPictureCommon(DVDVideoPicture* pDvdVideoPicture);
   virtual bool GetPicture(DVDVideoPicture* pDvdVideoPicture) override;
+  virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture) override;
   virtual void SetDropState(bool bDrop) override;
   virtual const char* GetName() override { return m_name.c_str(); }; // m_name is never changed after open
   virtual unsigned GetConvergeCount() override;

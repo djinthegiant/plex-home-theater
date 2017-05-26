@@ -967,6 +967,14 @@ bool CDVDVideoCodecFFmpeg::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   return true;
 }
 
+bool CDVDVideoCodecFFmpeg::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
+{
+  if (m_pHardware)
+    m_pHardware->ClearPicture(pDvdVideoPicture);
+
+  return CDVDVideoCodec::ClearPicture(pDvdVideoPicture);
+}
+
 int CDVDVideoCodecFFmpeg::FilterOpen(const std::string& filters, bool scale)
 {
   int result;
