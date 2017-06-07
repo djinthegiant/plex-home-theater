@@ -353,7 +353,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   m_hints = hints;
   m_options = options;
 
-  AVCodec* pCodec;
+  AVCodec* pCodec = nullptr;
 
   m_iOrientation = hints.orientation;
 
@@ -361,9 +361,18 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   m_formats = m_processInfo.GetRenderFormats();
   m_formats.push_back(AV_PIX_FMT_NONE); /* always add none to get a terminated list in ffmpeg world */
 
-  pCodec = avcodec_find_decoder(hints.codec);
+  if (!(hints.codecOptions & CODEC_FORCE_SOFTWARE))
+  {
+#ifdef HAS_RKMPP
+    std::string codec = StringUtils::Format("%s_rkmpp", avcodec_get_name(hints.codec));
+    pCodec = avcodec_find_decoder_by_name(codec.c_str());
+#endif
+  }
 
-  if(pCodec == NULL)
+  if (pCodec == nullptr)
+    pCodec = avcodec_find_decoder(hints.codec);
+
+  if (pCodec == nullptr)
   {
     CLog::Log(LOGDEBUG,"CDVDVideoCodecFFmpeg::Open() Unable to find codec %d", hints.codec);
     return false;
@@ -1329,6 +1338,17 @@ IHardwareDecoder* CDVDVideoCodecFFmpeg::CreateVideoDecoderHW(AVPixelFormat pixfm
 {
   if (pixfmt == AV_PIX_FMT_YUV420P)
     return new MMAL::CDecoder(m_processInfo, m_hints);
+  return nullptr;
+}
+#endif
+
+#ifdef HAS_RKMPP
+#include "RKMPP.h"
+#define VP_VIDEOCODEC_HW
+IHardwareDecoder* CDVDVideoCodecFFmpeg::CreateVideoDecoderHW(AVPixelFormat pixfmt, CProcessInfo &processInfo)
+{
+  if (pixfmt == AV_PIX_FMT_RKMPP)
+    return new RKMPP::CDecoder(m_processInfo);
   return nullptr;
 }
 #endif
