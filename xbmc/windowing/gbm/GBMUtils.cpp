@@ -188,7 +188,7 @@ drm_fb * CGBMUtils::DrmFbGetFromBo(struct gbm_bo *bo)
   auto ret = drmModeAddFB(m_drm->fd,
                           width,
                           height,
-                          24,
+                          32,
                           32,
                           stride,
                           handle,
