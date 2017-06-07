@@ -63,6 +63,9 @@
 #if defined(HAVE_LIBOPENMAX)
 #include "HwDecRender/RendererOpenMax.h"
 #endif
+#if defined(HAS_RKMPP)
+#include "HwDecRender/RendererRKMPP.h"
+#endif
 #elif defined(HAS_DX)
   #include "WinRenderer.h"
 #elif defined(HAS_SDL)
@@ -560,6 +563,12 @@ void CRenderManager::CreateRenderer()
       else if (0)
       {
         m_pRenderer = new CRendererAML;
+      }
+#endif
+#if defined(HAS_RKMPP)
+      else if (CRendererRKMPP::HandlesVideoBuffer(m_pConfigPicture->videoBuffer))
+      {
+        m_pRenderer = new CRendererRKMPP;
       }
 #endif
 #if defined(HAS_GL)
