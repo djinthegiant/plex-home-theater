@@ -45,7 +45,9 @@
 #endif
 #elif HAS_GLES == 2
   #include "LinuxRendererGLES.h"
+#if defined(HAVE_LIBVA)
   #include "HwDecRender/RendererVAAPIGLES.h"
+#endif
 #if defined(HAS_MMAL)
 #include "HwDecRender/MMALRenderer.h"
 #endif
