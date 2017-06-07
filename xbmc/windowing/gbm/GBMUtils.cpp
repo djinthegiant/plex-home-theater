@@ -45,6 +45,7 @@ static struct gbm_bo *m_bo = nullptr;
 static struct gbm_bo *m_next_bo = nullptr;
 
 static drmModeResPtr m_drm_resources = nullptr;
+static drmModePlaneResPtr m_drm_plane_resources = nullptr;
 static drmModeConnectorPtr m_drm_connector = nullptr;
 static drmModeEncoderPtr m_drm_encoder = nullptr;
 static drmModeCrtcPtr m_orig_crtc = nullptr;
@@ -294,6 +295,12 @@ bool CGBMUtils::GetResources()
     return false;
   }
 
+  m_drm_plane_resources = drmModeGetPlaneResources(m_drm->fd);
+  if (!m_drm_plane_resources)
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -424,6 +431,18 @@ bool CGBMUtils::InitDrm()
     }
   }
 
+  m_drm->video_plane_id = 0;
+  for (uint32_t i = 0; i < m_drm_plane_resources->count_planes; i++)
+  {
+    drmModePlane *plane = drmModeGetPlane(m_drm->fd, m_drm_plane_resources->planes[i]);
+    if (!plane)
+      continue;
+    if (!m_drm->video_plane_id && plane->possible_crtcs & (1 << m_drm->crtc_index))
+      m_drm->video_plane_id = plane->plane_id;
+    drmModeFreePlane(plane);
+  }
+
+  drmModeFreePlaneResources(m_drm_plane_resources);
   drmModeFreeResources(m_drm_resources);
 
   drmSetMaster(m_drm->fd);
@@ -497,6 +516,11 @@ void CGBMUtils::DestroyDrm()
     drmModeFreeConnector(m_drm_connector);
   }
 
+  if (m_drm_plane_resources)
+  {
+     drmModeFreePlaneResources(m_drm_plane_resources);
+  }
+
   if(m_drm_resources)
   {
     drmModeFreeResources(m_drm_resources);
@@ -508,6 +532,7 @@ void CGBMUtils::DestroyDrm()
   m_drm_encoder = nullptr;
   m_drm_connector = nullptr;
   m_drm_resources = nullptr;
+  m_drm_plane_resources = nullptr;
 
   m_drm->connector = nullptr;
   m_drm->connector_id = 0;
@@ -515,6 +540,7 @@ void CGBMUtils::DestroyDrm()
   m_drm->crtc_id = 0;
   m_drm->crtc_index = 0;
   m_drm->fd = -1;
+  m_drm->video_plane_id = 0;
   m_drm->mode = nullptr;
 
   m_gbm = nullptr;
