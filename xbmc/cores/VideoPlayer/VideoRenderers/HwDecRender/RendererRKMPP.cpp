@@ -25,6 +25,7 @@
 #include "settings/MediaSettings.h"
 #include "utils/log.h"
 #include "windowing/WindowingFactory.h"
+#include "windowing/gbm/GBMUtils.h"
 
 #undef CLASSNAME
 #define CLASSNAME "CRendererRKMPP"
@@ -33,6 +34,8 @@ CRendererRKMPP::CRendererRKMPP()
   : m_bConfigured(false)
   , m_iRenderBuffer(0)
   , m_iLastRenderBuffer(-1)
+  , m_gem_handle(0)
+  , m_fb_id(0)
 {
   for (int i = 0; i < m_numRenderBuffers; ++i)
     m_buffers[i].videoBuffer = nullptr;
@@ -187,5 +190,76 @@ bool CRendererRKMPP::Supports(ESCALINGMETHOD method)
 
 void CRendererRKMPP::SetVideoPlane(RKMPP::CVideoBufferRKMPP* buffer)
 {
-  // TODO: implement
+  struct drm* drm = CGBMUtils::GetDrm();
+  uint32_t gem_handle = 0;
+  uint32_t fb_id = 0;
+
+  if (buffer)
+  {
+    av_drmprime* drmprime = buffer->GetDrmPrime();
+    uint32_t pitches[4] = { 0, 0, 0, 0 };
+    uint32_t offsets[4] = { 0, 0, 0, 0 };
+    uint32_t handles[4] = { 0, 0, 0, 0 };
+
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "%s::%s - buffer:%p width:%u height:%u", CLASSNAME, __FUNCTION__, buffer, buffer->GetWidth(), buffer->GetHeight());
+
+    // get GEM handle from the prime fd
+    int ret = drmPrimeFDToHandle(drm->fd, drmprime->fds[0], &gem_handle);
+    if (ret < 0)
+    {
+      CLog::Log(LOGERROR, "%s::%s - failed to retrieve the GEM handle, ret = %d", CLASSNAME, __FUNCTION__, ret);
+      return;
+    }
+
+    handles[0] = gem_handle;
+    pitches[0] = drmprime->strides[0];
+    offsets[0] = drmprime->offsets[0];
+
+    handles[1] = gem_handle;
+    pitches[1] = drmprime->strides[1];
+    offsets[1] = drmprime->offsets[1];
+
+    // add the video frame FB
+    ret = drmModeAddFB2(drm->fd, buffer->GetWidth(), buffer->GetHeight(), drmprime->format, handles, pitches, offsets, &fb_id, 0);
+    if (ret < 0)
+    {
+      CLog::Log(LOGERROR, "%s::%s - failed add drm layer %d", CLASSNAME, __FUNCTION__, fb_id);
+      return;
+    }
+
+    int32_t crtc_x = (int32_t)m_destRect.x1;
+    int32_t crtc_y = (int32_t)m_destRect.y1;
+    uint32_t crtc_w = (uint32_t)m_destRect.Width();
+    uint32_t crtc_h = (uint32_t)m_destRect.Height();
+    uint32_t src_x = 0;
+    uint32_t src_y = 0;
+    uint32_t src_w = buffer->GetWidth() << 16;
+    uint32_t src_h = buffer->GetHeight() << 16;
+
+    // show the video frame FB on the video plane
+    ret = drmModeSetPlane(drm->fd, drm->video_plane_id, drm->crtc_id, fb_id, 0,
+                          crtc_x, crtc_y, crtc_w, crtc_h,
+                          src_x, src_y, src_w, src_h);
+    if (ret < 0)
+    {
+      CLog::Log(LOGERROR, "%s::%s - failed to set the plane %d (buffer %d)", CLASSNAME, __FUNCTION__, drm->video_plane_id, fb_id);
+      return;
+    }
+  }
+
+  // remove the previous video frame FB
+  if (m_fb_id)
+  {
+    drmModeRmFB(drm->fd, m_fb_id);
+  }
+  m_fb_id = fb_id;
+
+  // close the GEM handle for the previous video frame
+  if (m_gem_handle)
+  {
+    struct drm_gem_close gem_close = { .handle = m_gem_handle };
+    drmIoctl(drm->fd, DRM_IOCTL_GEM_CLOSE, &gem_close);
+  }
+  m_gem_handle = gem_handle;
 }

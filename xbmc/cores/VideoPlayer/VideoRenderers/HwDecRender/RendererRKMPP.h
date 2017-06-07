@@ -67,4 +67,7 @@ private:
   {
     CVideoBuffer* videoBuffer;
   } m_buffers[m_numRenderBuffers];
+
+  uint32_t m_gem_handle;
+  uint32_t m_fb_id;
 };
