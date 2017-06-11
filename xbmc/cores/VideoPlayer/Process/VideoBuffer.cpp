@@ -164,7 +164,7 @@ bool CVideoBuffer::CopyYUV422PackedPicture(YuvImage* pDst, YuvImage *pSrc)
   int h = pDst->height;
 
   // Copy YUYV
-  if ((w * 2 == pSrc->stride[0]) && ((unsigned int) pSrc->stride[0] == pDst->stride[0]))
+  if ((w * 2 == pSrc->stride[0]) && (pSrc->stride[0] == pDst->stride[0]))
   {
     memcpy(d, s, w*h*2);
   }
