@@ -168,22 +168,10 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags)
   AddPlaneProperty(req, plane_id, "CRTC_W", m_drm->mode->hdisplay);
   AddPlaneProperty(req, plane_id, "CRTC_H", m_drm->mode->vdisplay);
 
-  if (m_drm->kms_in_fence_fd != -1)
-  {
-    AddCrtcProperty(req, m_drm->crtc_id, "OUT_FENCE_PTR", (uint64_t)(unsigned long)&m_drm->kms_out_fence_fd);
-    AddPlaneProperty(req, plane_id, "IN_FENCE_FD", m_drm->kms_in_fence_fd);
-  }
-
   auto ret = drmModeAtomicCommit(m_drm->fd, req, flags, nullptr);
   if (ret)
   {
     return false;
-  }
-
-  if (m_drm->kms_in_fence_fd != -1)
-  {
-    close(m_drm->kms_in_fence_fd);
-    m_drm->kms_in_fence_fd = -1;
   }
 
   return true;
@@ -191,20 +179,13 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags)
 
 void CDRMAtomic::FlipPage(CGLContextEGL *pGLContext)
 {
-  int flags = DRM_MODE_ATOMIC_NONBLOCK;
+  int flags = 0;
 
   if(m_drm->need_modeset)
   {
     flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
     m_drm->need_modeset = false;
   }
-
-  pGLContext->CreateGPUFence();
-  m_drm->kms_in_fence_fd = pGLContext->FlushFence();
-  pGLContext->WaitSyncCPU();
-
-  gbm_surface_release_buffer(m_gbm->surface, m_bo);
-  m_bo = m_next_bo;
 
   m_next_bo = gbm_surface_lock_front_buffer(m_gbm->surface);
   if (!m_next_bo)
@@ -226,16 +207,8 @@ void CDRMAtomic::FlipPage(CGLContextEGL *pGLContext)
     return;
   }
 
-  pGLContext->CreateKMSFence(m_drm->kms_out_fence_fd);
-  pGLContext->WaitSyncGPU();
-  m_drm->kms_out_fence_fd = -1;
-
-  if(g_Windowing.NoOfBuffers() > 2 && gbm_surface_has_free_buffers(m_gbm->surface))
-  {
-    return;
-  }
-
-  gbm_surface_release_buffer(m_gbm->surface, m_bo);
+  if (m_bo != nullptr)
+    gbm_surface_release_buffer(m_gbm->surface, m_bo);
   m_bo = m_next_bo;
 }
 
@@ -300,8 +273,6 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
 
   m_drm = drm;
   m_gbm = gbm;
-
-  m_drm->kms_out_fence_fd = -1;
 
   if (!CDRMUtils::InitDrm(m_drm))
   {
