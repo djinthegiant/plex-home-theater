@@ -19,7 +19,7 @@
  */
 
 #include <errno.h>
-#include <drm/drm_mode.h>
+#include <drm_mode.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <string.h>
