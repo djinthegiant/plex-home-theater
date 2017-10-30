@@ -177,7 +177,7 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags)
   return true;
 }
 
-void CDRMAtomic::FlipPage(CGLContextEGL *pGLContext)
+void CDRMAtomic::FlipPage()
 {
   int flags = 0;
 
@@ -207,13 +207,15 @@ void CDRMAtomic::FlipPage(CGLContextEGL *pGLContext)
     return;
   }
 
-  if (m_bo != nullptr)
+  if (m_bo)
     gbm_surface_release_buffer(m_gbm->surface, m_bo);
   m_bo = m_next_bo;
 }
 
 int CDRMAtomic::GetPlaneId()
 {
+  CLog::Log(LOGNOTICE, "CDRMAtomic::%s", __FUNCTION__);
+
   drmModePlaneResPtr plane_resources;
   int ret = -EINVAL;
   int found_primary = 0;
@@ -268,6 +270,8 @@ int CDRMAtomic::GetPlaneId()
 
 bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
 {
+  CLog::Log(LOGNOTICE, "CDRMAtomic::%s", __FUNCTION__);
+
   int plane_id;
   int ret;
 
@@ -323,7 +327,7 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
   m_drm->plane->props_info = new drmModePropertyPtr;
   for (uint32_t i = 0; i < m_drm->plane->props->count_props; i++)
   {
-    m_drm->plane->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->plane->props->props[i]);             \
+    m_drm->plane->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->plane->props->props[i]);
   }
 
   // crtc
@@ -344,7 +348,7 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
   m_drm->crtc->props_info = new drmModePropertyPtr;
   for (uint32_t i = 0; i < m_drm->crtc->props->count_props; i++)
   {
-    m_drm->crtc->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->crtc->props->props[i]);             \
+    m_drm->crtc->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->crtc->props->props[i]);
   }
 
   // connector
@@ -365,7 +369,7 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
   m_drm->connector->props_info = new drmModePropertyPtr;
   for (uint32_t i = 0; i < m_drm->connector->props->count_props; i++)
   {
-    m_drm->connector->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->connector->props->props[i]);             \
+    m_drm->connector->props_info[i] = drmModeGetProperty(m_drm->fd, m_drm->connector->props->props[i]);
   }
 
   //
@@ -381,22 +385,30 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
 
 void CDRMAtomic::DestroyDrmAtomic()
 {
+  CLog::Log(LOGNOTICE, "CDRMAtomic::%s", __FUNCTION__);
+
   CDRMUtils::DestroyDrm();
 
   if(m_gbm->surface)
   {
     gbm_surface_destroy(m_gbm->surface);
+    m_gbm->surface = nullptr;
   }
 
   if(m_gbm->dev)
   {
     gbm_device_destroy(m_gbm->dev);
+    m_gbm->dev = nullptr;
   }
 }
 
 bool CDRMAtomic::SetVideoMode(RESOLUTION_INFO res)
 {
+  CLog::Log(LOGNOTICE, "CDRMAtomic::%s", __FUNCTION__);
+
   m_drm->need_modeset = true;
+
+  FlipPage();
 
   return true;
 }

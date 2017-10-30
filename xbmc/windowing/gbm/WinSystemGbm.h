@@ -26,7 +26,6 @@
 #include "threads/CriticalSection.h"
 #include "windowing/WinSystem.h"
 #include "DRM.h"
-#include "GLContextEGL.h"
 
 class IDispResource;
 
@@ -48,7 +47,7 @@ public:
   bool ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop) override;
   bool SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays) override;
 
-  void FlipPage(CGLContextEGL *m_pGLContext);
+  void FlipPage();
 
   void UpdateResolutions() override;
 

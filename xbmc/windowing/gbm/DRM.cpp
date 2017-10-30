@@ -29,20 +29,21 @@ CDRM::CDRM()
 {
 }
 
-void CDRM::FlipPage(CGLContextEGL *pGLContext)
+void CDRM::FlipPage()
 {
   if (m_atomic)
   {
-    CDRMAtomic::FlipPage(pGLContext);
+    CDRMAtomic::FlipPage();
   }
   else
   {
-    CDRMLegacy::FlipPage(pGLContext);
+    CDRMLegacy::FlipPage();
   }
 }
 
 bool CDRM::SetVideoMode(RESOLUTION_INFO res)
 {
+  CLog::Log(LOGNOTICE, "CDRM::%s", __FUNCTION__);
   if (m_atomic)
   {
     return CDRMAtomic::SetVideoMode(res);
@@ -55,6 +56,7 @@ bool CDRM::SetVideoMode(RESOLUTION_INFO res)
 
 bool CDRM::InitDrm(drm *drm, gbm *gbm)
 {
+  CLog::Log(LOGNOTICE, "CDRM::%s", __FUNCTION__);
   if (CDRMAtomic::InitDrmAtomic(drm, gbm))
   {
     m_atomic = true;
@@ -72,6 +74,7 @@ bool CDRM::InitDrm(drm *drm, gbm *gbm)
 
 void CDRM::DestroyDrm()
 {
+  CLog::Log(LOGNOTICE, "CDRM::%s", __FUNCTION__);
   if (m_atomic)
   {
     CDRMAtomic::DestroyDrmAtomic();
