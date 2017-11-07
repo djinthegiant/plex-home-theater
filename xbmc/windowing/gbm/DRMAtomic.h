@@ -25,7 +25,8 @@
 class CDRMAtomic : public CDRMUtils
 {
 public:
-  static void FlipPage();
+  static bool AddPlaneProperty(drmModeAtomicReq *req, struct plane *obj, const char *name, int value);
+  static void FlipPage(bool rendered);
   static bool SetVideoMode(RESOLUTION_INFO res);
   static bool InitDrmAtomic(drm *drm, gbm *gbm);
   static void DestroyDrmAtomic();
@@ -33,7 +34,6 @@ public:
 private:
   static bool AddConnectorProperty(drmModeAtomicReq *req, int obj_id, const char *name, int value);
   static bool AddCrtcProperty(drmModeAtomicReq *req, int obj_id, const char *name, int value);
-  static bool AddPlaneProperty(drmModeAtomicReq *req, int obj_id, const char *name, int value);
-  static bool DrmAtomicCommit(int fb_id, int flags);
-  static int GetPlaneId();
+  static bool DrmAtomicCommit(int fb_id, int flags, bool rendered);
+  static int GetPlaneId(uint32_t type);
 };
