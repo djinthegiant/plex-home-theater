@@ -116,7 +116,7 @@ bool CResolutionUtils::FindResolutionFromOverride(float fps, int width, bool is3
                       override.fpsmin, override.fpsmax, override.refreshmin, override.refreshmax);
           }
 
-          weight = RefreshWeight(info.fRefreshRate, fps);
+          weight = RefreshWeight(info.fRefreshRate, fps, width);
 
           return true; //fps and refresh match with this override, use this resolution
         }
@@ -186,7 +186,7 @@ void CResolutionUtils::FindResolutionFromFpsMatch(float fps, int width, bool is3
         }
       }
 
-      weight = RefreshWeight(curr.fRefreshRate, fps);
+      weight = RefreshWeight(curr.fRefreshRate, fps, width);
     }
   }
 }
@@ -259,8 +259,8 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
     }
     else
     {
-      int c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
-      int i_weight = MathUtils::round_int(RefreshWeight(info.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
+      int c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier, width) * 10000.0);
+      int i_weight = MathUtils::round_int(RefreshWeight(info.fRefreshRate, fRefreshRate * multiplier, width) * 10000.0);
 
       RESOLUTION current_bak = current;
       RESOLUTION_INFO curr_bak = curr;
@@ -294,13 +294,13 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
   if (is3D)
     weight = 0;
   else
-    weight = RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier);
+    weight = RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier, width);
 
   return current;
 }
 
 //distance of refresh to the closest multiple of fps (multiple is 1 or higher), as a multiplier of fps
-float CResolutionUtils::RefreshWeight(float refresh, float fps)
+float CResolutionUtils::RefreshWeight(float refresh, float fps, int width)
 {
   float div   = refresh / fps;
   int   round = MathUtils::round_int(div);
@@ -318,7 +318,7 @@ float CResolutionUtils::RefreshWeight(float refresh, float fps)
   // the content is interlaced at the start, only
   // punish when refreshrate > 60 hz to not have to switch
   // twice for 30i content
-  if (refresh > 60 && round > 1)
+  if ((refresh > 60 || width > 1920) && round > 1)
     weight += round / 10000.0;
 
   return weight;

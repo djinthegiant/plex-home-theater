@@ -105,5 +105,5 @@ protected:
   static bool FindResolutionFromOverride(float fps, int width, bool is3D, RESOLUTION &resolution, float& weight, bool fallback);
   static void FindResolutionFromFpsMatch(float fps, int width, bool is3D, RESOLUTION &resolution, float& weight);
   static RESOLUTION FindClosestResolution(float fps, int width, bool is3D, float multiplier, RESOLUTION current, float& weight);
-  static float RefreshWeight(float refresh, float fps);
+  static float RefreshWeight(float refresh, float fps, int width);
 };
