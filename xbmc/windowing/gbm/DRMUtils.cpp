@@ -32,6 +32,7 @@
 #include "WinSystemGbmGLESContext.h"
 #include "guilib/gui3d.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 #include "DRMUtils.h"
 
@@ -437,7 +438,6 @@ bool CDRMUtils::GetModes(std::vector<RESOLUTION_INFO> &resolutions)
     res.iSubtitles = static_cast<int>(0.965 * res.iHeight);
     res.fPixelRatio = 1.0f;
     res.bFullScreen = true;
-    res.strMode = m_drm_connector->modes[i].name;
     res.strId = std::to_string(i);
 
     if(m_drm_connector->modes[i].flags & DRM_MODE_FLAG_3D_MASK)
@@ -461,6 +461,8 @@ bool CDRMUtils::GetModes(std::vector<RESOLUTION_INFO> &resolutions)
       res.dwFlags = D3DPRESENTFLAG_PROGRESSIVE;
     }
 
+    res.strMode = StringUtils::Format("%dx%d%s @ %.6f Hz", res.iScreenWidth, res.iScreenHeight,
+                                      res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "", res.fRefreshRate);
     resolutions.push_back(res);
   }
 
