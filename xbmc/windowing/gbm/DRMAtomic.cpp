@@ -158,13 +158,13 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
     }
   }
 
+  if (videoLayer)
+    plane = m_drm->overlay_plane;
+  else
+    plane = m_drm->primary_plane;
+
   if (rendered)
   {
-    if (videoLayer)
-      plane = m_drm->overlay_plane;
-    else
-      plane = m_drm->primary_plane;
-
     AddPlaneProperty(m_drm->req, plane, "FB_ID", fb_id);
     AddPlaneProperty(m_drm->req, plane, "CRTC_ID", m_drm->crtc_id);
     AddPlaneProperty(m_drm->req, plane, "SRC_X", 0);
@@ -175,6 +175,13 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
     AddPlaneProperty(m_drm->req, plane, "CRTC_Y", 0);
     AddPlaneProperty(m_drm->req, plane, "CRTC_W", m_drm->mode->hdisplay);
     AddPlaneProperty(m_drm->req, plane, "CRTC_H", m_drm->mode->vdisplay);
+  }
+  else if (videoLayer)
+  {
+    // disable gui plane when video layer is active and nothing is rendered
+    // TODO: only disable when no control is visible
+    AddPlaneProperty(m_drm->req, plane, "FB_ID", 0);
+    AddPlaneProperty(m_drm->req, plane, "CRTC_ID", 0);
   }
 
   auto ret = drmModeAtomicCommit(m_drm->fd, m_drm->req, flags, nullptr);
