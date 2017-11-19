@@ -149,6 +149,13 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
     {
       return false;
     }
+
+    if (!videoLayer)
+    {
+      // disable overlay plane on modeset
+      AddPlaneProperty(m_drm->req, m_drm->overlay_plane, "FB_ID", 0);
+      AddPlaneProperty(m_drm->req, m_drm->overlay_plane, "CRTC_ID", 0);
+    }
   }
 
   if (rendered)
