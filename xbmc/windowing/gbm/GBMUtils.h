@@ -20,12 +20,7 @@
 
 #pragma once
 
-#include <xf86drm.h>
-#include <xf86drmMode.h>
 #include <gbm.h>
-#include <vector>
-
-#include "guilib/Resolution.h"
 
 struct gbm
 {
@@ -37,6 +32,6 @@ struct gbm
 class CGBMUtils
 {
 public:
-  static bool InitGbm(struct gbm *gbm, int hdisplay, int vdisplay);
+  static bool InitGbm(struct gbm *gbm, int width, int height);
   static void DestroyGbm(struct gbm *gbm);
 };

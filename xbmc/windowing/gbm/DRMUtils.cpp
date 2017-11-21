@@ -427,8 +427,8 @@ bool CDRMUtils::GetModes(std::vector<RESOLUTION_INFO> &resolutions)
   {
     RESOLUTION_INFO res;
     res.iScreen = 0;
-    res.iWidth = m_drm_connector->modes[i].hdisplay;
-    res.iHeight = m_drm_connector->modes[i].vdisplay;
+    res.iWidth = m_drm_connector->modes[i].hdisplay == 3840 ? 1280 : m_drm_connector->modes[i].hdisplay;
+    res.iHeight = m_drm_connector->modes[i].vdisplay == 2160 ? 720 : m_drm_connector->modes[i].vdisplay;
     res.iScreenWidth = m_drm_connector->modes[i].hdisplay;
     res.iScreenHeight = m_drm_connector->modes[i].vdisplay;
     if (m_drm_connector->modes[i].clock % 10 != 0)
@@ -461,8 +461,11 @@ bool CDRMUtils::GetModes(std::vector<RESOLUTION_INFO> &resolutions)
       res.dwFlags = D3DPRESENTFLAG_PROGRESSIVE;
     }
 
-    res.strMode = StringUtils::Format("%dx%d%s @ %.6f Hz", res.iScreenWidth, res.iScreenHeight,
-                                      res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "", res.fRefreshRate);
+    res.strMode = StringUtils::Format("%dx%d%s @ %f Hz",
+                                      res.iScreenWidth,
+                                      res.iScreenHeight,
+                                      res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "",
+                                      res.fRefreshRate);
     resolutions.push_back(res);
   }
 

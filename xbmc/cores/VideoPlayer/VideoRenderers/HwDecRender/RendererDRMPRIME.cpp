@@ -202,16 +202,20 @@ void CRendererDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer)
       return;
     }
 
-    int32_t crtc_x = (int32_t)m_destRect.x1;
-    int32_t crtc_y = (int32_t)m_destRect.y1;
-    uint32_t crtc_w = (uint32_t)m_destRect.Width();
-    uint32_t crtc_h = (uint32_t)m_destRect.Height();
+    //int32_t crtc_x = (int32_t)m_destRect.x1;
+    //int32_t crtc_y = (int32_t)m_destRect.y1;
+    //uint32_t crtc_w = (uint32_t)m_destRect.Width();
+    //uint32_t crtc_h = (uint32_t)m_destRect.Height();
+    int32_t crtc_x = 0;
+    int32_t crtc_y = 0;
+    uint32_t crtc_w = (uint32_t)drm->mode->hdisplay;
+    uint32_t crtc_h = (uint32_t)drm->mode->vdisplay;
     uint32_t src_x = 0;
     uint32_t src_y = 0;
     uint32_t src_w = buffer->GetWidth() << 16;
     uint32_t src_h = buffer->GetHeight() << 16;
 
-    if(drm->req)
+    if (drm->req)
     {
       CDRMAtomic::AddPlaneProperty(drm->req, drm->primary_plane, "FB_ID",   buffer->m_fb_id);
       CDRMAtomic::AddPlaneProperty(drm->req, drm->primary_plane, "CRTC_ID", drm->crtc_id);
@@ -227,12 +231,12 @@ void CRendererDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer)
     else
     {
       // show the video frame FB on the video plane
-      ret = drmModeSetPlane(drm->fd, drm->primary_plane->plane->plane_id, drm->crtc_id, buffer->m_fb_id, 0,
+      ret = drmModeSetPlane(drm->fd, drm->video_plane_id, drm->crtc_id, buffer->m_fb_id, 0,
                             crtc_x, crtc_y, crtc_w, crtc_h,
                             src_x, src_y, src_w, src_h);
       if (ret < 0)
       {
-        CLog::Log(LOGERROR, "CRendererDRMPRIME::%s - failed to set drm plane %d, buffer = %d, ret = %d", __FUNCTION__, drm->primary_plane->plane->plane_id, buffer->m_fb_id, ret);
+        CLog::Log(LOGERROR, "CRendererDRMPRIME::%s - failed to set drm plane %d, buffer = %d, ret = %d", __FUNCTION__, drm->video_plane_id, buffer->m_fb_id, ret);
         return;
       }
     }

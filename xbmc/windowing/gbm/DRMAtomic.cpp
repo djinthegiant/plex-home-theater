@@ -169,8 +169,8 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
     AddPlaneProperty(m_drm->req, plane, "CRTC_ID", m_drm->crtc_id);
     AddPlaneProperty(m_drm->req, plane, "SRC_X", 0);
     AddPlaneProperty(m_drm->req, plane, "SRC_Y", 0);
-    AddPlaneProperty(m_drm->req, plane, "SRC_W", m_drm->mode->hdisplay << 16);
-    AddPlaneProperty(m_drm->req, plane, "SRC_H", m_drm->mode->vdisplay << 16);
+    AddPlaneProperty(m_drm->req, plane, "SRC_W", m_gbm->width << 16);
+    AddPlaneProperty(m_drm->req, plane, "SRC_H", m_gbm->height << 16);
     AddPlaneProperty(m_drm->req, plane, "CRTC_X", 0);
     AddPlaneProperty(m_drm->req, plane, "CRTC_Y", 0);
     AddPlaneProperty(m_drm->req, plane, "CRTC_W", m_drm->mode->hdisplay);
@@ -209,9 +209,6 @@ void CDRMAtomic::FlipPage(bool rendered, bool videoLayer)
 
   if (rendered)
   {
-    gbm_surface_release_buffer(m_gbm->surface, m_bo);
-    m_bo = m_next_bo;
-
     m_next_bo = gbm_surface_lock_front_buffer(m_gbm->surface);
     if (!m_next_bo)
     {
@@ -231,6 +228,12 @@ void CDRMAtomic::FlipPage(bool rendered, bool videoLayer)
   if (!ret) {
     CLog::Log(LOGERROR, "CDRMAtomic::%s - failed to commit: %s", __FUNCTION__, strerror(errno));
     return;
+  }
+
+  if (rendered)
+  {
+    gbm_surface_release_buffer(m_gbm->surface, m_bo);
+    m_bo = m_next_bo;
   }
 }
 
@@ -434,7 +437,7 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
 
   m_gbm->dev = gbm_create_device(m_drm->fd);
 
-  if (!CGBMUtils::InitGbm(m_gbm, m_drm->mode->hdisplay, m_drm->mode->vdisplay))
+  if (!CGBMUtils::InitGbm(m_gbm, 1920, 1080))
   {
     return false;
   }
@@ -446,19 +449,25 @@ bool CDRMAtomic::InitDrmAtomic(drm *drm, gbm *gbm)
 
 void CDRMAtomic::DestroyDrmAtomic()
 {
+  gbm_surface_release_buffer(m_gbm->surface, m_bo);
+  m_bo = m_next_bo = nullptr;
+
   CDRMUtils::DestroyDrm();
 
   if(m_gbm->surface)
   {
     gbm_surface_destroy(m_gbm->surface);
+    m_gbm->surface = nullptr;
   }
 
   if(m_gbm->dev)
   {
     gbm_device_destroy(m_gbm->dev);
+    m_gbm->dev = nullptr;
   }
 
   drmModeAtomicFree(m_drm->req);
+  m_drm->req = nullptr;
 }
 
 bool CDRMAtomic::SetVideoMode(RESOLUTION_INFO res)
