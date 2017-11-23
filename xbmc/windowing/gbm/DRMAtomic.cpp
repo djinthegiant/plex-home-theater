@@ -23,6 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "guilib/GUIWindowManager.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
 
@@ -176,10 +177,9 @@ bool CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
     AddPlaneProperty(m_drm->req, plane, "CRTC_W", m_drm->mode->hdisplay);
     AddPlaneProperty(m_drm->req, plane, "CRTC_H", m_drm->mode->vdisplay);
   }
-  else if (videoLayer)
+  else if (videoLayer && !g_windowManager.HasVisibleControls())
   {
-    // disable gui plane when video layer is active and nothing is rendered
-    // TODO: only disable when no control is visible
+    // disable gui plane when video layer is active and gui has no visible controls
     AddPlaneProperty(m_drm->req, plane, "FB_ID", 0);
     AddPlaneProperty(m_drm->req, plane, "CRTC_ID", 0);
   }
