@@ -19,7 +19,7 @@ set(APP_BINARY ${APP_NAME_LC}${APP_BINARY_SUFFIX})
 set(APP_PREFIX ${prefix})
 set(APP_LIB_DIR ${libdir}/${APP_NAME_LC})
 set(APP_DATA_DIR ${datarootdir}/${APP_NAME_LC})
-set(APP_INCLUDE_DIR ${includedir}/${APP_NAME_LC})
+set(APP_INCLUDE_DIR ${includedir}/kodi)
 set(CXX11_SWITCH "-std=c++11")
 
 # Set XBMC_STANDALONE_SH_PULSE so we can insert PulseAudio block into kodi-standalone
@@ -149,12 +149,12 @@ endif()
 # Install kodi-addon-dev headers
 include(${CMAKE_SOURCE_DIR}/xbmc/addons/AddonBindings.cmake)
 install(DIRECTORY ${CORE_ADDON_BINDINGS_DIRS}/
-        DESTINATION ${includedir}/${APP_NAME_LC}
+        DESTINATION ${includedir}/kodi
         COMPONENT kodi-addon-dev
         REGEX ".txt" EXCLUDE)
 
 install(FILES ${CORE_ADDON_BINDINGS_FILES}
-        DESTINATION ${includedir}/${APP_NAME_LC}
+        DESTINATION ${includedir}/kodi
         COMPONENT kodi-addon-dev)
 
 # Install kodi-addon-dev add-on bindings
@@ -213,7 +213,7 @@ if(ENABLE_EVENTCLIENTS)
 
   # Install kodi-eventclients-dev headers
   install(FILES ${CMAKE_SOURCE_DIR}/tools/EventClients/lib/c++/xbmcclient.h
-          DESTINATION ${includedir}/${APP_NAME_LC}
+          DESTINATION ${includedir}/kodi
           COMPONENT kodi-eventclients-dev)
 
   # Install kodi-eventclients-dev C# examples

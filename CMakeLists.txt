@@ -443,11 +443,11 @@ endif()
 # Prepare add-on build env
 include(${CORE_SOURCE_DIR}/xbmc/addons/AddonBindings.cmake)
 file(COPY ${CORE_ADDON_BINDINGS_FILES} ${CORE_ADDON_BINDINGS_DIRS}/
-     DESTINATION ${CORE_BUILD_DIR}/include/${APP_NAME_LC}
+     DESTINATION ${CORE_BUILD_DIR}/include/kodi
      REGEX ".txt" EXCLUDE)
 
 set(APP_LIB_DIR ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/${APP_NAME_LC})
-set(APP_INCLUDE_DIR ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/include/${APP_NAME_LC})
+set(APP_INCLUDE_DIR ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/include/kodi)
 set(CXX11_SWITCH "-std=c++11")
 configure_file(${CMAKE_SOURCE_DIR}/cmake/KodiConfig.cmake.in
                ${CORE_BUILD_DIR}/lib/${APP_NAME_LC}/KodiConfig.cmake @ONLY)
