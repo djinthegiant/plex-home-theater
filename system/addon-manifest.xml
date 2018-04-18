@@ -36,6 +36,7 @@
   <addon>metadata.themoviedb.org</addon>
   <addon>metadata.tvdb.com</addon>
   <addon>repository.xbmc.org</addon>
+  <addon>repository.openpht.tv</addon>
   <addon>resource.images.weathericons.default</addon>
   <addon>resource.language.en_gb</addon>
   <addon>resource.uisounds.kodi</addon>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.openpht.tv"
+		name="OpenPHT Add-on repository"
+		version="2.0.0"
+		provider-name="Team RasPlex">
+	<requires>
+		<import addon="xbmc.addon" version="12.0.0"/>
+	</requires>
+	<extension point="xbmc.addon.repository">
+		<info>https://addons.openpht.tv/openpht-2.0/addons.xml.gz</info>
+		<checksum>https://addons.openpht.tv/openpht-2.0/addons.xml.gz.md5</checksum>
+		<datadir>https://addons.openpht.tv/openpht-2.0</datadir>
+		<hashes>true</hashes>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en_GB">Install Add-ons from OpenPHT.tv</summary>
+		<summary lang="en_US">Install Add-ons from OpenPHT.tv</summary>
+		<description lang="en_GB">Download and install add-ons from the Official OpenPHT add-on repository.[CR]  By using the official Repository you will be able to take advantage of our extensive file mirror service to help get you faster downloads from a region close to you.[CR]  All add-ons on this repository have under gone basic testing, if you find a broken or not working add-on please report it to Team RasPlex so we can take any action needed.</description>
+		<description lang="en_US">Download and install add-ons from the Official OpenPHT add-on repository.[CR]  By using the official Repository you will be able to take advantage of our extensive file mirror service to help get you faster downloads from a region close to you.[CR]  All add-ons on this repository have under gone basic testing, if you find a broken or not working add-on please report it to Team RasPlex so we can take any action needed.</description>
+		<disclaimer lang="en_GB">Team RasPlex did not make all the add-ons on this repository and are not responsible for their content</disclaimer>
+		<disclaimer lang="en_US">Team RasPlex did not make all the add-ons on this repository and are not responsible for their content</disclaimer>
+		<platform>all</platform>
+	</extension>
+</addon>
