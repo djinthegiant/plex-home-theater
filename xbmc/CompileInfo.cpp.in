@@ -35,6 +35,16 @@ int CCompileInfo::GetMinor()
   return @APP_VERSION_MINOR@;
 }
 
+int CCompileInfo::GetPatch()
+{
+  return @APP_VERSION_PATCH@;
+}
+
+int CCompileInfo::GetBuild()
+{
+  return @APP_VERSION_BUILD@;
+}
+
 const char* CCompileInfo::GetPackage()
 {
   return "@APP_PACKAGE@";

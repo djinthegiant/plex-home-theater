@@ -603,7 +603,7 @@ std::string CSysInfo::GetOsName(bool emptyIfUnknown /* = false*/)
   if (osName.empty())
   {
 #if defined (TARGET_WINDOWS)
-    osName = GetKernelName() + "-based OS";
+    osName = "Windows";
 #elif defined(TARGET_FREEBSD)
     osName = GetKernelName(true); // FIXME: for FreeBSD OS name is a kernel name
 #elif defined(TARGET_DARWIN_IOS)
@@ -1151,9 +1151,6 @@ std::string CSysInfo::GetUserAgent()
 #endif
   result += ")";
 
-  if (GetAppName() != "Kodi")
-    result += " Kodi_Fork_" + GetAppName() + "/1.0"; // default fork number is '1.0', replace it with actual number if necessary
-
 #ifdef TARGET_LINUX
   // Add distribution name
   std::string linuxOSName(GetOsName(true));
@@ -1214,14 +1211,14 @@ std::string CSysInfo::GetDeviceName()
 std::string CSysInfo::GetVersionShort()
 {
   if (strlen(CCompileInfo::GetSuffix()) == 0)
-    return StringUtils::Format("%d.%d", CCompileInfo::GetMajor(), CCompileInfo::GetMinor());
+    return StringUtils::Format("%d.%d.%d.%d", CCompileInfo::GetMajor(), CCompileInfo::GetMinor(), CCompileInfo::GetPatch(), CCompileInfo::GetBuild());
   else
-    return StringUtils::Format("%d.%d-%s", CCompileInfo::GetMajor(), CCompileInfo::GetMinor(), CCompileInfo::GetSuffix());
+    return StringUtils::Format("%d.%d.%d.%d-%s", CCompileInfo::GetMajor(), CCompileInfo::GetMinor(), CCompileInfo::GetPatch(), CCompileInfo::GetBuild(), CCompileInfo::GetSuffix());
 }
 
 std::string CSysInfo::GetVersion()
 {
-  return GetVersionShort() + " Git:" + CCompileInfo::GetSCMID();
+  return GetVersionShort() + "-" + CCompileInfo::GetSCMID();
 }
 
 std::string CSysInfo::GetBuildDate()

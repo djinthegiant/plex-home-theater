@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(kodi LANGUAGES CXX C ASM)
+project(openpht LANGUAGES CXX C ASM)
 
 if(POLICY CMP0069)
   set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
@@ -74,7 +74,7 @@ else()
   set(ENABLE_STATIC_LIBS FALSE)
 endif()
 
-core_find_git_rev(APP_SCMID FULL)
+core_find_git_rev(APP_SCMID)
 
 # Dynamically loaded libraries built with the project
 add_custom_target(${APP_NAME_LC}-libraries)

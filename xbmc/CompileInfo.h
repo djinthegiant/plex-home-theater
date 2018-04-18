@@ -25,6 +25,8 @@ class CCompileInfo
 public:
   static int GetMajor();
   static int GetMinor();
+  static int GetPatch();
+  static int GetBuild();
   static const char* GetPackage();
   static const char* GetClass();
   static const char* GetAppName();

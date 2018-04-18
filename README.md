@@ -1,7 +1,23 @@
-[![Documentation](https://codedocs.xyz/xbmc/xbmc.svg)](https://codedocs.xyz/xbmc/xbmc/)
+# OpenPHTv2
 
-![Kodi logo](media/banner.png)
-# Kodi Home Theater Software
+OpenPHT is a community driven fork of Plex Home Theater.
+
+OpenPHTv2 is a complete rewrite of OpenPHT based on latest Kodi Leia.
+
+## Roadmap
+
+- [ ] Rebrand Kodi to OpenPHT
+- [ ] Configure Jenkins for automated builds
+  - [ ] RasPlex/Embedded
+  - [ ] Ubuntu/Debian
+  - [ ] Windows
+  - [ ] macOS
+- [ ] Update private proof-of-concept code to Kodi Leia
+
+NOTE: This branch will be rebased and forced pushed at times
+
+
+# Kodi
 
 **Welcome to Kodi!**
 

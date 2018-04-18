@@ -646,7 +646,7 @@ function(core_find_git_rev stamp)
                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
         endif()
         # get HEAD commit SHA-1
-        execute_process(COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:"%h" HEAD
+        execute_process(COMMAND ${GIT_EXECUTABLE} log -n 1 --abbrev=8 --pretty=format:"%h" HEAD
                         OUTPUT_VARIABLE HASH
                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
         string(REPLACE "\"" "" HASH ${HASH})
@@ -689,9 +689,11 @@ endfunction()
 #   COMPANY_NAME - company name
 #   APP_VERSION_MAJOR - the app version major
 #   APP_VERSION_MINOR - the app version minor
+#   APP_VERSION_PATCH - the app version patch
+#   APP_VERSION_BUILD - the app version build
 #   APP_VERSION_TAG - the app version tag
 #   APP_VERSION_TAG_LC - lowercased app version tag
-#   APP_VERSION - the app version (${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}-${APP_VERSION_TAG})
+#   APP_VERSION - the app version (${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_VERSION_PATCH}.${APP_VERSION_BUILD}-${APP_VERSION_TAG})
 #   APP_ADDON_API - the addon API version in the form of 16.9.702
 #   FILE_VERSION - file version in the form of 16,9,702,0 - Windows only
 #   JSONRPC_VERSION - the json api version in the form of 8.3.0
@@ -722,6 +724,7 @@ macro(core_find_versions)
     PACKAGE_PUBLISHER
     VERSION_MAJOR
     VERSION_MINOR
+    VERSION_PATCH
     VERSION_TAG
     VERSION_CODE
     WEBSITE
@@ -735,13 +738,18 @@ macro(core_find_versions)
   string(TOLOWER ${APP_APP_NAME} APP_NAME_LC)
   string(TOUPPER ${APP_APP_NAME} APP_NAME_UC)
   set(COMPANY_NAME ${APP_COMPANY_NAME})
-  set(APP_VERSION ${APP_VERSION_MAJOR}.${APP_VERSION_MINOR})
+  if(DEFINED ENV{BUILD_NUMBER})
+    set(APP_VERSION_BUILD $ENV{BUILD_NUMBER})
+  else()
+    set(APP_VERSION_BUILD 0)
+  endif()
+  set(APP_VERSION ${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_VERSION_PATCH}.${APP_VERSION_BUILD})
   set(APP_PACKAGE ${APP_APP_PACKAGE})
   if(APP_VERSION_TAG)
     set(APP_VERSION ${APP_VERSION}-${APP_VERSION_TAG})
     string(TOLOWER ${APP_VERSION_TAG} APP_VERSION_TAG_LC)
   endif()
-  string(REPLACE "." "," FILE_VERSION ${APP_ADDON_API}.0)
+  string(REPLACE "." "," FILE_VERSION ${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_VERSION_PATCH}.${APP_VERSION_BUILD})
   set(JSONRPC_VERSION ${APP_JSONRPC_VERSION})
 
   # Set defines used in addon.xml.in and read from versions.h to set add-on
@@ -764,7 +772,7 @@ macro(core_find_versions)
   unset(BIN_ADDON_PARTS)
 
   # bail if we can't parse version.txt
-  if(NOT DEFINED APP_VERSION_MAJOR OR NOT DEFINED APP_VERSION_MINOR)
+  if(NOT DEFINED APP_VERSION_MAJOR OR NOT DEFINED APP_VERSION_MINOR OR NOT DEFINED APP_VERSION_PATCH)
     message(FATAL_ERROR "Could not determine app version! Make sure that ${CORE_SOURCE_DIR}/version.txt exists")
   endif()
   if(NOT DEFINED JSONRPC_VERSION)
