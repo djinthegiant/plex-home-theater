@@ -20,10 +20,13 @@
 
 #include "RendererDRMPRIME.h"
 
+#include "ServiceBroker.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderCapture.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
+#include "settings/DisplaySettings.h"
 #include "utils/log.h"
+#include "windowing/GraphicContext.h"
 
 static CWinSystemGbmGLESContext *m_pWinSystem;
 
@@ -73,6 +76,16 @@ bool CRendererDRMPRIME::Configure(const VideoPicture& picture, float fps, unsign
 
   m_bConfigured = true;
   return true;
+}
+
+void CRendererDRMPRIME::ManageRenderArea()
+{
+  RESOLUTION_INFO info = CServiceBroker::GetWinSystem()->GetGfxContext().GetResInfo();
+  CBaseRenderer::ManageRenderArea();
+  CalcNormalRenderRect(0, 0, info.iScreenWidth, info.iScreenHeight,
+                       GetAspectRatio() * CDisplaySettings::GetInstance().GetPixelRatio(),
+                       CDisplaySettings::GetInstance().GetZoomAmount(),
+                       CDisplaySettings::GetInstance().GetVerticalShift());
 }
 
 void CRendererDRMPRIME::AddVideoPicture(const VideoPicture& picture, int index, double currentClock)
