@@ -71,6 +71,7 @@ public:
 
   std::string GetModule() const { return m_module; }
   std::string GetDevicePath() const { return m_device_path; }
+  bool HasVideoPlane() const { return m_overlay_plane->plane != nullptr; }
 
   bool GetModes(std::vector<RESOLUTION_INFO> &resolutions);
   bool SetMode(RESOLUTION_INFO& res);
