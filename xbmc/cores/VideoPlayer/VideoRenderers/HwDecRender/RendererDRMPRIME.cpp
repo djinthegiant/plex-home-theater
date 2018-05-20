@@ -84,7 +84,7 @@ void CRendererDRMPRIME::ManageRenderArea()
   CBaseRenderer::ManageRenderArea();
   CalcNormalRenderRect(0, 0, info.iScreenWidth, info.iScreenHeight,
                        GetAspectRatio() * CDisplaySettings::GetInstance().GetPixelRatio(),
-                       CDisplaySettings::GetInstance().GetZoomAmount(),
+                       fmin(CDisplaySettings::GetInstance().GetZoomAmount(), 1.0f),
                        CDisplaySettings::GetInstance().GetVerticalShift());
 }
 
