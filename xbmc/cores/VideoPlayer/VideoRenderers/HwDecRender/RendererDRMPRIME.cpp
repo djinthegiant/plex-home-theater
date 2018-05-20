@@ -42,7 +42,8 @@ CRendererDRMPRIME::~CRendererDRMPRIME()
 
 CBaseRenderer* CRendererDRMPRIME::Create(CVideoBuffer* buffer)
 {
-  if (buffer && dynamic_cast<CVideoBufferDRMPRIME*>(buffer))
+  // only use this renderer when video plane is supported, TODO: fall back to a EGL_EXT_image_dma_buf_import renderer
+  if (buffer && dynamic_cast<CVideoBufferDRMPRIME*>(buffer) && m_pWinSystem->m_DRM->HasVideoPlane())
     return new CRendererDRMPRIME(m_pWinSystem->m_DRM);
 
   return nullptr;
@@ -237,6 +238,8 @@ void CRendererDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer)
     uint32_t src_y = 0;
     uint32_t src_w = buffer->GetWidth() << 16;
     uint32_t src_h = buffer->GetHeight() << 16;
+
+    // TODO: m_DRM->SetVideoPlane(buffer->m_fb_id, crtc_x, crtc_y, crtc_w, crtc_h, src_x, src_y, src_w, src_h);
 
     if(m_DRM->m_req)
     {
