@@ -37,6 +37,7 @@ CRendererDRMPRIME::CRendererDRMPRIME(std::shared_ptr<CDRMUtils> drm)
 
 CRendererDRMPRIME::~CRendererDRMPRIME()
 {
+  m_DRM->DisableVideoLayer();
   Reset();
 }
 
