@@ -24,8 +24,11 @@
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
 #include "ServiceBroker.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "windowing/gbm/WinSystemGbm.h"
+
+const std::string SETTING_VIDEOPLAYER_USEPRIMERENDERER = "videoplayer.useprimerenderer";
 
 CRendererDRMPRIME::CRendererDRMPRIME(std::shared_ptr<CDRMUtils> drm)
   : m_DRM(drm)
@@ -42,7 +45,7 @@ CBaseRenderer* CRendererDRMPRIME::Create(CVideoBuffer* buffer)
   if (buffer && dynamic_cast<CVideoBufferDRMPRIME*>(buffer))
   {
     CWinSystemGbm* winSystem = dynamic_cast<CWinSystemGbm*>(CServiceBroker::GetWinSystem());
-    if (winSystem)
+    if (winSystem && CServiceBroker::GetSettings().GetInt(SETTING_VIDEOPLAYER_USEPRIMERENDERER) == 0)
       return new CRendererDRMPRIME(winSystem->m_DRM);
   }
 
