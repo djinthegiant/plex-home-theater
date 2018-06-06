@@ -43,10 +43,12 @@ CVideoBufferDRMPRIME::CVideoBufferDRMPRIME(IVideoBufferPool& pool, int id)
   : CVideoBuffer(id)
 {
   m_pFrame = av_frame_alloc();
+  CLog::Log(LOGNOTICE, "CVideoBufferDRMPRIME::%s - id=%d refCount=%d", __FUNCTION__, id, m_refCount);
 }
 
 CVideoBufferDRMPRIME::~CVideoBufferDRMPRIME()
 {
+  CLog::Log(LOGNOTICE, "CVideoBufferDRMPRIME::%s - id=%d refCount=%d", __FUNCTION__, m_id, m_refCount);
   Unref();
   av_frame_free(&m_pFrame);
 }
@@ -96,6 +98,7 @@ protected:
 
 CVideoBufferPoolDRMPRIME::~CVideoBufferPoolDRMPRIME()
 {
+  CLog::Log(LOGNOTICE, "CVideoBufferPoolDRMPRIME::%s", __FUNCTION__);
   for (auto buf : m_all)
     delete buf;
 }
@@ -150,12 +153,14 @@ void CVideoBufferPoolDRMPRIME::Return(int id)
 CDVDVideoCodecDRMPRIME::CDVDVideoCodecDRMPRIME(CProcessInfo& processInfo)
   : CDVDVideoCodec(processInfo)
 {
+  CLog::Log(LOGNOTICE, "CDVDVideoCodecDRMPRIME::%s", __FUNCTION__);
   m_pFrame = av_frame_alloc();
   m_videoBufferPool = std::make_shared<CVideoBufferPoolDRMPRIME>();
 }
 
 CDVDVideoCodecDRMPRIME::~CDVDVideoCodecDRMPRIME()
 {
+  CLog::Log(LOGNOTICE, "CDVDVideoCodecDRMPRIME::%s", __FUNCTION__);
   av_frame_free(&m_pFrame);
   avcodec_free_context(&m_pCodecContext);
 }

@@ -64,13 +64,12 @@ private:
 
   bool m_bConfigured = false;
   int m_iLastRenderBuffer = -1;
-  static const int m_numRenderBuffers = 4;
+  static const int m_numRenderBuffers = NUM_BUFFERS;
 
   std::shared_ptr<CDRMUtils> m_DRM;
 
   struct BUFFER
   {
-    BUFFER() : videoBuffer(nullptr) {};
-    CVideoBuffer* videoBuffer;
+    CVideoBuffer* videoBuffer = nullptr;
   } m_buffers[m_numRenderBuffers];
 };

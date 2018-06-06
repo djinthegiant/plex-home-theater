@@ -39,6 +39,8 @@ void CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
 
   if (flags & DRM_MODE_ATOMIC_ALLOW_MODESET)
   {
+    CLog::Log(LOGNOTICE, "CDRMAtomic::%s - modeset", __FUNCTION__);
+
     if (!AddProperty(m_req, m_connector, "CRTC_ID", m_crtc->crtc->crtc_id))
     {
       return;

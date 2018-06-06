@@ -33,12 +33,15 @@ static CWinSystemGbmGLESContext *m_pWinSystem;
 CRendererDRMPRIME::CRendererDRMPRIME(std::shared_ptr<CDRMUtils> drm)
   : m_DRM(drm)
 {
+  CLog::Log(LOGNOTICE, "CRendererDRMPRIME::%s", __FUNCTION__);
 }
 
 CRendererDRMPRIME::~CRendererDRMPRIME()
 {
+  CLog::Log(LOGNOTICE, "CRendererDRMPRIME::%s - start", __FUNCTION__);
   m_DRM->DisableVideoLayer();
   Reset();
+  CLog::Log(LOGNOTICE, "CRendererDRMPRIME::%s - end", __FUNCTION__);
 }
 
 CBaseRenderer* CRendererDRMPRIME::Create(CVideoBuffer* buffer)
@@ -77,6 +80,8 @@ bool CRendererDRMPRIME::Configure(const VideoPicture& picture, float fps, unsign
   Reset();
 
   m_bConfigured = true;
+
+  CServiceBroker::GetWinSystem()->GetGfxContext().SetFullScreenVideo(true);
   return true;
 }
 
@@ -101,6 +106,7 @@ void CRendererDRMPRIME::AddVideoPicture(const VideoPicture& picture, int index, 
 
 void CRendererDRMPRIME::Reset()
 {
+  CLog::Log(LOGNOTICE, "CRendererDRMPRIME::%s - lastRenderBuffer=%d", __FUNCTION__, m_iLastRenderBuffer);
   for (int i = 0; i < m_numRenderBuffers; i++)
     ReleaseBuffer(i);
 
@@ -109,6 +115,7 @@ void CRendererDRMPRIME::Reset()
 
 void CRendererDRMPRIME::Flush()
 {
+  CLog::Log(LOGNOTICE, "CRendererDRMPRIME::%s - lastRenderBuffer=%d", __FUNCTION__, m_iLastRenderBuffer);
   m_iLastRenderBuffer = -1;
 }
 
