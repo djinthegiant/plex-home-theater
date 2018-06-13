@@ -22,7 +22,6 @@
 
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
 #include "DRMPRIMEEGL.h"
-#include "windowing/gbm/WinSystemGbmGLESContext.h"
 
 class CRendererDRMPRIMEGLES : public CLinuxRendererGLES
 {
@@ -32,14 +31,11 @@ public:
 
   // Registration
   static CBaseRenderer* Create(CVideoBuffer* buffer);
-  static bool Register(CWinSystemGbmGLESContext *winSystem);
+  static bool Register();
 
   // CLinuxRendererGLES overrides
   bool Configure(const VideoPicture &picture, float fps, unsigned int orientation) override;
   void ReleaseBuffer(int index) override;
-
-  // Feature support
-  CRenderInfo GetRenderInfo() override;
 
 protected:
   // CLinuxRendererGLES overrides
@@ -50,6 +46,4 @@ protected:
   bool CreateTexture(int index) override;
 
   CDRMPRIMETexture m_DRMPRIMETextures[NUM_BUFFERS];
-
-  static CWinSystemGbmGLESContext *m_pWinSystem;
 };

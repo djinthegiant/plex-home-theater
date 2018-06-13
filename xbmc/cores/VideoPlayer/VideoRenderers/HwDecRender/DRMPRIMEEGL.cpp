@@ -20,17 +20,6 @@
 
 #include "DRMPRIMEEGL.h"
 
-#include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.h"
-#include "utils/log.h"
-#include "windowing/gbm/DRMUtils.h"
-
-#include <drm_fourcc.h>
-
-extern "C" {
-#include <libavutil/frame.h>
-#include <libavutil/hwcontext_drm.h>
-}
-
 void CDRMPRIMETexture::Init(EGLDisplay eglDisplay)
 {
   m_eglImage.reset(new CEGLImage(eglDisplay));

@@ -20,13 +20,10 @@
 
 #include "RendererDRMPRIMEGLES.h"
 
-#include "cores/VideoPlayer/DVDCodecs/DVDCodecUtils.h"
-#include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "ServiceBroker.h"
 #include "utils/log.h"
-
-CWinSystemGbmGLESContext *CRendererDRMPRIMEGLES::m_pWinSystem = nullptr;
+#include "windowing/gbm/WinSystemGbmGLESContext.h"
 
 CRendererDRMPRIMEGLES::~CRendererDRMPRIMEGLES()
 {
@@ -42,18 +39,20 @@ CBaseRenderer* CRendererDRMPRIMEGLES::Create(CVideoBuffer* buffer)
   return nullptr;
 }
 
-bool CRendererDRMPRIMEGLES::Register(CWinSystemGbmGLESContext *winSystem)
+bool CRendererDRMPRIMEGLES::Register()
 {
   VIDEOPLAYER::CRendererFactory::RegisterRenderer("drm_prime_gles", CRendererDRMPRIMEGLES::Create);
-  m_pWinSystem = winSystem;
-
   return true;
 }
 
 bool CRendererDRMPRIMEGLES::Configure(const VideoPicture &picture, float fps, unsigned int orientation)
 {
+  CWinSystemGbmGLESContext* winSystem = dynamic_cast<CWinSystemGbmGLESContext*>(CServiceBroker::GetWinSystem());
+  if (!winSystem)
+    return false;
+
   for (auto &texture : m_DRMPRIMETextures)
-    texture.Init(m_pWinSystem->GetEGLDisplay());
+    texture.Init(winSystem->GetEGLDisplay());
 
   return CLinuxRendererGLES::Configure(picture, fps, orientation);
 }
@@ -62,15 +61,6 @@ void CRendererDRMPRIMEGLES::ReleaseBuffer(int index)
 {
   m_DRMPRIMETextures[index].Unmap();
   CLinuxRendererGLES::ReleaseBuffer(index);
-}
-
-CRenderInfo CRendererDRMPRIMEGLES::GetRenderInfo()
-{
-  CRenderInfo info;
-  info.max_buffer_size = NUM_BUFFERS;
-  info.optimal_buffer_size = NUM_BUFFERS;
-  info.opaque_pointer = static_cast<void*>(this);
-  return info;
 }
 
 bool CRendererDRMPRIMEGLES::CreateTexture(int index)

@@ -44,4 +44,3 @@ protected:
   int m_texWidth{0};
   int m_texHeight{0};
 };
-
