@@ -67,7 +67,7 @@ bool CWinSystemGbmGLESContext::InitWindowSystem()
     GBM::VAAPIRegister(m_vaapiProxy.get(), deepColor);
   }
 
-  CRendererDRMPRIME::Register(this);
+  CRendererDRMPRIME::Register();
   CDVDVideoCodecDRMPRIME::Register();
 
   return true;

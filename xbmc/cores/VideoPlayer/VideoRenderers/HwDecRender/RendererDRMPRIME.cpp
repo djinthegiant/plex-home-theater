@@ -23,9 +23,9 @@
 #include "cores/VideoPlayer/VideoRenderers/RenderCapture.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
+#include "ServiceBroker.h"
 #include "utils/log.h"
-
-static CWinSystemGbmGLESContext *m_pWinSystem;
+#include "windowing/gbm/WinSystemGbm.h"
 
 CRendererDRMPRIME::CRendererDRMPRIME(std::shared_ptr<CDRMUtils> drm)
   : m_DRM(drm)
@@ -40,15 +40,18 @@ CRendererDRMPRIME::~CRendererDRMPRIME()
 CBaseRenderer* CRendererDRMPRIME::Create(CVideoBuffer* buffer)
 {
   if (buffer && dynamic_cast<CVideoBufferDRMPRIME*>(buffer))
-    return new CRendererDRMPRIME(m_pWinSystem->m_DRM);
+  {
+    CWinSystemGbm* winSystem = dynamic_cast<CWinSystemGbm*>(CServiceBroker::GetWinSystem());
+    if (winSystem)
+      return new CRendererDRMPRIME(winSystem->m_DRM);
+  }
 
   return nullptr;
 }
 
-bool CRendererDRMPRIME::Register(CWinSystemGbmGLESContext *winSystem)
+bool CRendererDRMPRIME::Register()
 {
   VIDEOPLAYER::CRendererFactory::RegisterRenderer("drm_prime", CRendererDRMPRIME::Create);
-  m_pWinSystem = winSystem;
   return true;
 }
 

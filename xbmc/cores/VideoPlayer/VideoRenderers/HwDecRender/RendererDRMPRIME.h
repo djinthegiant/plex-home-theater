@@ -22,7 +22,7 @@
 
 #include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.h"
 #include "cores/VideoPlayer/VideoRenderers/BaseRenderer.h"
-#include "windowing/gbm/WinSystemGbmGLESContext.h"
+#include "windowing/gbm/DRMUtils.h"
 
 class CRendererDRMPRIME
   : public CBaseRenderer
@@ -33,7 +33,7 @@ public:
 
   // Registration
   static CBaseRenderer* Create(CVideoBuffer* buffer);
-  static bool Register(CWinSystemGbmGLESContext *winSystem);
+  static bool Register();
 
   // Player functions
   bool Configure(const VideoPicture& picture, float fps, unsigned int orientation) override;
